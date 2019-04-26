@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<!--
+  All service mappings in a specific mapping project
+
+  @name    - project and package name
+  @from    - project dependencies
+  @to      - project dependencies
+  @package - base package name
+-->
+<mapping name="bc1_to_bc2"
+         from="sales"
+         to="inventory"
+         package="com.apuex.sales.mapping"
+         version="1.0.0">
+  <imports>
+    <import>com.apuex.sales.message._</import>
+    <import>akka.persistence.query._</import>
+    <import>javax.inject._</import>
+  </imports>
+  <!--
+    message flow from order to inventory
+    - subscribe events from order,
+    - and then map to service calls to inventory.
+
+    @from - from service, used as event source subscription
+    @to   - to service, used as destination
+  -->
+  <service from="order" to="inventory">
+    <imports>
+      <import>com.google.protobuf.timestamp.Timestamp</import>
+    </imports>
+    <!--
+      mapping rules for each type of message
+
+      @message - imput message
+    -->
+    <map message="pay_order_evt">
+      <and-then>
+        <service-call to="order" method="retrieve">
+          <field name="order_id" type="string" to="order_id" to-type="string"/>
+        </service-call>
+      </and-then>
+      <and-then>
+        <flat-map field="order_items">
+          <and-then>
+            <service-call to="product" method="retrieve">
+              <field name="product_id" type="string" to="product_id" to-type="string"/>
+            </service-call>
+          </and-then>
+          <and-then>
+            <service-call to="inventory" method="reduce">
+              <field name="sku" type="string" to="sku" to-type="string"/>
+              <field name="order_quantity" type="big_decimal" to="quantity" to-type="big_decimal"/>
+            </service-call>
+          </and-then>
+        </flat-map>
+      </and-then>
+    </map>
+  </service>
+</mapping>
