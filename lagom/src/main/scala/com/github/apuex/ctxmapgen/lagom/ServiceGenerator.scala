@@ -62,8 +62,13 @@ class ServiceGenerator(mappingLoader: MappingLoader) {
     // begin class declaration
     printWriter.println(
       s"""trait ${serviceName} extends Service {
-         |
-         |  def stream(offset: Offset): ServiceCall[Source[String, NotUsed], Source[String, NotUsed]]
+         |  /**
+         |    * Subscribe from event stream with offset.
+         |    *
+         |    * @param offset timed-uuid specifies start position
+         |    * @return
+         |    */
+         |  def events(offset: Offset): ServiceCall[Source[String, NotUsed], Source[String, NotUsed]]
          """.stripMargin)
 
     service._2.foreach(m => {
