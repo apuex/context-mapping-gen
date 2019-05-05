@@ -15,6 +15,7 @@ lazy val root = (project in file("."))
 
 lazy val `bc1-to-bc2-mapping` = (project in file("bc1-to-bc2-mapping"))
   .enablePlugins(ProtobufPlugin)
+  .enablePlugins(LagomScala)
 lazy val `bc1-to-bc2-app` = (project in file("bc1-to-bc2-app"))
   .dependsOn(`bc1-to-bc2-mapping`)
   .enablePlugins(PlayScala)

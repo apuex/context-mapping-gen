@@ -19,6 +19,14 @@ assemblyJarName in assembly := s"${name.value}-assembly-${version.value}.jar"
 mainClass in assembly := Some("play.core.server.ProdServerStart")
 fullClasspath in assembly += Attributed.blank(PlayKeys.playPackageAssets.value)
 
+assemblyExcludedJars in assembly := {
+  val cp = (fullClasspath in assembly).value
+  cp.filter( x =>
+    x.data.getName.contains("javax.activation-api")
+    || x.data.getName.contains("play-logback")
+  )
+}
+
 assemblyMergeStrategy in assembly := {
   case manifest if manifest.contains("MANIFEST.MF") =>
     // We don't need manifest files since sbt-assembly will create
