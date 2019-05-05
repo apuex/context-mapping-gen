@@ -12,8 +12,6 @@ libraryDependencies ++= {
   Seq(
     akkaPersistence,
     akkaPersistenceQuery,
-    akkaPersistenceCassandra,
-    akkaPersistenceCassandraLauncher,
     akkaClusterSharding,
     macwire        % Provided,
     scalaTest      % Test
