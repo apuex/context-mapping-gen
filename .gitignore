@@ -12,3 +12,6 @@ bin/
 tmp/
 
 **/*.protobin
+
+RUNNING_PID
+

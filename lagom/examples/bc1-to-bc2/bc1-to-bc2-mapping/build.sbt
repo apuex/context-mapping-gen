@@ -15,6 +15,7 @@ libraryDependencies ++= {
     akkaPersistenceCassandra,
     akkaPersistenceCassandraLauncher,
     akkaClusterSharding,
+    macwire        % Provided,
     scalaTest      % Test
   )
 }

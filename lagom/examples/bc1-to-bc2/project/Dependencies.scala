@@ -30,6 +30,7 @@ object Dependencies {
   lazy val playGuice       = "com.typesafe.play"         %%  "play-guice"                          % playVersion
   lazy val playJson        = "com.typesafe.play"         %%  "play-json"                           % playVersion
   lazy val lagomApi        = "com.lightbend.lagom"       %%  "lagom-scaladsl-api"                  % lagomVersion
+  lazy val macwire         = "com.softwaremill.macwire"  %% "macros"                               % "2.3.0"
 
   lazy val playSocketIO    = "com.lightbend.play"        %%  "play-socket-io"                      % "1.0.0-beta-2"
   lazy val macwireMicros   = "com.softwaremill.macwire"  %%  "macros"                              % "2.3.0"
