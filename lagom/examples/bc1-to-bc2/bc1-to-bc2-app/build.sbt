@@ -23,7 +23,7 @@ assemblyExcludedJars in assembly := {
   val cp = (fullClasspath in assembly).value
   cp.filter( x =>
     x.data.getName.contains("javax.activation-api")
-    || x.data.getName.contains("play-logback")
+      || x.data.getName.contains("play-logback")
   )
 }
 

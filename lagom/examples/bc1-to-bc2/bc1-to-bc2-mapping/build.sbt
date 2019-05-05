@@ -19,7 +19,6 @@ libraryDependencies ++= {
   )
 }
 
-
 assemblyJarName in assembly := s"${name.value}-assembly-${version.value}.jar"
 mainClass in assembly := Some("play.core.server.ProdServerStart")
 
@@ -46,3 +45,4 @@ assemblyMergeStrategy in assembly := {
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
 }
+       

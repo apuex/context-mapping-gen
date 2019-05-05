@@ -1,5 +1,4 @@
 import Dependencies._
-import sbtassembly.MergeStrategy
 
 name         := "bc1-to-bc2"
 scalaVersion := scalaVersionNumber
@@ -22,4 +21,3 @@ lazy val `bc1-to-bc2-app` = (project in file("bc1-to-bc2-app"))
 
 resolvers += "Local Maven" at Path.userHome.asFile.toURI.toURL + ".m2/repository"
 publishTo := localRepo
-
