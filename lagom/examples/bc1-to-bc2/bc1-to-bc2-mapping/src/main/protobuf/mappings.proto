@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package com.apuex.sales.mapping.bc1ToBc2;
+option java_package = "com.apuex.sales.mapping.bc1ToBc2";
+option java_outer_classname = "MappingMessages";
+option java_multiple_files = true;
+
+message ReduceStorageCmd {
+  string sku = 1;
+  int32 quantity = 2;
+}
+
+message RetrieveOrderCmd {
+  string orderId = 1;
+}
+
+message OrderItemVo {
+  string productId = 1;
+  int32 quantity = 2;
+}
+
+message OrderVo {
+  string orderId = 1;
+}
+
+message RetrieveProductCmd {
+  string productId = 1;
+}
+
+message ProductVo {
+  string productId = 1;
+  string sku = 2;
+}
