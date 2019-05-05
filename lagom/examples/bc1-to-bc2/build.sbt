@@ -8,15 +8,18 @@ maintainer   := "xtwxy@hotmail.com"
 
 lazy val root = (project in file("."))
   .aggregate(
-    `bc1-to-bc2-mapping`,
+    `bc1-to-bc2-api`,
+    `bc1-to-bc2-impl`,
     `bc1-to-bc2-app`
   )
 
-lazy val `bc1-to-bc2-mapping` = (project in file("bc1-to-bc2-mapping"))
-  .enablePlugins(ProtobufPlugin)
+lazy val `bc1-to-bc2-api` = (project in file("bc1-to-bc2-api"))
   .enablePlugins(LagomScala)
+lazy val `bc1-to-bc2-impl` = (project in file("bc1-to-bc2-impl"))
+  .dependsOn(`bc1-to-bc2-api`)
+  .enablePlugins(ProtobufPlugin)
 lazy val `bc1-to-bc2-app` = (project in file("bc1-to-bc2-app"))
-  .dependsOn(`bc1-to-bc2-mapping`)
+  .dependsOn(`bc1-to-bc2-impl`)
   .enablePlugins(PlayScala)
 
 resolvers += "Local Maven" at Path.userHome.asFile.toURI.toURL + ".m2/repository"
