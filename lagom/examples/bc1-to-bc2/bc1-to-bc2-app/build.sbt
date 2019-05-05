@@ -10,7 +10,7 @@ maintainer   := "xtwxy@hotmail.com"
 
 libraryDependencies ++= {
   Seq(
-    akkaPersistenceCassandra,
+    leveldbjni,
     scalaTest      % Test
   )
 }

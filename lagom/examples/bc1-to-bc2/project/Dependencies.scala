@@ -14,6 +14,7 @@ object Dependencies {
   lazy val akkaRemote      = "com.typesafe.akka"         %%  "akka-remote"                         % akkaVersion
   lazy val akkaStream      = "com.typesafe.akka"         %%  "akka-stream"                         % akkaVersion
   lazy val akkaPersistence = "com.typesafe.akka"         %%  "akka-persistence"                    % akkaVersion
+  lazy val leveldbjni      = "org.fusesource.leveldbjni" %   "leveldbjni-all"                      % "1.8"
   lazy val akkaPersistenceQuery = "com.typesafe.akka"    %% "akka-persistence-query"               % akkaVersion
   lazy val akkaPersistenceCassandra = "com.typesafe.akka"         %%  "akka-persistence-cassandra"          % "0.93"
   lazy val akkaPersistenceCassandraLauncher = "com.typesafe.akka"         %%  "akka-persistence-cassandra-launcher" % "0.93"
