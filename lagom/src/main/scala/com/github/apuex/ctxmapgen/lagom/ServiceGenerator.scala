@@ -55,7 +55,6 @@ class ServiceGenerator(mappingLoader: MappingLoader) {
     printWriter.println(
       s"""
          |import akka.{Done, NotUsed}
-         |import akka.persistence.query.Offset
          |import akka.stream.scaladsl.Source
          |import com.lightbend.lagom.scaladsl.api.{Descriptor, Service, ServiceCall}
        """.stripMargin)
@@ -65,10 +64,12 @@ class ServiceGenerator(mappingLoader: MappingLoader) {
          |  /**
          |    * Subscribe from event stream with offset.
          |    *
+         |    * @see [[akka.persistence.query.Offset]]
+         |    * @see [[akka.persistence.query.TimeBasedUUID]]
          |    * @param offset timed-uuid specifies start position
          |    * @return
          |    */
-         |  def events(offset: Offset): ServiceCall[Source[String, NotUsed], Source[String, NotUsed]]
+         |  def events(offset: Option[String]): ServiceCall[Source[String, NotUsed], Source[String, NotUsed]]
          """.stripMargin)
 
     service._2.foreach(m => {
@@ -98,7 +99,7 @@ class ServiceGenerator(mappingLoader: MappingLoader) {
        |
        |  named("${cToShell(service._1)}")
        |    .withCalls(
-       |      pathCall("/api/events/:offset", events _)
+       |      pathCall("/api/events", events _)
        |    ).withAutoAcl(true)
        |}
      """.stripMargin

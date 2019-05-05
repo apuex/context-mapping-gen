@@ -55,7 +55,10 @@ class ApplicationConfGenerator(mappingLoader: MappingLoader) {
          |
          |    serialization-bindings {
          |      "java.io.Serializable" = none
-         |      "scalapb.GeneratedMessage" = ${system}-protobuf
+         |      // scalapb 0.8.4
+         |      // "scalapb.GeneratedMessage" = ${system}-protobuf
+         |      // google protobuf-java 3.6.1
+         |      "com.google.protobuf.GeneratedMessageV3" = inventory-protobuf
          |    }
          |  }
          |
