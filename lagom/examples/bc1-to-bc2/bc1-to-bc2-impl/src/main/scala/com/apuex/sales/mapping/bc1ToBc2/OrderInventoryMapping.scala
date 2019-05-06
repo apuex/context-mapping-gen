@@ -7,6 +7,8 @@ import akka.persistence.query.Offset
 import akka.stream._
 import akka.stream.scaladsl._
 import com.github.apuex.events.play.EventEnvelope
+import com.google.protobuf
+import com.google.protobuf.Message
 import javax.inject._
 
 import scala.concurrent.duration._
@@ -40,6 +42,30 @@ class OrderInventoryMapping @Inject()(
       updateState(x)
   }
 
+  override def receiveCommand: Receive = {
+    case x: EventEnvelope =>
+      // TODO: process event
+      mappingEvent(unpack(x.getEvent))
+      persist(x.getOffset)(updateState)
+    case x =>
+      log.info("unhandled command: {}", x)
+  }
+
+  private def updateState: (Any => Unit) = {
+    case x: Offset =>
+      offset = Some(x)
+      log.info("unhandled update state: {}", x)
+  }
+
+  def unpack(any: protobuf.Any): Message = {
+    null
+  }
+
+  private def mappingEvent: (Message => Unit) = {
+    case x =>
+      log.debug("unhandled: {}", x)
+  }
+
   private def subscribe: Unit = {
     order.events(offset.map(_.toString))
       .invoke(
@@ -60,20 +86,6 @@ class OrderInventoryMapping @Inject()(
         log.error(x, "connect to event stream failed")
         context.system.scheduler.scheduleOnce(30.seconds)(subscribe)
     })
-  }
-
-  override def receiveCommand: Receive = {
-    case x: EventEnvelope =>
-      // TODO: process event
-      persist(x.getOffset)(updateState)
-    case x =>
-      log.info("unhandled command: {}", x)
-  }
-
-  private def updateState: (Any => Unit) = {
-    case x: Offset =>
-      offset = Some(x)
-      log.info("unhandled update state: {}", x)
   }
 
   private def parseJson(json: String): EventEnvelope = {
