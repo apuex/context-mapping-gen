@@ -10,6 +10,7 @@ maintainer   := "xtwxy@hotmail.com"
 
 libraryDependencies ++= {
   Seq(
+    protobufUtil,
     scalaTest      % Test
   )
 }

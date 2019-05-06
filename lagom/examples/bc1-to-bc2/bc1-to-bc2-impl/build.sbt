@@ -10,6 +10,7 @@ maintainer   := "xtwxy@hotmail.com"
 
 libraryDependencies ++= {
   Seq(
+    playEvents,
     akkaPersistence,
     akkaPersistenceQuery,
     akkaClusterSharding,
