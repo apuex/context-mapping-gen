@@ -1,12 +1,10 @@
 package com.apuex.sales.mapping.bc1ToBc2
 
-import java.util.Optional
 import java.util.concurrent.TimeUnit
 
 import akka.Done
 import akka.actor._
 import akka.persistence._
-import akka.persistence.query.{Offset, Sequence, TimeBasedUUID}
 import akka.stream._
 import akka.stream.scaladsl._
 import com.github.apuex.events.play.EventEnvelope
@@ -14,8 +12,8 @@ import com.google.protobuf.Message
 import javax.inject._
 
 import scala.collection.JavaConverters._
-import scala.compat.java8.OptionConverters._
 import scala.compat.java8.FutureConverters._
+import scala.compat.java8.OptionConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
@@ -111,30 +109,15 @@ class OrderInventoryMapping @Inject()(
           log.info("connected.")
           s.asScala
             .map(parseJson)
-            //.runForeach(x => mappingEvent(x.getOffset)(packager.unpack(x.getEvent)))
             .recover({
-            case x =>
-              log.error(x, "broken pipe")
-              context.system.scheduler.scheduleOnce(30.seconds)(subscribe)
-          })
-            .runWith(Sink.actorRef(self, Done))
+              case x =>
+                log.error(x, "broken pipe")
+                context.system.scheduler.scheduleOnce(30.seconds)(subscribe)
+            }).runWith(Sink.actorRef(self, Done))
         } else {
           log.error(t, "connect to event stream failed")
           context.system.scheduler.scheduleOnce(30.seconds)(subscribe)
         }
       })
-  }
-
-  private def parseJson(json: String): EventEnvelope = {
-    val builder = EventEnvelope.newBuilder()
-    parser.merge(json, builder)
-    builder.build()
-  }
-
-  private def offsetToString(offset: Option[Offset]): Optional[String] = {
-    Optional.of(offset.map({
-      case Sequence(value) => value.toString
-      case TimeBasedUUID(value) => value.toString
-    }).getOrElse(""))
   }
 }
