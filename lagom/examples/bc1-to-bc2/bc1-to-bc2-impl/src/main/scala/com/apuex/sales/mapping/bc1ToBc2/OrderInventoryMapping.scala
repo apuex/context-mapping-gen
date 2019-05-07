@@ -14,6 +14,7 @@ import com.google.protobuf.Message
 import javax.inject._
 
 import scala.collection.JavaConverters._
+import scala.compat.java8.OptionConverters._
 import scala.compat.java8.FutureConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -39,10 +40,10 @@ class OrderInventoryMapping @Inject()(
   override def persistenceId: String = OrderInventoryMapping.name
 
   // state
-  var offset: Option[Offset] = None
+  var offset: Option[String] = None
 
   override def receiveRecover: Receive = {
-    case SnapshotOffer(metadata: SnapshotMetadata, snapshot: Offset) =>
+    case SnapshotOffer(metadata: SnapshotMetadata, snapshot: String) =>
       offset = Some(snapshot)
     case _: RecoveryCompleted =>
       // TODO: connect to source service and start event subscription.
@@ -61,7 +62,7 @@ class OrderInventoryMapping @Inject()(
   }
 
   private def updateState: (Any => Unit) = {
-    case x: Offset =>
+    case x: String =>
       offset = Some(x)
       log.info("unhandled update state: {}", x)
   }
@@ -98,7 +99,7 @@ class OrderInventoryMapping @Inject()(
 
   private def subscribe: Unit = {
     log.info("connecting...")
-    order.events(offsetToString(offset))
+    order.events(offset.asJava)
       .invoke(
         Source(Long.MinValue to Long.MaxValue)
           .throttle(1, 30.second)
