@@ -7,7 +7,6 @@ import akka.persistence.query.Offset
 import akka.stream._
 import akka.stream.scaladsl._
 import com.github.apuex.events.play.EventEnvelope
-import com.google.protobuf
 import com.google.protobuf.Message
 import javax.inject._
 
@@ -24,6 +23,9 @@ class OrderInventoryMapping @Inject()(
                                      )
   extends PersistentActor
     with ActorLogging {
+
+  import config._
+
   implicit val executionContext = context.system.dispatcher
   implicit val materializer = ActorMaterializer()
 
@@ -45,7 +47,7 @@ class OrderInventoryMapping @Inject()(
   override def receiveCommand: Receive = {
     case x: EventEnvelope =>
       // TODO: process event
-      mappingEvent(unpack(x.getEvent))
+      mappingEvent(packager.unpack(x.getEvent))
       persist(x.getOffset)(updateState)
     case x =>
       log.info("unhandled command: {}", x)
@@ -55,10 +57,6 @@ class OrderInventoryMapping @Inject()(
     case x: Offset =>
       offset = Some(x)
       log.info("unhandled update state: {}", x)
-  }
-
-  def unpack(any: protobuf.Any): Message = {
-    null
   }
 
   private def mappingEvent: (Message => Unit) = {
@@ -90,7 +88,7 @@ class OrderInventoryMapping @Inject()(
 
   private def parseJson(json: String): EventEnvelope = {
     val builder = EventEnvelope.newBuilder()
-    config.parser.merge(json, builder)
+    parser.merge(json, builder)
     builder.build()
   }
 }

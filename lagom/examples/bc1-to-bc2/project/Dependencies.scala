@@ -35,7 +35,8 @@ object Dependencies {
   lazy val lagomApi        = "com.lightbend.lagom"       %%  "lagom-scaladsl-api"                  % lagomVersion
   lazy val macwire         = "com.softwaremill.macwire"  %% "macros"                               % "2.3.0"
 
-  lazy val playEvents      = "com.github.apuex"          %%  "play-events"                         % "1.0.0"
+  lazy val playEvents      = "com.github.apuex"          %%  "play-events"                         % "1.0.1"
+  lazy val serializer      = "com.github.apuex.protobuf" % "protobuf-serializer"                   % "1.0.1"
   lazy val playSocketIO    = "com.lightbend.play"        %%  "play-socket-io"                      % "1.0.0-beta-2"
   lazy val macwireMicros   = "com.softwaremill.macwire"  %%  "macros"                              % "2.3.0"
   lazy val guava           = "com.google.guava"          %   "guava"                               % "22.0"
