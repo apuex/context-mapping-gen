@@ -1,6 +1,7 @@
 package com.apuex.sales.mapping.bc1ToBc2
 
 import java.util.Optional
+import java.util.concurrent.TimeUnit
 
 import akka.Done
 import akka.actor._
@@ -12,6 +13,9 @@ import com.github.apuex.events.play.EventEnvelope
 import com.google.protobuf.Message
 import javax.inject._
 
+import scala.collection.JavaConverters._
+import scala.compat.java8.FutureConverters._
+import scala.concurrent.Await
 import scala.concurrent.duration._
 
 object OrderInventoryMapping {
@@ -51,8 +55,7 @@ class OrderInventoryMapping @Inject()(
   override def receiveCommand: Receive = {
     case x: EventEnvelope =>
       // TODO: process event
-      mappingEvent(packager.unpack(x.getEvent))
-      persist(x.getOffset)(updateState)
+      mappingEvent(x.getOffset)(packager.unpack(x.getEvent))
     case x =>
       log.info("unhandled command: {}", x)
   }
@@ -63,7 +66,32 @@ class OrderInventoryMapping @Inject()(
       log.info("unhandled update state: {}", x)
   }
 
-  private def mappingEvent: (Message => Unit) = {
+  private def mappingEvent(offset: String): (Message => Unit) = {
+    case x: PayOrderEvt =>
+      order.retrieve()
+        .invoke(
+          RetrieveOrderCmd.newBuilder()
+            .setOrderId(x.getOrderId())
+            .build()
+        ).toScala.map(o => o.getItemsList.asScala
+        .map(i =>
+          product.retrieve().invoke(
+            RetrieveProductCmd.newBuilder()
+              .setProductId(i.getProductId)
+              .build()
+          ).toScala.map(p =>
+            inventory.reduce().invoke(
+              ReduceStorageCmd.newBuilder()
+                .setSku(p.getSku)
+                .setQuantity(i.getQuantity)
+                .build()
+            )
+          )
+        )
+        .foreach(x => Await.ready(x, Duration(30, TimeUnit.SECONDS)))
+      ).map(_ => {
+        persist(offset)(updateState)
+      })
     case x =>
       log.debug("unhandled: {}", x)
   }
@@ -82,11 +110,12 @@ class OrderInventoryMapping @Inject()(
           log.info("connected.")
           s.asScala
             .map(parseJson)
+            //.runForeach(x => mappingEvent(x.getOffset)(packager.unpack(x.getEvent)))
             .recover({
-              case x =>
-                log.error(x, "broken pipe")
-                context.system.scheduler.scheduleOnce(30.seconds)(subscribe)
-            })
+            case x =>
+              log.error(x, "broken pipe")
+              context.system.scheduler.scheduleOnce(30.seconds)(subscribe)
+          })
             .runWith(Sink.actorRef(self, Done))
         } else {
           log.error(t, "connect to event stream failed")

@@ -30,7 +30,7 @@ public class MappingStream {
             config.keepAlive().asJava()
         )
         .whenComplete((is, throwable) -> {
-          if (null == throwable)
+          if (null == throwable) {
             is.map(x -> config.parseJson(x))
                 .map(x -> config.packager().unpack(x.getEvent()))
                 .filter(x -> x instanceof PayOrderEvt)
@@ -56,12 +56,14 @@ public class MappingStream {
                                 .build()
                         )
                     )
-                ).recover(new PFBuilder()
-                .match(Throwable.class, ex -> system.scheduler().scheduleOnce(Duration.ofSeconds(30), () -> stream(offset), executor))
-                .build()
+                ).mapError(new PFBuilder<Throwable, Throwable>().match(Throwable.class, ex -> {
+                  system.scheduler().scheduleOnce(Duration.ofSeconds(30), () -> stream(offset), executor);
+                  return ex;
+                }).build()
             );
-          else
+          } else {
             system.scheduler().scheduleOnce(Duration.ofSeconds(30), () -> stream(offset), executor);
+          }
         });
   }
 
