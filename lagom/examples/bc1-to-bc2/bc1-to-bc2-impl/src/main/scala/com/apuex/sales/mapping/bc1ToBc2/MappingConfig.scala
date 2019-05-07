@@ -1,8 +1,13 @@
 package com.apuex.sales.mapping.bc1ToBc2
 
-import com.github.apuex.events.play.EventEnvelopeProto
+import java.util.concurrent.TimeUnit
+
+import akka.stream.scaladsl.Source
+import com.github.apuex.events.play._
 import com.github.apuex.protobuf.serializer.AnyPackagerBuilder
 import com.google.protobuf.util.JsonFormat
+
+import scala.concurrent.duration.Duration
 
 
 class MappingConfig {
@@ -23,4 +28,14 @@ class MappingConfig {
     .withFileDescriptorProto(EventEnvelopeProto.getDescriptor.toProto)
     .withStringRegistry()
     .build()
+
+  val keepAlive = Source(Long.MinValue to Long.MaxValue)
+    .throttle(1, Duration.apply(30, TimeUnit.SECONDS))
+    .map(_.toString)
+
+  def parseJson(json: String): EventEnvelope = {
+    val builder = EventEnvelope.newBuilder
+    parser.merge(json, builder)
+    builder.build
+  }
 }

@@ -12,7 +12,7 @@ import static com.lightbend.lagom.javadsl.api.Service.pathCall;
 
 public interface OrderService extends Service {
 
-  ServiceCall<RetrieveOrderCmd, ProductVo> retrieve();
+  ServiceCall<RetrieveOrderCmd, OrderVo> retrieve();
 
   /**
    * Subscribe from event stream with offset.

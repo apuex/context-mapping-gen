@@ -14,6 +14,10 @@ message RetrieveOrderCmd {
   string orderId = 1;
 }
 
+message PayOrderEvt {
+  string orderId = 1;
+}
+
 message OrderItemVo {
   string productId = 1;
   int32 quantity = 2;
@@ -21,6 +25,7 @@ message OrderItemVo {
 
 message OrderVo {
   string orderId = 1;
+  repeated OrderItemVo items = 2;
 }
 
 message RetrieveProductCmd {
