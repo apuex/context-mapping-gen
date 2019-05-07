@@ -10,6 +10,7 @@ maintainer   := "xtwxy@hotmail.com"
 
 libraryDependencies ++= {
   Seq(
+    logback,
     leveldbjni,
     scalaTest      % Test
   )
@@ -23,7 +24,7 @@ assemblyExcludedJars in assembly := {
   val cp = (fullClasspath in assembly).value
   cp.filter( x =>
     x.data.getName.contains("javax.activation-api")
-      || x.data.getName.contains("play-logback")
+      || x.data.getName.contains("lagom-logback")
   )
 }
 

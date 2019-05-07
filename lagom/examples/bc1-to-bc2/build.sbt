@@ -14,7 +14,7 @@ lazy val root = (project in file("."))
   )
 
 lazy val `bc1-to-bc2-api` = (project in file("bc1-to-bc2-api"))
-  .enablePlugins(LagomScala)
+  .enablePlugins(LagomJava)
 lazy val `bc1-to-bc2-impl` = (project in file("bc1-to-bc2-impl"))
   .dependsOn(`bc1-to-bc2-api`)
   .enablePlugins(ProtobufPlugin)

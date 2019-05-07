@@ -1,9 +1,11 @@
 package com.apuex.sales.mapping.bc1ToBc2
 
+import java.util.Optional
+
 import akka.Done
 import akka.actor._
 import akka.persistence._
-import akka.persistence.query.Offset
+import akka.persistence.query.{Offset, Sequence, TimeBasedUUID}
 import akka.stream._
 import akka.stream.scaladsl._
 import com.github.apuex.events.play.EventEnvelope
@@ -18,6 +20,7 @@ object OrderInventoryMapping {
 
 class OrderInventoryMapping @Inject()(
                                        config: MappingConfig,
+                                       product: ProductService,
                                        order: OrderService,
                                        inventory: InventoryService
                                      )
@@ -39,6 +42,7 @@ class OrderInventoryMapping @Inject()(
       offset = Some(snapshot)
     case _: RecoveryCompleted =>
       // TODO: connect to source service and start event subscription.
+      log.info("recover complete.")
       subscribe
     case x =>
       updateState(x)
@@ -65,30 +69,42 @@ class OrderInventoryMapping @Inject()(
   }
 
   private def subscribe: Unit = {
-    order.events(offset.map(_.toString))
+    log.info("connecting...")
+    order.events(offsetToString(offset))
       .invoke(
         Source(Long.MinValue to Long.MaxValue)
           .throttle(1, 30.second)
           .map(_.toString)
+          .asJava
       )
-      .map(
-        _.map(parseJson)
-          .recover({
-            case x =>
-              log.error(x, "broken pipe")
-              context.system.scheduler.scheduleOnce(30.seconds)(subscribe)
-          })
-          .runWith(Sink.actorRef(self, Done))
-      ).recover({
-      case x =>
-        log.error(x, "connect to event stream failed")
-        context.system.scheduler.scheduleOnce(30.seconds)(subscribe)
-    })
+      .whenComplete((s, t) => {
+        if (null == t) {
+          log.info("connected.")
+          s.asScala
+            .map(parseJson)
+            .recover({
+              case x =>
+                log.error(x, "broken pipe")
+                context.system.scheduler.scheduleOnce(30.seconds)(subscribe)
+            })
+            .runWith(Sink.actorRef(self, Done))
+        } else {
+          log.error(t, "connect to event stream failed")
+          context.system.scheduler.scheduleOnce(30.seconds)(subscribe)
+        }
+      })
   }
 
   private def parseJson(json: String): EventEnvelope = {
     val builder = EventEnvelope.newBuilder()
     parser.merge(json, builder)
     builder.build()
+  }
+
+  private def offsetToString(offset: Option[Offset]): Optional[String] = {
+    Optional.of(offset.map({
+      case Sequence(value) => value.toString
+      case TimeBasedUUID(value) => value.toString
+    }).getOrElse(""))
   }
 }
