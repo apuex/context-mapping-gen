@@ -99,9 +99,7 @@ class OrderInventoryMapping @Inject()(
     log.info("connecting...")
     order.events(offset.asJava)
       .invoke(
-        Source(Long.MinValue to Long.MaxValue)
-          .throttle(1, 30.second)
-          .map(_.toString)
+        keepAlive
           .asJava
       )
       .whenComplete((s, t) => {

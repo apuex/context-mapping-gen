@@ -1,5 +1,6 @@
 package com.apuex.sales.mapping.bc1ToBc2
 
+import java.util.Date
 import java.util.concurrent.TimeUnit
 
 import akka.stream.scaladsl.Source
@@ -29,7 +30,11 @@ class MappingConfig {
     .withStringRegistry()
     .build()
 
-  val keepAlive = Source(Long.MinValue to Long.MaxValue)
+  val keepAlive = Source.fromIterator(() => new Iterator[String] {
+    override def hasNext: Boolean = true
+
+    override def next(): String = s"[${new Date()}] - keep-alive."
+  })
     .throttle(1, Duration.apply(30, TimeUnit.SECONDS))
     .map(_.toString)
 
