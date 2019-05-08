@@ -58,6 +58,9 @@ class H2GMapping @Inject()(
   private def updateState: (Any => Unit) = {
     case x: String =>
       offset = Some(x)
+      if(lastSequenceNr != 0 && lastSequenceNr % snapshotAfter == 0) {
+        offset.map(saveSnapshot)
+      }
     case x =>
       log.info("unhandled update state: {}", x)
   }
@@ -91,8 +94,7 @@ class H2GMapping @Inject()(
               case x =>
                 log.error(x, "broken pipe")
                 context.system.scheduler.scheduleOnce(30.seconds)(subscribe)
-            })//.runWith(Sink.foreach(println))
-            .runWith(Sink.actorRef(self, Done))
+            }).runWith(Sink.actorRef(self, Done))
         } else {
           log.error(t, "connect to event stream failed")
           context.system.scheduler.scheduleOnce(30.seconds)(subscribe)

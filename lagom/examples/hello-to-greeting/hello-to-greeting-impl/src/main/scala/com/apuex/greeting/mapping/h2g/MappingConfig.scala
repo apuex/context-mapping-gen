@@ -30,6 +30,7 @@ class MappingConfig {
     .withStringRegistry()
     .build()
 
+  val snapshotAfter = 1000
   val keepAlive = Source.fromIterator(() => new Iterator[String] {
     override def hasNext: Boolean = true
 
