@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package com.example.leveldb;
+option java_package = "com.example.leveldb";
+option java_outer_classname = "MessagesProto";
+option java_multiple_files = true;
+
+message SayHelloCommand {
+  string to = 1;
+}
+
+message SayHelloEvent {
+  string to = 1;
+  string message = 2;
+}
+
+message TakeSnapshotCommand {
+
+}
+
+message ShutdownSystemCommand {
+
+}
