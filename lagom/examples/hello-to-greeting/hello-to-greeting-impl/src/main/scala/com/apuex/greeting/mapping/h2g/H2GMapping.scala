@@ -11,10 +11,12 @@ import com.google.protobuf.Message
 import javax.inject._
 
 import scala.compat.java8.OptionConverters._
+import scala.compat.java8.FutureConverters._
+import scala.concurrent.Await
 import scala.concurrent.duration._
 
 object H2GMapping {
-  def name = "OrderInventoryMapping"
+  def name = "H2GMapping"
 }
 
 class H2GMapping @Inject()(
@@ -56,24 +58,25 @@ class H2GMapping @Inject()(
   private def updateState: (Any => Unit) = {
     case x: String =>
       offset = Some(x)
+    case x =>
       log.info("unhandled update state: {}", x)
   }
 
   private def mappingEvent(offset: String): (Message => Unit) = {
     case x: SayHelloEvent =>
-      hello.echo(x.getMessage())
+      Await.ready(hello.echo(x.getMessage())
         .invoke()
         .thenAccept(x => {
-          log.debug("message echoed back: {}", x)
-          persist(offset)(updateState)
-        })
+          log.info("message echoed back({}): {}", offset, x)
+        }).toScala, 20.seconds)
 
+      persist(offset)(updateState)
     case x =>
       log.debug("unhandled: {}", x)
   }
 
   private def subscribe: Unit = {
-    log.info("connecting...")
+    log.info("connecting, offset = {}...", offset)
     hello.events(offset.asJava)
       .invoke(
         keepAlive
@@ -88,7 +91,8 @@ class H2GMapping @Inject()(
               case x =>
                 log.error(x, "broken pipe")
                 context.system.scheduler.scheduleOnce(30.seconds)(subscribe)
-            }).runWith(Sink.actorRef(self, Done))
+            })//.runWith(Sink.foreach(println))
+            .runWith(Sink.actorRef(self, Done))
         } else {
           log.error(t, "connect to event stream failed")
           context.system.scheduler.scheduleOnce(30.seconds)(subscribe)
