@@ -4,6 +4,7 @@ name         := "context-mapping-gen"
 scalaVersion := scalaVersionNumber
 organization := artifactGroupName
 version      := artifactVersionNumber
+maintainer   := artifactMaintainer
 
 lazy val root = (project in file("."))
   .aggregate(

@@ -16,7 +16,28 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
   }
 
   def apiProjectSettings(): Unit = {
-
+    if (new File(s"${apiProjectDir}/build.sbt").exists()) return
+    new File(apiProjectDir).mkdirs()
+    val printWriter = new PrintWriter(s"${apiProjectDir}/build.sbt", "utf-8")
+    printWriter.println(
+      s"""
+         |import Dependencies._
+         |
+         |name         := "${apiProjectName}"
+         |scalaVersion := scalaVersionNumber
+         |organization := artifactGroupName
+         |version      := artifactVersionNumber
+         |maintainer   := artifactMaintainer
+         |
+         |libraryDependencies ++= {
+         |  Seq(
+         |    protobufUtil,
+         |    scalaTest      % Test
+         |  )
+         |}
+       """.stripMargin
+    )
+    printWriter.close()
   }
 
   def appProjectSettings(): Unit = {

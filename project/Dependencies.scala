@@ -5,6 +5,7 @@ object Dependencies {
   lazy val akkaVersion           = "2.5.22"
   lazy val artifactVersionNumber = "1.0.0"
   lazy val artifactGroupName     = "com.github.apuex"
+  lazy val artifactMaintainer    = "xtwxy@hotmail"
   lazy val sprayVersion          = "1.3.3"
   lazy val playVersion           = "2.6.9"
   lazy val playSilhouetteVersion = "5.0.3"

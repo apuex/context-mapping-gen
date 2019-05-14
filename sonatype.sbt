@@ -1,3 +1,4 @@
+import Dependencies._
 sonatypeProfileName := "com.github.apuex"
 
 publishMavenStyle := true
@@ -5,7 +6,7 @@ publishMavenStyle := true
 licenses := Seq("GPL3" -> url("https://www.gnu.org/licenses/gpl-3.0.txt"))
 
 import xerial.sbt.Sonatype._
-sonatypeProjectHosting := Some(GitHubHosting("apuex", "context-mapping-gen", "xtwxy@hotmail.com"))
+sonatypeProjectHosting := Some(GitHubHosting("apuex", "context-mapping-gen", artifactMaintainer))
 
 homepage := Some(url("https://github.com/apuex/context-mapping-gen"))
 scmInfo := Some(
@@ -16,7 +17,7 @@ scmInfo := Some(
 )
 
 developers := List(
-  Developer(id="apuex", name="Wangxy", email="xtwxy@hotmail.com", url=url("https://github.com/apuex"))
+  Developer(id="apuex", name="Wangxy", email=artifactMaintainer, url=url("https://github.com/apuex"))
 )
 
 /*

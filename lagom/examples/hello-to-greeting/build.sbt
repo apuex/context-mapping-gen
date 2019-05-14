@@ -4,7 +4,7 @@ name         := "hello-to-greeting"
 scalaVersion := scalaVersionNumber
 organization := artifactGroupName
 version      := artifactVersionNumber
-maintainer   := "xtwxy@hotmail.com"
+maintainer   := artifactMaintainer
 
 lazy val root = (project in file("."))
   .aggregate(

@@ -6,7 +6,7 @@ name         := "hello-to-greeting-app"
 scalaVersion := scalaVersionNumber
 organization := artifactGroupName
 version      := artifactVersionNumber
-maintainer   := "xtwxy@hotmail.com"
+maintainer   := artifactMaintainer
 
 libraryDependencies ++= {
   Seq(

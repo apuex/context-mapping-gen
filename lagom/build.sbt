@@ -4,6 +4,7 @@ name := "context-mapping-gen-lagom"
 scalaVersion := scalaVersionNumber
 organization := artifactGroupName
 version      := artifactVersionNumber
+maintainer   := artifactMaintainer
 
 libraryDependencies ++= Seq(
   scalaXml,

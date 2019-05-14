@@ -6,7 +6,7 @@ name         := "bc1-to-bc2-api"
 scalaVersion := scalaVersionNumber
 organization := artifactGroupName
 version      := artifactVersionNumber
-maintainer   := "xtwxy@hotmail.com"
+maintainer   := artifactMaintainer
 
 libraryDependencies ++= {
   Seq(
