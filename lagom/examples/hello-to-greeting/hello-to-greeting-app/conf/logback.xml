@@ -26,12 +26,11 @@
 
   <logger name="play" level="INFO" />
   <logger name="akka" level="INFO" />
-  <logger name="application" level="DEBUG" />
-  <logger name="com.apuex.*" level="DEBUG" />
+  <logger name="application" level="INFO" />
+  <logger name="com.apuex.*" level="INFO" />
 
   <root level="INFO">
-    <!--<appender-ref ref="ASYNCFILE" />-->
-    <appender-ref ref="ASYNCSTDOUT" />
+    <appender-ref ref="ASYNCFILE" />
   </root>
 
 </configuration>
