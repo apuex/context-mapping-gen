@@ -33,8 +33,10 @@ object MappingLoader {
 }
 
 class MappingLoader(val xml: Node) {
+  val api: String = "api"
+  val impl: String = "impl"
   val mapping: String = "mapping"
-  val application: String = "app"
+  val app: String = "app"
   val modelName = xml.\@("name")
   val modelPackage = xml.\@("package")
   val modelVersion = xml.\@("version")
@@ -42,16 +44,20 @@ class MappingLoader(val xml: Node) {
   val outputDir = s"${System.getProperty("output.dir", "target/generated")}"
   val rootProjectName = s"${cToShell(modelName)}"
   val rootProjectDir = s"${outputDir}/${rootProjectName}"
-  val mappingProjectName = s"${cToShell(modelName)}-${cToShell(mapping)}"
-  val mappingProjectDir = s"${rootProjectDir}/${mappingProjectName}"
-  val srcPackage = s"${modelPackage}.${cToCamel(modelName)}"
-  val srcDir = s"${mappingProjectDir}/src/main/scala/${srcPackage.replace('.', '/')}"
-  val appProjectName = s"${cToShell(modelName)}-${cToShell(application)}"
+  val apiProjectName = s"${cToShell(modelName)}-${cToShell(api)}"
+  val apiProjectDir = s"${rootProjectDir}/${apiProjectName}"
+  val implProjectName = s"${cToShell(modelName)}-${cToShell(impl)}"
+  val implProjectDir = s"${rootProjectDir}/${implProjectName}"
+  val apiSrcPackage = s"${modelPackage}.${cToCamel(modelName)}"
+  val apiSrcDir = s"${apiProjectDir}/src/main/scala/${apiSrcPackage.replace('.', '/')}"
+  val implSrcPackage = s"${apiSrcPackage}.${cToCamel(impl)}"
+  val implSrcDir = s"${implProjectDir}/src/main/scala/${implSrcPackage.replace('.', '/')}"
+  val appProjectName = s"${cToShell(modelName)}-${cToShell(app)}"
   val appProjectDir = s"${rootProjectDir}/${appProjectName}"
   val applicationConfDir = s"${appProjectDir}/conf"
   val symboConverter = if ("microsoft" == s"${System.getProperty("symbol.naming", "microsoft")}")
     "new IdentityConverter()" else "new CamelToCConverter()"
   val docsDir = s"${rootProjectDir}/docs"
-  val classNamePostfix = s"${cToPascal(mapping)}"
+  val classNamePostfix = s"${cToPascal(impl)}"
   val hyphen = if ("microsoft" == s"${System.getProperty("symbol.naming", "microsoft")}") "" else "-"
 }

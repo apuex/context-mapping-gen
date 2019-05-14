@@ -7,10 +7,10 @@ import com.github.apuex.ctxmapgen.lagom.MappingLoader._
 class ApplicationGenerator(mappingLoader: MappingLoader) {
   import mappingLoader._
   def generate(): Unit = {
-    new File(srcDir).mkdirs()
-    val printWriter = new PrintWriter(s"${srcDir}/Main.scala", "utf-8")
+    new File(implSrcDir).mkdirs()
+    val printWriter = new PrintWriter(s"${implSrcDir}/Main.scala", "utf-8")
     // package definition
-    printWriter.println(s"package ${srcPackage}\n")
+    printWriter.println(s"package ${implSrcPackage}\n")
     // imports
     printWriter.println(s"${importPackages(xml)}")
     // launcher(main class) object declaration

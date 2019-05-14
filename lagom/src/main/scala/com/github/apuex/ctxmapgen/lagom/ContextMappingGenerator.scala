@@ -28,10 +28,10 @@ class ContextMappingGenerator(mappingFile: String) {
   private def serviceMapping(service: Node): Unit = {
     val from = service.\@("from")
     val to = service.\@("to")
-    val mappingName = cToPascal(s"${from}_${to}_${mapping}")
-    val printWriter = new PrintWriter(s"${srcDir}/${mappingName}.scala", "utf-8")
+    val mappingName = cToPascal(s"${from}_${to}_${impl}")
+    val printWriter = new PrintWriter(s"${implSrcDir}/${mappingName}.scala", "utf-8")
     // package definition
-    printWriter.println(s"package ${srcPackage}\n")
+    printWriter.println(s"package ${implSrcPackage}\n")
     // imports
     printWriter.println(s"${importPackagesForService(model.xml, service)}")
     // companion object declaration

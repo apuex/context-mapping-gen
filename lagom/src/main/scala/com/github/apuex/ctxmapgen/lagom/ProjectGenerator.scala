@@ -10,11 +10,16 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
 
   def generate(): Unit = {
     rootProjectSettings()
-    applicationProjectSettings()
-    mappingProjectSettings()
+    apiProjectSettings()
+    appProjectSettings()
+    implProjectSettings()
   }
 
-  def applicationProjectSettings(): Unit = {
+  def apiProjectSettings(): Unit = {
+
+  }
+
+  def appProjectSettings(): Unit = {
     if (new File(s"${appProjectDir}/build.sbt").exists()) return
     new File(appProjectDir).mkdirs()
     val printWriter = new PrintWriter(s"${appProjectDir}/build.sbt", "utf-8")
@@ -68,16 +73,16 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
     printWriter.close()
   }
 
-  def mappingProjectSettings(): Unit = {
-    if (new File(s"${mappingProjectDir}/build.sbt").exists()) return
-    new File(srcDir).mkdirs()
-    val printWriter = new PrintWriter(s"${mappingProjectDir}/build.sbt", "utf-8")
+  def implProjectSettings(): Unit = {
+    if (new File(s"${implProjectDir}/build.sbt").exists()) return
+    new File(implSrcDir).mkdirs()
+    val printWriter = new PrintWriter(s"${implProjectDir}/build.sbt", "utf-8")
     printWriter.println(
       s"""
          |import Dependencies._
          |import sbtassembly.MergeStrategy
          |
-         |name         := "${mappingProjectName}"
+         |name         := "${implProjectName}"
          |scalaVersion := scalaVersionNumber
          |organization := artifactGroupName
          |version      := artifactVersionNumber
@@ -243,15 +248,15 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
          |
          |lazy val root = (project in file("."))
          |  .aggregate(
-         |    `${mappingProjectName}`,
+         |    `${implProjectName}`,
          |    `${appProjectName}`
          |  )
          |
-         |lazy val `${mappingProjectName}` = (project in file("${mappingProjectName}"))
+         |lazy val `${implProjectName}` = (project in file("${implProjectName}"))
          |  .enablePlugins(ProtobufPlugin)
          |  .enablePlugins(LagomScala)
          |lazy val `${appProjectName}` = (project in file("${appProjectName}"))
-         |  .dependsOn(`${mappingProjectName}`)
+         |  .dependsOn(`${implProjectName}`)
          |  .enablePlugins(PlayScala)
          |
          |resolvers += "Local Maven" at Path.userHome.asFile.toURI.toURL + ".m2/repository"

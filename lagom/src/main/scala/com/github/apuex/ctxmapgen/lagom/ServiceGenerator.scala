@@ -46,9 +46,9 @@ class ServiceGenerator(mappingLoader: MappingLoader) {
   def generateService(service: (String, mutable.Set[OperationDescription])): Unit = {
     val serviceName = cToPascal(s"${service._1}_service")
     val jsonSupportName = cToPascal(s"${service._1}_json_support")
-    val printWriter = new PrintWriter(s"${srcDir}/${serviceName}.scala", "utf-8")
+    val printWriter = new PrintWriter(s"${implSrcDir}/${serviceName}.scala", "utf-8")
     // package definition
-    printWriter.println(s"package ${srcPackage}\n")
+    printWriter.println(s"package ${implSrcPackage}\n")
     // imports
     printWriter.println(s"${importPackages(xml)}")
     // companion object declaration
