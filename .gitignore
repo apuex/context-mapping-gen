@@ -16,6 +16,7 @@ tmp/
 RUNNING_PID
 logs/
 log/
+.log
 repository
 root
 0f7453f6-5872-4dec-ab41-0e089c59a6ae
