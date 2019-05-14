@@ -1,6 +1,6 @@
 package com.github.apuex.ctxmapgen.lagom
 
-import java.io.PrintWriter
+import java.io.{File, PrintWriter}
 
 import com.github.apuex.ctxmapgen.lagom.MappingLoader.importPackages
 import com.github.apuex.springbootsolution.runtime.SymbolConverters._
@@ -46,9 +46,10 @@ class ServiceGenerator(mappingLoader: MappingLoader) {
   def generateService(service: (String, mutable.Set[OperationDescription])): Unit = {
     val serviceName = cToPascal(s"${service._1}_service")
     val jsonSupportName = cToPascal(s"${service._1}_json_support")
-    val printWriter = new PrintWriter(s"${implSrcDir}/${serviceName}.scala", "utf-8")
+    new File(apiSrcDir).mkdirs()
+    val printWriter = new PrintWriter(s"${apiSrcDir}/${serviceName}.scala", "utf-8")
     // package definition
-    printWriter.println(s"package ${implSrcPackage}\n")
+    printWriter.println(s"package ${apiSrcPackage}\n")
     // imports
     printWriter.println(s"${importPackages(xml)}")
     // companion object declaration
@@ -64,8 +65,6 @@ class ServiceGenerator(mappingLoader: MappingLoader) {
          |  /**
          |    * Subscribe from event stream with offset.
          |    *
-         |    * @see [[akka.persistence.query.Offset]]
-         |    * @see [[akka.persistence.query.TimeBasedUUID]]
          |    * @param offset timed-uuid specifies start position
          |    * @return
          |    */

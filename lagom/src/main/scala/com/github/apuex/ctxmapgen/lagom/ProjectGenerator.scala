@@ -16,7 +16,6 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
   }
 
   def apiProjectSettings(): Unit = {
-    if (new File(s"${apiProjectDir}/build.sbt").exists()) return
     new File(apiProjectDir).mkdirs()
     val printWriter = new PrintWriter(s"${apiProjectDir}/build.sbt", "utf-8")
     printWriter.println(
@@ -41,7 +40,6 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
   }
 
   def appProjectSettings(): Unit = {
-    if (new File(s"${appProjectDir}/build.sbt").exists()) return
     new File(appProjectDir).mkdirs()
     val printWriter = new PrintWriter(s"${appProjectDir}/build.sbt", "utf-8")
     printWriter.println(
@@ -53,11 +51,12 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
          |scalaVersion := scalaVersionNumber
          |organization := artifactGroupName
          |version      := artifactVersionNumber
-         |maintainer   := "xtwxy@hotmail.com"
+         |maintainer   := artifactMaintainer
          |
          |libraryDependencies ++= {
          |  Seq(
-         |    guice,
+         |    logback,
+         |    leveldbjni,
          |    scalaTest      % Test
          |  )
          |}
@@ -70,7 +69,7 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
          |  val cp = (fullClasspath in assembly).value
          |  cp.filter( x =>
          |    x.data.getName.contains("javax.activation-api")
-         |      || x.data.getName.contains("play-logback")
+         |      || x.data.getName.contains("lagom-logback")
          |  )
          |}
          |
@@ -95,7 +94,6 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
   }
 
   def implProjectSettings(): Unit = {
-    if (new File(s"${implProjectDir}/build.sbt").exists()) return
     new File(implSrcDir).mkdirs()
     val printWriter = new PrintWriter(s"${implProjectDir}/build.sbt", "utf-8")
     printWriter.println(
@@ -107,44 +105,19 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
          |scalaVersion := scalaVersionNumber
          |organization := artifactGroupName
          |version      := artifactVersionNumber
-         |maintainer   := "xtwxy@hotmail.com"
+         |maintainer   := artifactMaintainer
          |
          |libraryDependencies ++= {
          |  Seq(
+         |    playEvents,
+         |    playGuice,
+         |    serializer,
          |    akkaPersistence,
          |    akkaPersistenceQuery,
-         |    akkaPersistenceCassandra,
-         |    akkaPersistenceCassandraLauncher,
          |    akkaClusterSharding,
+         |    macwire        % Provided,
          |    scalaTest      % Test
          |  )
-         |}
-         |
-         |assemblyJarName in assembly := s"$${name.value}-assembly-$${version.value}.jar"
-         |mainClass in assembly := Some("play.core.server.ProdServerStart")
-         |
-         |assemblyExcludedJars in assembly := {
-         |  val cp = (fullClasspath in assembly).value
-         |  cp.filter( x =>
-         |    x.data.getName.contains("javax.activation-api")
-         |      || x.data.getName.contains("play-logback")
-         |  )
-         |}
-         |
-         |assemblyMergeStrategy in assembly := {
-         |  case manifest if manifest.contains("MANIFEST.MF") =>
-         |    // We don't need manifest files since sbt-assembly will create
-         |    // one with the given settings
-         |    MergeStrategy.discard
-         |  case PathList("META-INF", "io.netty.versions.properties") =>
-         |    MergeStrategy.discard
-         |  case referenceOverrides if referenceOverrides.contains("reference-overrides.conf") =>
-         |    // Keep the content for all reference-overrides.conf files
-         |    MergeStrategy.concat
-         |  case x =>
-         |    // For all the other files, use the default sbt-assembly merge strategy
-         |    val oldStrategy = (assemblyMergeStrategy in assembly).value
-         |    oldStrategy(x)
          |}
        """.stripMargin
     )
@@ -153,15 +126,11 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
 
 
   def rootProjectSettings(): Unit = {
-    if (!new File(s"${rootProjectDir}/build.sbt").exists())
     // build.sbt
     rootProjectBuildSbt()
-    if (!new File(s"${rootProjectDir}/project/build.properties").exists())
     rootProjectBuildProperties()
-    if (!new File(s"${rootProjectDir}/project/plugin.sbt").exists())
     rootProjectPluginSbt()
-    if (!new File(s"${rootProjectDir}/project/Dependencies.scala").exists())
-    rootProjectDependencies
+    rootProjectDependencies()
   }
 
   def makeRootProjectDir(): Boolean = new File(s"${rootProjectDir}/project/").mkdirs()
@@ -176,8 +145,9 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
          |object Dependencies {
          |  lazy val scalaVersionNumber    = "2.12.8"
          |  lazy val akkaVersion           = "2.5.22"
-         |  lazy val artifactGroupName     = "com.apuex.sales.mapping"
-         |  lazy val artifactVersionNumber = "1.0.0"
+         |  lazy val artifactGroupName     = "${modelPackage}"
+         |  lazy val artifactVersionNumber = "${modelVersion}"
+         |  lazy val artifactMaintainer    = "xtwxy@hotmail"
          |  lazy val sprayVersion          = "1.3.5"
          |  lazy val playVersion           = "2.7.2"
          |  lazy val lagomVersion          = "1.5.0"
@@ -187,6 +157,7 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
          |  lazy val akkaRemote      = "com.typesafe.akka"         %%  "akka-remote"                         % akkaVersion
          |  lazy val akkaStream      = "com.typesafe.akka"         %%  "akka-stream"                         % akkaVersion
          |  lazy val akkaPersistence = "com.typesafe.akka"         %%  "akka-persistence"                    % akkaVersion
+         |  lazy val leveldbjni      = "org.fusesource.leveldbjni" %   "leveldbjni-all"                      % "1.8"
          |  lazy val akkaPersistenceQuery = "com.typesafe.akka"    %% "akka-persistence-query"               % akkaVersion
          |  lazy val akkaPersistenceCassandra = "com.typesafe.akka"         %%  "akka-persistence-cassandra"          % "0.93"
          |  lazy val akkaPersistenceCassandraLauncher = "com.typesafe.akka"         %%  "akka-persistence-cassandra-launcher" % "0.93"
@@ -200,10 +171,15 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
          |  lazy val playTest        = "com.typesafe.play"         %%  "play-test"                           % playVersion
          |  lazy val jodaTime        = "joda-time"                 %   "joda-time"                           % "2.10.1"
          |  lazy val googleGuice     = "com.google.inject"         %   "guice"                               % "4.2.0"
+         |  lazy val protobuf        = "com.google.protobuf"       %   "protobuf-java"                       % "3.7.0"
+         |  lazy val protobufUtil    = "com.google.protobuf"       %   "protobuf-java-util"                       % "3.7.0"
          |  lazy val playGuice       = "com.typesafe.play"         %%  "play-guice"                          % playVersion
          |  lazy val playJson        = "com.typesafe.play"         %%  "play-json"                           % playVersion
          |  lazy val lagomApi        = "com.lightbend.lagom"       %%  "lagom-scaladsl-api"                  % lagomVersion
+         |  lazy val macwire         = "com.softwaremill.macwire"  %% "macros"                               % "2.3.0"
          |
+         |  lazy val playEvents      = "com.github.apuex"          %%  "play-events"                         % "1.0.1"
+         |  lazy val serializer      = "com.github.apuex.protobuf" %   "protobuf-serializer"                   % "1.0.1"
          |  lazy val playSocketIO    = "com.lightbend.play"        %%  "play-socket-io"                      % "1.0.0-beta-2"
          |  lazy val macwireMicros   = "com.softwaremill.macwire"  %%  "macros"                              % "2.3.0"
          |  lazy val guava           = "com.google.guava"          %   "guava"                               % "22.0"
@@ -265,19 +241,23 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
          |scalaVersion := scalaVersionNumber
          |organization := artifactGroupName
          |version      := artifactVersionNumber
-         |maintainer   := "xtwxy@hotmail.com"
+         |maintainer   := artifactMaintainer
          |
          |lazy val root = (project in file("."))
          |  .aggregate(
-         |    `${implProjectName}`,
-         |    `${appProjectName}`
+         |    `${app}`,
+         |    `${impl}`,
+         |    `${app}`
          |  )
          |
-         |lazy val `${implProjectName}` = (project in file("${implProjectName}"))
+         |lazy val `${api}` = (project in file("${api}"))
          |  .enablePlugins(ProtobufPlugin)
          |  .enablePlugins(LagomScala)
-         |lazy val `${appProjectName}` = (project in file("${appProjectName}"))
-         |  .dependsOn(`${implProjectName}`)
+         |lazy val `${impl}` = (project in file("${impl}"))
+         |  .dependsOn(`${api}`)
+         |  .enablePlugins(ProtobufPlugin)
+         |lazy val `${app}` = (project in file("${app}"))
+         |  .dependsOn(`${impl}`)
          |  .enablePlugins(PlayScala)
          |
          |resolvers += "Local Maven" at Path.userHome.asFile.toURI.toURL + ".m2/repository"

@@ -11,7 +11,8 @@
          from="sales"
          to="inventory"
          package="com.apuex.sales.mapping"
-         version="1.0.0">
+         version="1.0.0"
+         maintainer="xtwxy@hotmail.com">
   <imports>
     <import>com.apuex.sales.message._</import>
     <import>akka.persistence.query._</import>

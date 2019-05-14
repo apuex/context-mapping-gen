@@ -40,20 +40,21 @@ class MappingLoader(val xml: Node) {
   val modelName = xml.\@("name")
   val modelPackage = xml.\@("package")
   val modelVersion = xml.\@("version")
+  val modelMaintainer = xml.\@("maintainer")
   val system = xml.\@("to")
   val outputDir = s"${System.getProperty("output.dir", "target/generated")}"
   val rootProjectName = s"${cToShell(modelName)}"
   val rootProjectDir = s"${outputDir}/${rootProjectName}"
   val apiProjectName = s"${cToShell(modelName)}-${cToShell(api)}"
-  val apiProjectDir = s"${rootProjectDir}/${apiProjectName}"
+  val apiProjectDir = s"${rootProjectDir}/${api}"
   val implProjectName = s"${cToShell(modelName)}-${cToShell(impl)}"
-  val implProjectDir = s"${rootProjectDir}/${implProjectName}"
+  val implProjectDir = s"${rootProjectDir}/${impl}"
   val apiSrcPackage = s"${modelPackage}.${cToCamel(modelName)}"
   val apiSrcDir = s"${apiProjectDir}/src/main/scala/${apiSrcPackage.replace('.', '/')}"
   val implSrcPackage = s"${apiSrcPackage}.${cToCamel(impl)}"
   val implSrcDir = s"${implProjectDir}/src/main/scala/${implSrcPackage.replace('.', '/')}"
   val appProjectName = s"${cToShell(modelName)}-${cToShell(app)}"
-  val appProjectDir = s"${rootProjectDir}/${appProjectName}"
+  val appProjectDir = s"${rootProjectDir}/${app}"
   val applicationConfDir = s"${appProjectDir}/conf"
   val symboConverter = if ("microsoft" == s"${System.getProperty("symbol.naming", "microsoft")}")
     "new IdentityConverter()" else "new CamelToCConverter()"

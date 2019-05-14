@@ -16,7 +16,7 @@ class MappingLoaderSpec extends FlatSpec with Matchers {
     rootProjectName should be("bc1-to-bc2")
     rootProjectDir should be(s"${outputDir}/bc1-to-bc2")
     implProjectName should be("bc1-to-bc2-impl")
-    implProjectDir should be(s"${outputDir}/bc1-to-bc2/bc1-to-bc2-impl")
+    implProjectDir should be(s"${outputDir}/bc1-to-bc2/impl")
     implSrcDir should be(s"${implProjectDir}/src/main/scala/com/apuex/sales/mapping/bc1ToBc2/impl")
     implSrcPackage should be("com.apuex.sales.mapping.bc1ToBc2.impl")
     symboConverter should be(if ("microsoft" == s"${System.getProperty("symbol.naming", "microsoft")}")
