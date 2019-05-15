@@ -8,7 +8,7 @@ import com.github.apuex.springbootsolution.runtime.TextUtils.indent
 
 import scala.collection.mutable
 
-class ApplicationGenerator(mappingLoader: MappingLoader) {
+class ApplicationLoaderGenerator(mappingLoader: MappingLoader) {
 
   import mappingLoader._
 
@@ -57,7 +57,9 @@ class ApplicationGenerator(mappingLoader: MappingLoader) {
        |  override lazy val lagomServer: LagomServer = serverFor[${cToPascal(serviceName)}](wire[${cToPascal(serviceImplName)}])
        |  // Register the JSON serializer registry
        |  override lazy val optionalJsonSerializerRegistry = Some(new JsonSerializerRegistry {
+       |
        |    import mappingConfig._
+       |
        |    override def serializers: Seq[JsonSerializer[_]] = Seq(
        |      ${indent(generateJsonSerializers, 6)}
        |    )

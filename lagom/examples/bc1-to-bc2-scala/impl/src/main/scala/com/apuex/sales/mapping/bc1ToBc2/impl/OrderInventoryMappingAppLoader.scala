@@ -32,7 +32,9 @@ abstract class OrderInventoryMappingApp(context: LagomApplicationContext)
   override lazy val lagomServer: LagomServer = serverFor[OrderInventoryService](wire[OrderInventoryServiceImpl])
   // Register the JSON serializer registry
   override lazy val optionalJsonSerializerRegistry = Some(new JsonSerializerRegistry {
+
     import mappingConfig._
+
     override def serializers: Seq[JsonSerializer[_]] = Seq(
       JsonSerializer(jsonFormat(classOf[RetrieveOrderCmd])),
       JsonSerializer(jsonFormat(classOf[OrderVo])),
