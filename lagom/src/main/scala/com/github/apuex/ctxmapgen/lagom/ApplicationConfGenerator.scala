@@ -2,9 +2,9 @@ package com.github.apuex.ctxmapgen.lagom
 
 import java.io.{File, PrintWriter}
 
+import com.github.apuex.ctxmapgen.lagom.ServiceGenerator._
 import com.github.apuex.springbootsolution.runtime.SymbolConverters._
 import com.github.apuex.springbootsolution.runtime.TextUtils.indent
-import com.github.apuex.ctxmapgen.lagom.ServiceGenerator._
 
 import scala.collection.mutable
 
@@ -13,6 +13,13 @@ class ApplicationConfGenerator(mappingLoader: MappingLoader) {
   import mappingLoader._
 
   def generate(): Unit = {
+    generateAppConf()
+    generateLogConf()
+    generateMessageConf()
+    generateRoutesConf()
+  }
+
+  def generateAppConf(): Unit = {
     new File(applicationConfDir).mkdirs()
     val printWriter = new PrintWriter(s"${applicationConfDir}/application.conf", "utf-8")
     printWriter.println(
@@ -130,5 +137,81 @@ class ApplicationConfGenerator(mappingLoader: MappingLoader) {
     collectServiceCalls(xml, serviceCalls)
     serviceCalls.map(x => s"""${cToShell(x._1)} = "http://localhost:9000/${cToShell(x._1)}"""")
       .reduce((x, y) => "%s\n%s".format(x, y))
+  }
+
+  def generateLogConf(): Unit = {
+    new File(applicationConfDir).mkdirs()
+    val printWriter = new PrintWriter(s"${applicationConfDir}/logback.xml", "utf-8")
+    printWriter.println(
+      s"""
+         |<!-- https://www.playframework.com/documentation/latest/SettingsLogger -->
+         |<configuration>
+         |
+         |  <conversionRule conversionWord="coloredLevel" converterClass="play.api.libs.logback.ColoredLevel" />
+         |
+         |  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+         |    <file>$${application.home :-.}/logs/application.log</file>
+         |    <encoder>
+         |      <pattern>%date [%level] from %logger in %thread - %message%n%xException</pattern>
+         |    </encoder>
+         |  </appender>
+         |
+         |  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+         |    <encoder>
+         |      <pattern>%coloredLevel %logger{15} - %message%n%xException{10}</pattern>
+         |    </encoder>
+         |  </appender>
+         |
+         |  <appender name="ASYNCFILE" class="ch.qos.logback.classic.AsyncAppender">
+         |    <appender-ref ref="FILE" />
+         |  </appender>
+         |
+         |  <appender name="ASYNCSTDOUT" class="ch.qos.logback.classic.AsyncAppender">
+         |    <appender-ref ref="STDOUT" />
+         |  </appender>
+         |
+         |  <logger name="play" level="INFO" />
+         |  <logger name="akka" level="INFO" />
+         |  <logger name="application" level="INFO" />
+         |  <logger name="${modelPackage}" level="INFO" />
+         |
+         |  <root level="INFO">
+         |    <appender-ref ref="ASYNCSTDOUT" />
+         |    <appender-ref ref="ASYNCFILE" />
+         |  </root>
+         |
+         |</configuration>
+       """.stripMargin
+        .trim)
+    printWriter.close()
+  }
+
+  def generateMessageConf(): Unit = {
+    new File(applicationConfDir).mkdirs()
+    val printWriter = new PrintWriter(s"${applicationConfDir}/messages", "utf-8")
+    printWriter.println(
+      s"""
+         |# https://www.playframework.com/documentation/latest/ScalaI18N
+       """.stripMargin
+        .trim)
+    printWriter.close()
+  }
+
+  def generateRoutesConf(): Unit = {
+    new File(applicationConfDir).mkdirs()
+    val printWriter = new PrintWriter(s"${applicationConfDir}/routes", "utf-8")
+    printWriter.println(
+      s"""
+         |# Routes
+         |# This file defines all application routes (Higher priority routes first)
+         |# https://www.playframework.com/documentation/latest/ScalaRouting
+         |# ~~~~
+         |
+         |# Map static resources from the /public folder to the /assets URL path
+         |GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+         |->      /api                        playevents.Routes
+       """.stripMargin
+        .trim)
+    printWriter.close()
   }
 }
