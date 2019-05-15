@@ -17,7 +17,6 @@ trait OrderService extends Service {
          
   def retrieve(): ServiceCall[RetrieveOrderCmd, OrderVo]
 
-  
   override final def descriptor: Descriptor = {
     import Service._
   
@@ -26,5 +25,4 @@ trait OrderService extends Service {
         pathCall("/api/events?offset", events _)
       ).withAutoAcl(true)
   }
-       
 }

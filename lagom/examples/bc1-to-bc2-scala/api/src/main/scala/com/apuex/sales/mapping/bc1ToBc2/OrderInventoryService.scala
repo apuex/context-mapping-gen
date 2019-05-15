@@ -1,9 +1,11 @@
 package com.apuex.sales.mapping.bc1ToBc2
 
-import akka.stream.scaladsl.Source
-import akka.{Done, NotUsed}
-import com.lightbend.lagom.scaladsl.api.{Descriptor, Service, ServiceCall}
+import javax.inject._
 
+import akka.{Done, NotUsed}
+import akka.stream.scaladsl.Source
+import com.lightbend.lagom.scaladsl.api.{Descriptor, Service, ServiceCall}
+       
 trait OrderInventoryService extends Service {
   /**
     * Subscribe from event stream with offset.
@@ -16,10 +18,9 @@ trait OrderInventoryService extends Service {
   override final def descriptor: Descriptor = {
     import Service._
   
-    named("order-inventory-mapping")
+    named("order-inventory")
       .withCalls(
         pathCall("/api/events?offset", events _)
       ).withAutoAcl(true)
   }
-       
 }

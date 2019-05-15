@@ -8,7 +8,7 @@
   @package - base package name
 -->
 <mapping name="bc1_to_bc2"
-         from="sales"
+         from="order"
          to="inventory"
          package="com.apuex.sales.mapping"
          version="1.0.0"

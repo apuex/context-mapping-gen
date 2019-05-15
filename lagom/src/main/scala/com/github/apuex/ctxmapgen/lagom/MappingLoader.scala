@@ -36,12 +36,15 @@ class MappingLoader(val xml: Node) {
   val api: String = "api"
   val impl: String = "impl"
   val mapping: String = "mapping"
+  val service: String = "service"
   val app: String = "app"
+  val loader: String = "loader"
   val modelName = xml.\@("name")
   val modelPackage = xml.\@("package")
   val modelVersion = xml.\@("version")
   val modelMaintainer = xml.\@("maintainer")
-  val system = xml.\@("to")
+  val srcSystem = xml.\@("from")
+  val destSystem = xml.\@("to")
   val outputDir = s"${System.getProperty("output.dir", "target/generated")}"
   val rootProjectName = s"${cToShell(modelName)}"
   val rootProjectDir = s"${outputDir}/${rootProjectName}"

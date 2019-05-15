@@ -17,7 +17,6 @@ trait InventoryService extends Service {
          
   def reduce(): ServiceCall[ReduceStorageCmd, Done]
 
-  
   override final def descriptor: Descriptor = {
     import Service._
   
@@ -26,5 +25,4 @@ trait InventoryService extends Service {
         pathCall("/api/events?offset", events _)
       ).withAutoAcl(true)
   }
-       
 }
