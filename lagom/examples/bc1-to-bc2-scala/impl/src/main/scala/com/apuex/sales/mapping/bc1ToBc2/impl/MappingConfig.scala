@@ -16,6 +16,7 @@ class MappingConfig {
   // json parser and printer
   val registry = JsonFormat.TypeRegistry
     .newBuilder
+    // TODO: add your protobuf message descriptors here.
     .add(MappingMessages.getDescriptor.getMessageTypes)
     .add(EventEnvelopeProto.getDescriptor.getMessageTypes)
     .build
@@ -26,6 +27,7 @@ class MappingConfig {
 
   // any packager for pack/unpack messages.
   val packager = AnyPackagerBuilder.builder()
+    // TODO: add your protobuf message descriptors here.
     .withFileDescriptorProto(MappingMessages.getDescriptor.toProto)
     .withFileDescriptorProto(EventEnvelopeProto.getDescriptor.toProto)
     .withStringRegistry()

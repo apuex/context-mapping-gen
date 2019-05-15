@@ -3,18 +3,12 @@ package com.apuex.sales.mapping.bc1ToBc2.impl
 import akka.actor.Props
 import com.apuex.sales.mapping.bc1ToBc2._
 import com.lightbend.lagom.scaladsl.client._
-import com.lightbend.lagom.scaladsl.devmode._
+import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
 import com.lightbend.lagom.scaladsl.playjson.{JsonSerializer, JsonSerializerRegistry}
 import com.lightbend.lagom.scaladsl.server._
 import com.softwaremill.macwire._
-import play.api.libs.ws.ahc._
-import com.lightbend.lagom.scaladsl.api.ServiceLocator
-import com.lightbend.lagom.scaladsl.api.ServiceLocator.NoServiceLocator
-import com.lightbend.lagom.scaladsl.server._
-import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
 import play.api.libs.ws.ahc.AhcWSComponents
-import com.lightbend.lagom.scaladsl.playjson.JsonSerializerRegistry
-import com.softwaremill.macwire._
+
 import scala.collection.immutable.Seq
 
 class OrderInventoryMappingLoader extends LagomApplicationLoader {

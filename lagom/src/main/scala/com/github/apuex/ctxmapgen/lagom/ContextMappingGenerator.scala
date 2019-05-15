@@ -17,6 +17,7 @@ class ContextMappingGenerator(mappingFile: String) {
     new ProjectGenerator(model).generate()
     new ApplicationConfGenerator(model).generate()
     new ServiceGenerator(model).generate()
+    new MappingConfigGenerator(model).generate()
     generateServiceMappings()
   }
 
