@@ -16,6 +16,7 @@ class ContextMappingGenerator(mappingFile: String) {
   def generate() : Unit = {
     new ProjectGenerator(model).generate()
     new ApplicationConfGenerator(model).generate()
+    new ApplicationGenerator(model).generate()
     new ServiceGenerator(model).generate()
     new MappingConfigGenerator(model).generate()
     generateServiceMappings()

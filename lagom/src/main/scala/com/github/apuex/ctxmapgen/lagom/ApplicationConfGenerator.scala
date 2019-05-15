@@ -32,7 +32,7 @@ class ApplicationConfGenerator(mappingLoader: MappingLoader) {
          |
          |play {
          |  application {
-         |    loader = "${implSrcPackage}.${cToPascal(s"${srcSystem}_${destSystem}_${app}_${loader}")}"
+         |    loader = "${implSrcPackage}.${cToPascal(s"${srcSystem}_${destSystem}_${mapping}_${app}_${loader}")}"
          |  }
          |  http {
          |    secret {
@@ -82,7 +82,7 @@ class ApplicationConfGenerator(mappingLoader: MappingLoader) {
          |    serialization-bindings {
          |      "java.io.Serializable" = none
          |      // scalapb 0.8.4
-         |      "scalapb.GeneratedMessage" = ${cToShell(destSystem)}-protobuf
+         |      // "scalapb.GeneratedMessage" = ${cToShell(destSystem)}-protobuf
          |      // google protobuf-java 3.6.1
          |      "com.google.protobuf.GeneratedMessageV3" = ${cToShell(destSystem)}-protobuf
          |    }
