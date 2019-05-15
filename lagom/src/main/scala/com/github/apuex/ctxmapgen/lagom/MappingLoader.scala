@@ -28,7 +28,8 @@ object MappingLoader {
       .map(x => x.replace("*", "_"))
       .map(x => x.replace("static", ""))
       .map(x => s"import ${x}")
-      .reduceLeft((l, r) => s"${l}\n${r}")
+      .foldLeft("")((l, r) => s"${l}\n${r}")
+      .trim
   }
 }
 

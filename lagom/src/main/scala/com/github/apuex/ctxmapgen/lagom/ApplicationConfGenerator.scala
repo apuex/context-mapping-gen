@@ -137,6 +137,7 @@ class ApplicationConfGenerator(mappingLoader: MappingLoader) {
     collectServiceCalls(xml, serviceCalls)
     serviceCalls.map(x => s"""${cToShell(x._1)} = "http://localhost:9000/${cToShell(x._1)}"""")
       .reduce((x, y) => "%s\n%s".format(x, y))
+      .trim
   }
 
   def generateLogConf(): Unit = {

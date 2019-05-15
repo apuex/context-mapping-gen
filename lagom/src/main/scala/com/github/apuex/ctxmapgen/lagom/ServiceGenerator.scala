@@ -79,6 +79,7 @@ class ServiceGenerator(mappingLoader: MappingLoader) {
   def generate(): Unit = {
     val serviceCalls: mutable.Map[String, mutable.Set[OperationDescription]] = mutable.Map()
     collectService(xml, serviceCalls)
+    serviceCalls.foreach(x => generateServiceImpl(x))
     collectServiceCalls(xml, serviceCalls)
     serviceCalls.foreach(x => generateService(x))
   }
@@ -89,7 +90,7 @@ class ServiceGenerator(mappingLoader: MappingLoader) {
     new File(apiSrcDir).mkdirs()
     val printWriter = new PrintWriter(s"${apiSrcDir}/${serviceName}.scala", "utf-8")
     // package definition
-    printWriter.println(s"package ${apiSrcPackage}\n")
+    printWriter.println(s"package ${apiSrcPackage}")
     // imports
     printWriter.println(s"${importPackages(xml)}")
     // companion object declaration
@@ -98,7 +99,8 @@ class ServiceGenerator(mappingLoader: MappingLoader) {
          |import akka.{Done, NotUsed}
          |import akka.stream.scaladsl.Source
          |import com.lightbend.lagom.scaladsl.api.{Descriptor, Service, ServiceCall}
-       """.stripMargin)
+       """.stripMargin.trim)
+    printWriter.println()
     // begin class declaration
     printWriter.println(
       s"""trait ${serviceName} extends Service {
@@ -109,13 +111,53 @@ class ServiceGenerator(mappingLoader: MappingLoader) {
          |    * @return
          |    */
          |  def events(offset: Option[String]): ServiceCall[Source[String, NotUsed], Source[String, NotUsed]]
-         """.stripMargin)
+         """.stripMargin.trim)
 
     serviceCalls._2.foreach(m => {
-      printWriter.println(s"${indent(generateServiceOperation(serviceCalls._1, m), 2, true)}\n")
+      printWriter.println(s"\n${indent(generateServiceOperation(serviceCalls._1, m), 2, true)}\n")
     })
     // method descriptor
-    printWriter.println(s"${indent(generateServiceDescriptor(serviceCalls), 2, true)}")
+    printWriter.println(s"\n${indent(generateServiceDescriptor(serviceCalls), 2, true)}")
+    // end class declaration
+    printWriter.println("}")
+    printWriter.close()
+  }
+
+  def generateServiceImpl(serviceCalls: (String, mutable.Set[OperationDescription])): Unit = {
+    val serviceName = cToPascal(s"${serviceCalls._1}_${service}")
+    val serviceImplName = cToPascal(s"${serviceName}_${impl}")
+    new File(implSrcDir).mkdirs()
+    val printWriter = new PrintWriter(s"${implSrcDir}/${serviceImplName}.scala", "utf-8")
+    // package definition
+    printWriter.println(s"package ${implSrcPackage}")
+    // imports
+    printWriter.println(s"${importPackages(xml)}")
+    // companion object declaration
+    printWriter.println(
+      s"""
+         |import akka.{Done, NotUsed}
+         |import akka.stream.scaladsl.Source
+         |import com.lightbend.lagom.scaladsl.api.ServiceCall
+         |import ${apiSrcPackage}.${serviceName}
+         |
+         |import scala.concurrent.Future
+       """.stripMargin.trim)
+    printWriter.println()
+    // begin class declaration
+    printWriter.println(
+      s"""class ${serviceImplName} extends ${serviceName} {
+         |  /**
+         |    * Subscribe from event stream with offset.
+         |    *
+         |    * @param offset timed-uuid specifies start position
+         |    * @return
+         |    */
+         |  override def events(offset: Option[String]): ServiceCall[Source[String, NotUsed], Source[String, NotUsed]] =
+         |    ServiceCall { is =>
+         |      Future.successful(is.map(x => x))
+         |    }
+         """.stripMargin.trim)
+
     // end class declaration
     printWriter.println("}")
     printWriter.close()
