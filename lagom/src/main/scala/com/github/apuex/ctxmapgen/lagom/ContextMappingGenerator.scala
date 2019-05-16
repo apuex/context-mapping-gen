@@ -5,6 +5,8 @@ import java.io.PrintWriter
 import com.github.apuex.springbootsolution.runtime.SymbolConverters._
 import com.github.apuex.springbootsolution.runtime.TextUtils._
 
+import scala.xml.Node
+
 class ContextMappingGenerator(mappingFile: String) {
   val model = MappingLoader(mappingFile)
 
@@ -155,7 +157,8 @@ class ContextMappingGenerator(mappingFile: String) {
        |        context.system.scheduler.scheduleOnce(30.seconds)(subscribe)
        |    })
        |}
-     """.stripMargin
+     """
+      .stripMargin
       .trim
   }
 
@@ -163,10 +166,12 @@ class ContextMappingGenerator(mappingFile: String) {
     s"""
        |private def mapEvent(offset: String): (Message => Unit) = {
        |  // TODO: add message mappings here.
+       |  ${indent(mapEvent(xml), 2)}
        |  case x =>
        |    log.debug("unhandled: {}", x)
        |}
-     """.stripMargin
+     """
+      .stripMargin
       .trim
   }
 
@@ -178,7 +183,24 @@ class ContextMappingGenerator(mappingFile: String) {
     s"""
        |val config: MappingConfig,
        |${services}
-       """.stripMargin
+       """
+      .stripMargin
       .trim
+  }
+
+  private def mapEvent(node: Node): String = {
+    node.child.filter(x => x.label == "map")
+      .map(x => {
+        s"""case ${cToCamel(x.\@("alias"))}: ${cToPascal(x.\@("message"))} =>
+           |  ${indent(mapEventImpl(x), 2)}
+         """
+          .stripMargin
+          .trim
+      })
+      .reduce((l, r) => s"${l}\n${r}")
+  }
+
+  private def mapEventImpl(node: Node): String = {
+    ""
   }
 }
