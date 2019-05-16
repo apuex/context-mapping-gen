@@ -13,15 +13,10 @@ object ServiceGenerator {
 
   case class OperationDescription(name: String, req: String, resp: String)
 
-  def collectService(node: Node, calls: mutable.Map[String, mutable.Set[OperationDescription]]): Unit = {
-    node.child.filter(x => x.label == "service")
-      .foreach(x => {
-        val from = x.\@("from")
-        val to = x.\@("to")
-        val serviceName = (s"${from}_${to}")
-        val operations = calls.getOrElse(serviceName, mutable.Set())
-        calls += (serviceName -> operations)
-      })
+  def collectService(loader: MappingLoader, calls: mutable.Map[String, mutable.Set[OperationDescription]]): Unit = {
+    val serviceName = (s"${loader.srcSystem}_${loader.destSystem}")
+    val operations = calls.getOrElse(serviceName, mutable.Set())
+    calls += (serviceName -> operations)
   }
 
   def collectServiceCalls(node: Node, calls: mutable.Map[String, mutable.Set[OperationDescription]]): Unit = {
@@ -43,7 +38,6 @@ object ServiceGenerator {
     )
     calls += (serviceName -> operations)
   }
-
 
 
   def generateServiceOperation(service: String, operation: OperationDescription): String = {
@@ -77,7 +71,7 @@ class ServiceGenerator(mappingLoader: MappingLoader) {
 
   def generate(): Unit = {
     val serviceCalls: mutable.Map[String, mutable.Set[OperationDescription]] = mutable.Map()
-    collectService(xml, serviceCalls)
+    collectService(mappingLoader, serviceCalls)
     serviceCalls.foreach(x => generateServiceImpl(x))
     collectServiceCalls(xml, serviceCalls)
     serviceCalls.foreach(x => generateService(x))

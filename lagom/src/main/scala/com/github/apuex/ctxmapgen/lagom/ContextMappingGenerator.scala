@@ -5,8 +5,6 @@ import java.io.PrintWriter
 import com.github.apuex.springbootsolution.runtime.SymbolConverters._
 import com.github.apuex.springbootsolution.runtime.TextUtils._
 
-import scala.xml.Node
-
 class ContextMappingGenerator(mappingFile: String) {
   val model = MappingLoader(mappingFile)
 
@@ -28,14 +26,7 @@ class ContextMappingGenerator(mappingFile: String) {
   }
 
   private def generateServiceMappings(): Unit = {
-    model.xml.child.filter(x => x.label == "service")
-      .foreach(x => serviceMapping(x))
-  }
-
-  private def serviceMapping(service: Node): Unit = {
-    val from = service.\@("from")
-    val to = service.\@("to")
-    val mappingName = cToPascal(s"${from}_${to}_${mapping}")
+    val mappingName = cToPascal(s"${srcSystem}_${destSystem}_${mapping}")
     val printWriter = new PrintWriter(s"${implSrcDir}/${mappingName}.scala", "utf-8")
     // package definition
     printWriter.println(s"package ${implSrcPackage}\n")
@@ -90,18 +81,18 @@ class ContextMappingGenerator(mappingFile: String) {
          """.stripMargin
         .trim)
 
-    printWriter.println(s"${indent(receiveRecover(service), 2, true)}\n")
-    printWriter.println(s"${indent(receiveCommand(service), 2, true)}\n")
-    printWriter.println(s"${indent(updateState(service), 2, true)}\n")
-    printWriter.println(s"${indent(mapEvent(service), 2, true)}\n")
-    printWriter.println(s"${indent(subscribe(service), 2, true)}\n")
+    printWriter.println(s"${indent(receiveRecover(), 2, true)}\n")
+    printWriter.println(s"${indent(receiveCommand(), 2, true)}\n")
+    printWriter.println(s"${indent(updateState(), 2, true)}\n")
+    printWriter.println(s"${indent(mapEvent(), 2, true)}\n")
+    printWriter.println(s"${indent(subscribe(), 2, true)}\n")
 
     // end class declaration
     printWriter.println("}")
     printWriter.close()
   }
 
-  private def receiveRecover(service: Node): String = {
+  private def receiveRecover(): String = {
     s"""
        |override def receiveRecover: Receive = {
        |  case SnapshotOffer(metadata: SnapshotMetadata, snapshot: String) =>
@@ -117,7 +108,7 @@ class ContextMappingGenerator(mappingFile: String) {
       .trim
   }
 
-  private def receiveCommand(service: Node): String = {
+  private def receiveCommand(): String = {
     s"""
        |override def receiveCommand: Receive = {
        |  case x: EventEnvelope =>
@@ -130,7 +121,7 @@ class ContextMappingGenerator(mappingFile: String) {
       .trim
   }
 
-  private def updateState(service: Node): String = {
+  private def updateState(): String = {
     s"""
        |private def updateState: (Any => Unit) = {
        |  case x: String =>
@@ -141,7 +132,7 @@ class ContextMappingGenerator(mappingFile: String) {
       .trim
   }
 
-  private def subscribe(service: Node): String = {
+  private def subscribe(): String = {
     s"""
        |private def subscribe(): Unit = {
        |  log.info("connecting...")
@@ -168,7 +159,7 @@ class ContextMappingGenerator(mappingFile: String) {
       .trim
   }
 
-  private def mapEvent(service: Node): String = {
+  private def mapEvent(): String = {
     s"""
        |private def mapEvent(offset: String): (Message => Unit) = {
        |  // TODO: add message mappings here.
