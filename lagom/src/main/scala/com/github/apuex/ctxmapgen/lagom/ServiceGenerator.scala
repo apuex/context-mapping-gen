@@ -2,7 +2,6 @@ package com.github.apuex.ctxmapgen.lagom
 
 import java.io.{File, PrintWriter}
 
-import com.github.apuex.ctxmapgen.lagom.MappingLoader.importPackages
 import com.github.apuex.ctxmapgen.lagom.ServiceGenerator._
 import com.github.apuex.springbootsolution.runtime.SymbolConverters._
 import com.github.apuex.springbootsolution.runtime.TextUtils.indent
@@ -90,9 +89,7 @@ class ServiceGenerator(mappingLoader: MappingLoader) {
     new File(apiSrcDir).mkdirs()
     val printWriter = new PrintWriter(s"${apiSrcDir}/${serviceName}.scala", "utf-8")
     // package definition
-    printWriter.println(s"package ${apiSrcPackage}")
-    // imports
-    printWriter.println(s"${importPackages(xml)}")
+    printWriter.println(s"package ${apiSrcPackage}\n")
     // companion object declaration
     printWriter.println(
       s"""
@@ -129,9 +126,7 @@ class ServiceGenerator(mappingLoader: MappingLoader) {
     new File(implSrcDir).mkdirs()
     val printWriter = new PrintWriter(s"${implSrcDir}/${serviceImplName}.scala", "utf-8")
     // package definition
-    printWriter.println(s"package ${implSrcPackage}")
-    // imports
-    printWriter.println(s"${importPackages(xml)}")
+    printWriter.println(s"package ${implSrcPackage}\n")
     // companion object declaration
     printWriter.println(
       s"""

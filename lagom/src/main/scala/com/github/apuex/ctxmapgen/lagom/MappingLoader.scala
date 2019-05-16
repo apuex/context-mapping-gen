@@ -13,15 +13,15 @@ object MappingLoader {
 
   def apply(xml: Node): MappingLoader = new MappingLoader(xml)
 
-  def importPackagesForService(model: Node, service: Node): String = {
+  def importPackagesForService1(model: Node, service: Node): String = {
     s"""
-       |${importPackages(service)}
-       |${importPackages(model)}
+       |${importPackages1(service)}
+       |${importPackages1(model)}
      """.stripMargin
       .trim
   }
 
-  def importPackages(node: Node): String = {
+  def importPackages1(node: Node): String = {
     node.child.filter(x => x.label == "imports")
       .flatMap(x => x.child.filter(c => c.label == "import"))
       .map(x => x.text.trim)

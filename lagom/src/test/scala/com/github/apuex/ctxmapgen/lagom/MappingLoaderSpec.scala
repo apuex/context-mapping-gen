@@ -1,6 +1,5 @@
 package com.github.apuex.ctxmapgen.lagom
 
-import com.github.apuex.ctxmapgen.lagom.MappingLoader._
 import com.github.apuex.ctxmapgen.util.ClasspathXmlLoader
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -24,30 +23,5 @@ class MappingLoaderSpec extends FlatSpec with Matchers {
     docsDir should be(s"${outputDir}/bc1-to-bc2/docs")
     classNamePostfix should be(s"Impl")
     hyphen should be(if ("microsoft" == s"${System.getProperty("symbol.naming", "microsoft")}") "" else "-")
-
-    importPackages(xml) should be(
-      s"""
-         |import com.apuex.sales.message._
-         |import akka.persistence.query._
-         |import javax.inject._
-       """.stripMargin.trim)
-
-    val expectedImports =
-      s"""
-         |import com.google.protobuf.timestamp.Timestamp
-         |import com.apuex.sales.message._
-         |import akka.persistence.query._
-         |import javax.inject._
-     """.stripMargin
-          .trim
-    xml.child.filter(x => x.label == "service")
-      .foreach(x => {
-        s"""
-           |${importPackages(x)}
-           |${importPackages(xml)}
-     """.stripMargin
-          .trim should be(expectedImports)
-      })
-
   }
 }

@@ -1,30 +1,30 @@
-package com.apuex.sales.mapping.bc1ToBc2
+package com.apuex.sales.mapping.bc1ToBc2.impl
 
 import java.util.concurrent.TimeUnit
 
-import akka.Done
+import akka._
 import akka.actor._
 import akka.persistence._
 import akka.stream._
 import akka.stream.scaladsl._
-import com.github.apuex.events.play.EventEnvelope
+import com.apuex.sales.mapping.bc1ToBc2._
+import com.github.apuex.events.play._
 import com.google.protobuf.Message
-import javax.inject._
 
 import scala.collection.JavaConverters._
-import scala.concurrent.Await
+import scala.concurrent._
 import scala.concurrent.duration._
 
 object OrderInventoryMapping {
   def name = "OrderInventoryMapping"
 }
 
-class OrderInventoryMapping @Inject()(
-                                       config: MappingConfig,
-                                       order: OrderService,
-                                       product: ProductService,
-                                       inventory: InventoryService
-                                     )
+class OrderInventoryMapping (
+    val config: MappingConfig,
+    val order: OrderService,
+    val product: ProductService,
+    val inventory: InventoryService
+  )
   extends PersistentActor
     with ActorLogging {
 
@@ -37,7 +37,6 @@ class OrderInventoryMapping @Inject()(
 
   // state
   var offset: Option[String] = None
-
   override def receiveRecover: Receive = {
     case SnapshotOffer(metadata: SnapshotMetadata, snapshot: String) =>
       offset = Some(snapshot)
@@ -52,7 +51,7 @@ class OrderInventoryMapping @Inject()(
   override def receiveCommand: Receive = {
     case x: EventEnvelope =>
       // TODO: process event
-      mappingEvent(x.getOffset)(packager.unpack(x.getEvent))
+      mapEvent(x.getOffset)(packager.unpack(x.getEvent))
     case x =>
       log.info("unhandled command: {}", x)
   }
@@ -63,7 +62,7 @@ class OrderInventoryMapping @Inject()(
       log.info("unhandled update state: {}", x)
   }
 
-  private def mappingEvent(offset: String): (Message => Unit) = {
+  private def mapEvent(offset: String): (Message => Unit) = {
     case x: PayOrderEvt =>
       Await.ready(order.retrieve()
         .invoke(
@@ -114,4 +113,5 @@ class OrderInventoryMapping @Inject()(
           context.system.scheduler.scheduleOnce(30.seconds)(subscribe)
       })
   }
+
 }
