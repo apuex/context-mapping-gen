@@ -76,7 +76,7 @@ class ContextMappingGenerator(mappingFile: String) {
          |  implicit val executionContext = context.system.dispatcher
          |  implicit val materializer = ActorMaterializer()
          |
-         |  override def persistenceId: String = OrderInventoryMapping.name
+         |  override def persistenceId: String = ${mappingName}.name
          |
          |  // state
          |  var offset: Option[String] = None
@@ -138,7 +138,7 @@ class ContextMappingGenerator(mappingFile: String) {
     s"""
        |private def subscribe(): Unit = {
        |  log.info("connecting...")
-       |  order.events(offset)
+       |  ${cToCamel(srcSystem)}.events(offset)
        |    .invoke(
        |      keepAlive
        |    )
