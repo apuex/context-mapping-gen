@@ -34,8 +34,6 @@ class ContextMappingGenerator(mappingFile: String) {
     printWriter.println(s"package ${implSrcPackage}\n")
     printWriter.println(
       s"""
-         |import java.util.concurrent.TimeUnit
-         |
          |import akka._
          |import akka.actor._
          |import akka.persistence._

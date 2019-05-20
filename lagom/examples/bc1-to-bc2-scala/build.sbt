@@ -1,6 +1,6 @@
 import Dependencies._
 
-name         := "bc1-to-bc2-scala"
+name         := "bc1-to-bc2-mapping"
 scalaVersion := scalaVersionNumber
 organization := artifactGroupName
 version      := artifactVersionNumber
