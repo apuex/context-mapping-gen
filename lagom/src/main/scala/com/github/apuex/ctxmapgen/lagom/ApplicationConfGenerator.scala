@@ -32,7 +32,7 @@ class ApplicationConfGenerator(mappingLoader: MappingLoader) {
          |
          |play {
          |  application {
-         |    loader = "${implSrcPackage}.${cToPascal(s"${srcSystem}_${destSystem}_${mapping}_${app}_${loader}")}"
+         |    loader = "${implSrcPackage}.${cToPascal(s"${modelName}_${app}_${loader}")}"
          |  }
          |  http {
          |    secret {
@@ -93,18 +93,20 @@ class ApplicationConfGenerator(mappingLoader: MappingLoader) {
          |  persistence {
          |    journal {
          |      plugin = "akka.persistence.journal.leveldb"
+         |      auto-start-journals = ["akka.persistence.journal.leveldb"]
          |      leveldb {
-         |        dir = "target/journal"
+         |        dir = "${cToShell(modelName)}/journal"
          |        native = on
          |        fsync = off
          |      }
          |    }
          |    snapshot-store {
          |      plugin = "akka.persistence.snapshot-store.local"
+         |      auto-start-snapshot-stores = ["akka.persistence.snapshot-store.local"]
          |      local {
-         |        dir = "target/snapshots"
+         |        dir = "${cToShell(modelName)}/snapshots"
          |        native = on
-         |        fsync = on
+         |        fsync = off
          |      }
          |    }
          |    query {
@@ -112,7 +114,7 @@ class ApplicationConfGenerator(mappingLoader: MappingLoader) {
          |        leveldb {
          |          class = "akka.persistence.query.journal.leveldb.LeveldbReadJournalProvider"
          |          write-plugin="akka.persistence.journal.leveldb"
-         |          dir = "target/journal"
+         |          dir = "${cToShell(modelName)}/journal"
          |          native = on
          |          // switch off fsync would not survive process crashes.
          |          fsync = off

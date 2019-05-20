@@ -7,7 +7,7 @@
   @to      - project dependencies
   @package - base package name
 -->
-<mapping name="bc1_to_bc2"
+<mapping name="bc1_to_bc2_mapping"
          from="order"
          to="inventory"
          package="com.apuex.sales.mapping"

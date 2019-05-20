@@ -1,8 +1,8 @@
 
-package com.apuex.sales.mapping.bc1ToBc2.impl
+package com.apuex.sales.mapping.bc1ToBc2Mapping.impl
 
 import akka.actor.Props
-import com.apuex.sales.mapping.bc1ToBc2._
+import com.apuex.sales.mapping.bc1ToBc2Mapping._
 import com.lightbend.lagom.scaladsl.client._
 import com.lightbend.lagom.scaladsl.devmode._
 import com.lightbend.lagom.scaladsl.playjson._
@@ -12,24 +12,24 @@ import play.api.libs.ws.ahc.AhcWSComponents
 
 import scala.collection.immutable.Seq
 
-class OrderInventoryMappingAppLoader extends LagomApplicationLoader {
+class Bc1ToBc2MappingAppLoader extends LagomApplicationLoader {
 
   override def load(context: LagomApplicationContext): LagomApplication =
-    new OrderInventoryMappingApp(context) with ConfigurationServiceLocatorComponents
+    new Bc1ToBc2MappingApp(context) with ConfigurationServiceLocatorComponents
 
   override def loadDevMode(context: LagomApplicationContext): LagomApplication =
-    new OrderInventoryMappingApp(context) with LagomDevModeComponents
+    new Bc1ToBc2MappingApp(context) with LagomDevModeComponents
 
-  override def describeService = Some(readDescriptor[OrderInventoryService])
+  override def describeService = Some(readDescriptor[Bc1ToBc2MappingService])
 }
 
-abstract class OrderInventoryMappingApp(context: LagomApplicationContext)
+abstract class Bc1ToBc2MappingApp(context: LagomApplicationContext)
   extends LagomApplication(context)
     with AhcWSComponents {
 
   lazy val mappingConfig = new MappingConfig()
   // Bind the service that this server provides
-  override lazy val lagomServer: LagomServer = serverFor[OrderInventoryService](wire[OrderInventoryServiceImpl])
+  override lazy val lagomServer: LagomServer = serverFor[Bc1ToBc2MappingService](wire[Bc1ToBc2MappingServiceImpl])
   // Register the JSON serializer registry
   override lazy val optionalJsonSerializerRegistry = Some(new JsonSerializerRegistry {
 
@@ -50,13 +50,13 @@ abstract class OrderInventoryMappingApp(context: LagomApplicationContext)
   lazy val inventory: InventoryService = serviceClient.implement[InventoryService]
 
   val mapping = actorSystem.actorOf(
-    Props(new OrderInventoryMapping(
+    Props(new Bc1ToBc2Mapping(
       mappingConfig,
       order,
       product,
       inventory
     )),
-    OrderInventoryMapping.name
+    Bc1ToBc2Mapping.name
   )
 }
      

@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package com.apuex.sales.mapping.bc1ToBc2;
-option java_package = "com.apuex.sales.mapping.bc1ToBc2";
+option java_package = "com.apuex.sales.mapping.bc1ToBc2Mapping";
 option java_outer_classname = "MappingMessages";
 option java_multiple_files = true;
 

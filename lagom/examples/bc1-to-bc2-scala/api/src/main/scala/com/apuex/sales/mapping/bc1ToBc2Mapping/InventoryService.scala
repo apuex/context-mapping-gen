@@ -1,10 +1,10 @@
-package com.apuex.sales.mapping.bc1ToBc2
+package com.apuex.sales.mapping.bc1ToBc2Mapping
 
 import akka.{Done, NotUsed}
 import akka.stream.scaladsl.Source
 import com.lightbend.lagom.scaladsl.api.{Descriptor, Service, ServiceCall}
 
-trait OrderInventoryService extends Service {
+trait InventoryService extends Service {
   /**
     * Subscribe from event stream with offset.
     *
@@ -13,10 +13,13 @@ trait OrderInventoryService extends Service {
     */
   def events(offset: Option[String]): ServiceCall[Source[String, NotUsed], Source[String, NotUsed]]
 
+  def reduce(): ServiceCall[ReduceStorageCmd, Done]
+
+
   override final def descriptor: Descriptor = {
     import Service._
   
-    named("order-inventory")
+    named("inventory")
       .withCalls(
         pathCall("/api/events?offset", events _)
       ).withAutoAcl(true)

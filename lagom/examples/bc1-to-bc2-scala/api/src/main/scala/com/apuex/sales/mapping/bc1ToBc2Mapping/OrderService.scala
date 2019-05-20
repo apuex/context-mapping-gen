@@ -1,4 +1,4 @@
-package com.apuex.sales.mapping.bc1ToBc2
+package com.apuex.sales.mapping.bc1ToBc2Mapping
 
 import akka.{Done, NotUsed}
 import akka.stream.scaladsl.Source

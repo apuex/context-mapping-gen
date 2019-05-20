@@ -1,25 +1,22 @@
-package com.apuex.sales.mapping.bc1ToBc2.impl
-
-import java.util.concurrent.TimeUnit
+package com.apuex.sales.mapping.bc1ToBc2Mapping.impl
 
 import akka._
 import akka.actor._
 import akka.persistence._
 import akka.stream._
 import akka.stream.scaladsl._
-import com.apuex.sales.mapping.bc1ToBc2._
+import com.apuex.sales.mapping.bc1ToBc2Mapping._
 import com.github.apuex.events.play._
 import com.google.protobuf.Message
 
 import scala.collection.JavaConverters._
 import scala.concurrent._
-import scala.concurrent.duration._
 
-object OrderInventoryMapping {
-  def name = "OrderInventoryMapping"
+object Bc1ToBc2Mapping {
+  def name = "Bc1ToBc2Mapping"
 }
 
-class OrderInventoryMapping (
+class Bc1ToBc2Mapping (
     val config: MappingConfig,
     val order: OrderService,
     val product: ProductService,
@@ -33,7 +30,7 @@ class OrderInventoryMapping (
   implicit val executionContext = context.system.dispatcher
   implicit val materializer = ActorMaterializer()
 
-  override def persistenceId: String = OrderInventoryMapping.name
+  override def persistenceId: String = Bc1ToBc2Mapping.name
 
   // state
   var offset: Option[String] = None
@@ -84,10 +81,10 @@ class OrderInventoryMapping (
             )
           )
         )
-        .foreach(x => Await.ready(x, Duration(30, TimeUnit.SECONDS)))
+        .foreach(x => Await.ready(x, duration))
       ).map(_ => {
         persist(offset)(updateState)
-      }), Duration(30, TimeUnit.SECONDS))
+      }), duration)
     case x =>
       log.debug("unhandled: {}", x)
   }
@@ -104,13 +101,13 @@ class OrderInventoryMapping (
           .recover({
             case x =>
               log.error(x, "broken pipe")
-              context.system.scheduler.scheduleOnce(30.seconds)(subscribe)
+              context.system.scheduler.scheduleOnce(duration)(subscribe)
           }).runWith(Sink.actorRef(self, Done))
       })
       .recover({
         case t: Throwable =>
           log.error(t, "connect to event stream failed")
-          context.system.scheduler.scheduleOnce(30.seconds)(subscribe)
+          context.system.scheduler.scheduleOnce(duration)(subscribe)
       })
   }
 

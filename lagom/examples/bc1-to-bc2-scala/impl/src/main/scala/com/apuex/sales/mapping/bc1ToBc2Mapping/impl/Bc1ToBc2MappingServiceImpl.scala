@@ -1,13 +1,13 @@
-package com.apuex.sales.mapping.bc1ToBc2.impl
+package com.apuex.sales.mapping.bc1ToBc2Mapping.impl
 
 import akka.{Done, NotUsed}
 import akka.stream.scaladsl.Source
 import com.lightbend.lagom.scaladsl.api.ServiceCall
-import com.apuex.sales.mapping.bc1ToBc2.OrderInventoryService
+import com.apuex.sales.mapping.bc1ToBc2Mapping.Bc1ToBc2MappingService
 
 import scala.concurrent.Future
 
-class OrderInventoryServiceImpl extends OrderInventoryService {
+class Bc1ToBc2MappingServiceImpl extends Bc1ToBc2MappingService {
   /**
     * Subscribe from event stream with offset.
     *

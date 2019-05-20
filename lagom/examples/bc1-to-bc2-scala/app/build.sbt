@@ -2,7 +2,7 @@
 import Dependencies._
 import sbtassembly.MergeStrategy
 
-name         := "bc1-to-bc2-app"
+name         := "bc1-to-bc2-mapping-app"
 scalaVersion := scalaVersionNumber
 organization := artifactGroupName
 version      := artifactVersionNumber

@@ -28,7 +28,7 @@ class ContextMappingGenerator(mappingFile: String) {
   }
 
   private def generateServiceMappings(): Unit = {
-    val mappingName = cToPascal(s"${srcSystem}_${destSystem}_${mapping}")
+    val mappingName = cToPascal(s"${modelName}")
     val printWriter = new PrintWriter(s"${implSrcDir}/${mappingName}.scala", "utf-8")
     // package definition
     printWriter.println(s"package ${implSrcPackage}\n")
@@ -47,7 +47,6 @@ class ContextMappingGenerator(mappingFile: String) {
          |
          |import scala.collection.JavaConverters._
          |import scala.concurrent._
-         |import scala.concurrent.duration._
        """.stripMargin
         .trim)
 
@@ -148,13 +147,13 @@ class ContextMappingGenerator(mappingFile: String) {
        |        .recover({
        |          case x =>
        |            log.error(x, "broken pipe")
-       |            context.system.scheduler.scheduleOnce(30.seconds)(subscribe)
+       |            context.system.scheduler.scheduleOnce(duration)(subscribe)
        |        }).runWith(Sink.actorRef(self, Done))
        |    })
        |    .recover({
        |      case t: Throwable =>
        |        log.error(t, "connect to event stream failed")
-       |        context.system.scheduler.scheduleOnce(30.seconds)(subscribe)
+       |        context.system.scheduler.scheduleOnce(duration)(subscribe)
        |    })
        |}
      """

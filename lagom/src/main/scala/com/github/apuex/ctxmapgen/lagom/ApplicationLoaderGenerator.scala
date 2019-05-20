@@ -12,9 +12,8 @@ class ApplicationLoaderGenerator(mappingLoader: MappingLoader) {
 
   import mappingLoader._
 
-  val name = (s"${srcSystem}_${destSystem}")
-  val mappingName = (s"${name}_${mapping}")
-  val serviceName = (s"${name}_${service}")
+  val mappingName = (s"${modelName}")
+  val serviceName = (s"${mappingName}_${service}")
   val serviceImplName = (s"${serviceName}_${impl}")
   val appName = (s"${mappingName}_${app}")
   val loaderName = (s"${appName}_${loader}")

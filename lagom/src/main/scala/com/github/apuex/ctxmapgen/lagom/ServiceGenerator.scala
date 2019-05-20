@@ -14,7 +14,7 @@ object ServiceGenerator {
   case class OperationDescription(name: String, req: String, resp: String)
 
   def collectService(loader: MappingLoader, calls: mutable.Map[String, mutable.Set[OperationDescription]]): Unit = {
-    val serviceName = (s"${loader.srcSystem}_${loader.destSystem}")
+    val serviceName = (s"${loader.modelName}")
     val operations = calls.getOrElse(serviceName, mutable.Set())
     calls += (serviceName -> operations)
   }
