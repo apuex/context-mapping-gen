@@ -73,7 +73,7 @@ class ApplicationConfGenerator(mappingLoader: MappingLoader) {
          |  log-dead-letters-during-shutdown = off
          |
          |  actor {
-         |    passivate-timeout = 6 seconds
+         |    provider = "akka.cluster.ClusterActorRefProvider"
          |
          |    serializers {
          |      ${cToShell(destSystem)}-protobuf = "akka.remote.serialization.ProtobufSerializer"
