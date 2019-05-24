@@ -30,11 +30,16 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
          |
          |libraryDependencies ++= {
          |  Seq(
-         |    protobufUtil,
+         |    scalapbRuntime % "protobuf",
+         |    scalapbJson4s,
          |    scalaTest      % Test
          |  )
          |}
-       """.stripMargin
+         |
+         |PB.targets in Compile := Seq(
+         |  scalapb.gen() -> (sourceManaged in Compile).value
+         |)
+       """.stripMargin.trim
     )
     printWriter.close()
   }
@@ -88,7 +93,7 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
          |    val oldStrategy = (assemblyMergeStrategy in assembly).value
          |    oldStrategy(x)
          |}
-       """.stripMargin
+       """.stripMargin.trim
     )
     printWriter.close()
   }
@@ -111,7 +116,6 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
          |  Seq(
          |    playEvents,
          |    playGuice,
-         |    serializer,
          |    akkaPersistence,
          |    akkaPersistenceQuery,
          |    akkaClusterSharding,
@@ -119,7 +123,7 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
          |    scalaTest      % Test
          |  )
          |}
-       """.stripMargin
+       """.stripMargin.trim
     )
     printWriter.close()
   }
@@ -141,6 +145,7 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
     printWriter.println(
       s"""
          |import sbt._
+         |import scalapb.compiler.Version.scalapbVersion
          |
          |object Dependencies {
          |  lazy val scalaVersionNumber    = "2.12.8"
@@ -170,14 +175,14 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
          |  lazy val playTest        = "com.typesafe.play"         %%  "play-test"                           % playVersion
          |  lazy val jodaTime        = "joda-time"                 %   "joda-time"                           % "2.10.1"
          |  lazy val googleGuice     = "com.google.inject"         %   "guice"                               % "4.2.0"
-         |  lazy val protobuf        = "com.google.protobuf"       %   "protobuf-java"                       % "3.7.0"
-         |  lazy val protobufUtil    = "com.google.protobuf"       %   "protobuf-java-util"                  % "3.7.0"
+         |  lazy val scalapbRuntime  = "com.thesamet.scalapb"      %% "scalapb-runtime"                      % scalapbVersion
+         |  lazy val scalapbJson4s   = "com.thesamet.scalapb"      %% "scalapb-json4s"                       % "0.9.0-M1"
          |  lazy val playGuice       = "com.typesafe.play"         %%  "play-guice"                          % playVersion
          |  lazy val playJson        = "com.typesafe.play"         %%  "play-json"                           % playVersion
          |  lazy val lagomApi        = "com.lightbend.lagom"       %%  "lagom-scaladsl-api"                  % lagomVersion
          |  lazy val macwire         = "com.softwaremill.macwire"  %%  "macros"                              % "2.3.0"
          |
-         |  lazy val playEvents      = "com.github.apuex"          %%  "play-events"                         % "1.0.1"
+         |  lazy val playEvents      = "com.github.apuex"          %%  "play-events"                         % "1.0.2"
          |  lazy val serializer      = "com.github.apuex.protobuf" %   "protobuf-serializer"                 % "1.0.1"
          |  lazy val playSocketIO    = "com.lightbend.play"        %%  "play-socket-io"                      % "1.0.0-beta-2"
          |  lazy val macwireMicros   = "com.softwaremill.macwire"  %%  "macros"                              % "2.3.0"
@@ -215,7 +220,8 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
          |addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.5")
          |addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.3.20")
          |
-         |addSbtPlugin("com.github.gseitz" % "sbt-protobuf" % "0.6.3")
+         |addSbtPlugin("com.thesamet" % "sbt-protoc" % "0.99.20")
+         |libraryDependencies += "com.thesamet.scalapb" %% "compilerplugin" % "0.9.0-M5"
        """.stripMargin
         .trim
     )
@@ -250,11 +256,9 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
          |  )
          |
          |lazy val `${api}` = (project in file("${api}"))
-         |  .enablePlugins(ProtobufPlugin)
          |  .enablePlugins(LagomScala)
          |lazy val `${impl}` = (project in file("${impl}"))
          |  .dependsOn(`${api}`)
-         |  .enablePlugins(ProtobufPlugin)
          |lazy val `${app}` = (project in file("${app}"))
          |  .dependsOn(`${impl}`)
          |  .enablePlugins(PlayScala)

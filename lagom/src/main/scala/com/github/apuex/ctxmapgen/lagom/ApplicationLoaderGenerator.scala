@@ -87,7 +87,7 @@ class ApplicationLoaderGenerator(mappingLoader: MappingLoader) {
   private def generateJsonSerializers = serviceCalls
     .flatMap(x => x._2.map(d => collectMessage(x._1, d)))
     .flatMap(x => x)
-    .map(x => s"JsonSerializer(jsonFormat(classOf[${cToPascal(x)}]))")
+    .map(x => s"JsonSerializer(jsonFormat[${cToPascal(x)}])")
     .reduce((l, r) => s"${l},\n${r}")
 
   private def collectMessage(service: String, operation: OperationDescription): Seq[String] = {

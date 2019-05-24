@@ -15,34 +15,28 @@ class MappingConfigGenerator(mappingLoader: MappingLoader) {
        |
        |import akka.stream.scaladsl.Source
        |import akka.util.Timeout
-       |import com.github.apuex.events.play._
-       |import com.github.apuex.protobuf.serializer.AnyPackagerBuilder
-       |import com.google.protobuf.Message
-       |import com.google.protobuf.util.JsonFormat
+       |import com.github.apuex.events.play.{EventEnvelope, EventEnvelopeProto}
+       |import com.google.protobuf.any.Any
        |import play.api.libs.json._
+       |import scalapb.{GeneratedMessage, GeneratedMessageCompanion, Message}
+       |import scalapb.json4s.JsonFormat.GenericCompanion
+       |import scalapb.json4s._
        |
        |import scala.concurrent.duration.Duration
        |
        |class MappingConfig {
        |  // json parser and printer
-       |  val registry = JsonFormat.TypeRegistry
-       |    .newBuilder
-       |    // TODO: add your protobuf message descriptors here.
-       |    .add(MappingMessages.getDescriptor.getMessageTypes)
-       |    .add(EventEnvelopeProto.getDescriptor.getMessageTypes)
-       |    .build
+       |  val messagesCompanions = MappingsProto.messagesCompanions ++ EventEnvelopeProto.messagesCompanions
+       |  val registry: TypeRegistry = messagesCompanions
+       |    .foldLeft(TypeRegistry())((r, mc) => r.addMessageByCompanion(mc.asInstanceOf[GenericCompanion]))
        |
-       |  val printer = JsonFormat.printer().usingTypeRegistry(registry)
+       |  val printer = new Printer().withTypeRegistry(registry)
        |
-       |  val parser = JsonFormat.parser().usingTypeRegistry(registry)
+       |  val parser = new Parser().withTypeRegistry(registry)
        |
        |  // any packager for pack/unpack messages.
-       |  val packager = AnyPackagerBuilder.builder()
-       |    // TODO: add your protobuf message descriptors here.
-       |    .withFileDescriptorProto(MappingMessages.getDescriptor.toProto)
-       |    .withFileDescriptorProto(EventEnvelopeProto.getDescriptor.toProto)
-       |    .withStringRegistry()
-       |    .build()
+       |  def unpack(any: Any): GeneratedMessage = registry.findType(any.typeUrl)
+       |    .map(_.parseFrom(any.value.newCodedInput())).get
        |
        |  implicit val duration = Duration.apply(30, TimeUnit.SECONDS)
        |  implicit val timeout = Timeout(duration)
@@ -57,17 +51,12 @@ class MappingConfigGenerator(mappingLoader: MappingLoader) {
        |    .map(_.toString)
        |
        |  def parseJson(json: String): EventEnvelope = {
-       |    val builder = EventEnvelope.newBuilder
-       |    parser.merge(json, builder)
-       |    builder.build
+       |    parser.fromJsonString[EventEnvelope](json)
        |  }
        |
-       |  class MessageFormat[T<: Message](val clazz: Class[T]) extends OFormat[T] {
-       |    val builderMethod = clazz.getDeclaredMethod("newBuilder")
+       |  class MessageFormat[T <: GeneratedMessage with Message[T] : GeneratedMessageCompanion] extends OFormat[T] {
        |    override def reads(json: JsValue): JsResult[T] = {
-       |      val builder = builderMethod.invoke(null).asInstanceOf[Message.Builder]
-       |      parser.merge(json.toString(), builder)
-       |      JsSuccess(builder.build().asInstanceOf[T])
+       |      JsSuccess(parser.fromJsonString[T](json.toString()))
        |    }
        |
        |    override def writes(o: T): JsObject = Json.parse(
@@ -75,7 +64,7 @@ class MappingConfigGenerator(mappingLoader: MappingLoader) {
        |    ).validate[JsObject].get
        |  }
        |
-       |  def jsonFormat[T<: Message](clazz: Class[T]): OFormat[T] = new MessageFormat(clazz)
+       |  def jsonFormat[T <: GeneratedMessage with Message[T] : GeneratedMessageCompanion]: OFormat[T] = new MessageFormat[T]
        |}
      """.stripMargin.trim
 

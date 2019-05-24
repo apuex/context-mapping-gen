@@ -41,9 +41,7 @@ class ContextMappingGenerator(mappingFile: String) {
          |import akka.stream.scaladsl._
          |import ${apiSrcPackage}._
          |import com.github.apuex.events.play._
-         |import com.google.protobuf.Message
          |
-         |import scala.collection.JavaConverters._
          |import scala.concurrent._
        """.stripMargin
         .trim)
@@ -112,7 +110,7 @@ class ContextMappingGenerator(mappingFile: String) {
        |override def receiveCommand: Receive = {
        |  case x: EventEnvelope =>
        |    // TODO: process event
-       |    mapEvent(x.getOffset)(packager.unpack(x.getEvent))
+       |    mapEvent(x.offset)(unpack(x.getEvent))
        |  case x =>
        |    log.info("unhandled command: {}", x)
        |}
@@ -161,7 +159,7 @@ class ContextMappingGenerator(mappingFile: String) {
 
   private def mapEvent(): String = {
     s"""
-       |private def mapEvent(offset: String): (Message => Unit) = {
+       |private def mapEvent(offset: String): (Any => Unit) = {
        |  // TODO: add message mappings here.
        |  ${indent(mapEvent(xml), 2)}
        |  case x =>
