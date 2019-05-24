@@ -47,6 +47,7 @@ class H2GMapping (
     case x: EventEnvelope =>
       // TODO: process event
       mappingEvent(x.offset)(unpack(x.getEvent))
+    case Done =>
     case x =>
       log.info("unhandled command: {}", x)
   }
@@ -81,7 +82,7 @@ class H2GMapping (
         keepAlive
       )
       .map(s => {
-        log.info("connected.")
+        log.info("connected, starting at {}.", offset)
         s.map(parseJson)
           .recover({
             case x =>
