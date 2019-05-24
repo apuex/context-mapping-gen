@@ -1,4 +1,5 @@
 import sbt._
+import scalapb.compiler.Version.scalapbVersion
 
 object Dependencies {
   lazy val scalaVersionNumber    = "2.12.8"
@@ -29,14 +30,14 @@ object Dependencies {
   lazy val playTest        = "com.typesafe.play"         %%  "play-test"                           % playVersion
   lazy val jodaTime        = "joda-time"                 %   "joda-time"                           % "2.10.1"
   lazy val googleGuice     = "com.google.inject"         %   "guice"                               % "4.2.0"
-  lazy val protobuf        = "com.google.protobuf"       %   "protobuf-java"                       % "3.7.0"
-  lazy val protobufUtil    = "com.google.protobuf"       %   "protobuf-java-util"                       % "3.7.0"
+  lazy val scalapbRuntime  = "com.thesamet.scalapb"      %% "scalapb-runtime"                      % scalapbVersion
+  lazy val scalapbJson4s   = "com.thesamet.scalapb"      %% "scalapb-json4s"                       % "0.9.0-M1"
   lazy val playGuice       = "com.typesafe.play"         %%  "play-guice"                          % playVersion
   lazy val playJson        = "com.typesafe.play"         %%  "play-json"                           % playVersion
   lazy val lagomApi        = "com.lightbend.lagom"       %%  "lagom-scaladsl-api"                  % lagomVersion
   lazy val macwire         = "com.softwaremill.macwire"  %% "macros"                               % "2.3.0"
 
-  lazy val playEvents      = "com.github.apuex"          %%  "play-events"                         % "1.0.1"
+  lazy val playEvents      = "com.github.apuex"          %%  "play-events"                         % "1.0.2"
   lazy val serializer      = "com.github.apuex.protobuf" % "protobuf-serializer"                   % "1.0.1"
   lazy val playSocketIO    = "com.lightbend.play"        %%  "play-socket-io"                      % "1.0.0-beta-2"
   lazy val macwireMicros   = "com.softwaremill.macwire"  %%  "macros"                              % "2.3.0"

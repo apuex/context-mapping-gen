@@ -1,6 +1,5 @@
 
 import Dependencies._
-import sbtassembly.MergeStrategy
 
 name         := "hello-to-greeting-impl"
 scalaVersion := scalaVersionNumber
@@ -20,4 +19,3 @@ libraryDependencies ++= {
     scalaTest      % Test
   )
 }
-

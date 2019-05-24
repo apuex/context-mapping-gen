@@ -9,8 +9,13 @@ maintainer   := artifactMaintainer
 
 libraryDependencies ++= {
   Seq(
-    protobufUtil,
+    playEvents,
+    scalapbRuntime % "protobuf",
+    scalapbJson4s,
     scalaTest      % Test
   )
 }
 
+PB.targets in Compile := Seq(
+  scalapb.gen() -> (sourceManaged in Compile).value
+)

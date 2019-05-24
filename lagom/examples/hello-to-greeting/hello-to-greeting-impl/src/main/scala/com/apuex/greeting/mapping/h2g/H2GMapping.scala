@@ -7,11 +7,7 @@ import akka.stream._
 import akka.stream.scaladsl._
 import com.example.leveldb._
 import com.github.apuex.events.play.EventEnvelope
-import com.google.protobuf.Message
-import javax.inject._
 
-import scala.compat.java8.OptionConverters._
-import scala.compat.java8.FutureConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
@@ -19,7 +15,7 @@ object H2GMapping {
   def name = "H2GMapping"
 }
 
-class H2GMapping @Inject()(
+class H2GMapping (
                             config: MappingConfig,
                             hello: HelloService
                           )
@@ -50,7 +46,7 @@ class H2GMapping @Inject()(
   override def receiveCommand: Receive = {
     case x: EventEnvelope =>
       // TODO: process event
-      mappingEvent(x.getOffset)(packager.unpack(x.getEvent))
+      mappingEvent(x.offset)(unpack(x.getEvent))
     case x =>
       log.info("unhandled command: {}", x)
   }
@@ -58,47 +54,45 @@ class H2GMapping @Inject()(
   private def updateState: (Any => Unit) = {
     case x: String =>
       offset = Some(x)
-      if(lastSequenceNr != 0 && lastSequenceNr % snapshotAfter == 0) {
+      if (lastSequenceNr != 0 && lastSequenceNr % snapshotSequenceCount == 0) {
         offset.map(saveSnapshot)
       }
     case x =>
       log.info("unhandled update state: {}", x)
   }
 
-  private def mappingEvent(offset: String): (Message => Unit) = {
+  private def mappingEvent(offset: String): (Any => Unit) = {
     case x: SayHelloEvent =>
-      Await.ready(hello.echo(x.getMessage())
+      Await.ready(hello.echo(x.message)
         .invoke()
-        .thenAccept(x => {
+        .map(x => {
           log.info("message echoed back({}): {}", offset, x)
-        }).toScala, 20.seconds)
+        }), 20.seconds)
 
       persist(offset)(updateState)
     case x =>
       log.debug("unhandled: {}", x)
   }
 
-  private def subscribe: Unit = {
-    log.info("connecting, offset = {}...", offset)
-    hello.events(offset.asJava)
+  private def subscribe(): Unit = {
+    log.info("connecting...")
+    hello.events(offset)
       .invoke(
         keepAlive
-          .asJava
       )
-      .whenComplete((s, t) => {
-        if (null == t) {
-          log.info("connected.")
-          s.asScala
-            .map(parseJson)
-            .recover({
-              case x =>
-                log.error(x, "broken pipe")
-                context.system.scheduler.scheduleOnce(30.seconds)(subscribe)
-            }).runWith(Sink.actorRef(self, Done))
-        } else {
+      .map(s => {
+        log.info("connected.")
+        s.map(parseJson)
+          .recover({
+            case x =>
+              log.error(x, "broken pipe")
+              context.system.scheduler.scheduleOnce(duration)(subscribe)
+          }).runWith(Sink.actorRef(self, Done))
+      })
+      .recover({
+        case t: Throwable =>
           log.error(t, "connect to event stream failed")
-          context.system.scheduler.scheduleOnce(30.seconds)(subscribe)
-        }
+          context.system.scheduler.scheduleOnce(duration)(subscribe)
       })
   }
 }
