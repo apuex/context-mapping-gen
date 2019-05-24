@@ -7,9 +7,7 @@ import akka.stream._
 import akka.stream.scaladsl._
 import com.apuex.sales.mapping.bc1ToBc2Mapping._
 import com.github.apuex.events.play._
-import com.google.protobuf.Message
 
-import scala.collection.JavaConverters._
 import scala.concurrent._
 
 object Bc1ToBc2Mapping {
@@ -48,7 +46,7 @@ class Bc1ToBc2Mapping (
   override def receiveCommand: Receive = {
     case x: EventEnvelope =>
       // TODO: process event
-      mapEvent(x.getOffset)(packager.unpack(x.getEvent))
+      mapEvent(x.offset)(unpack(x.getEvent))
     case x =>
       log.info("unhandled command: {}", x)
   }
@@ -59,26 +57,15 @@ class Bc1ToBc2Mapping (
       log.info("unhandled update state: {}", x)
   }
 
-  private def mapEvent(offset: String): (Message => Unit) = {
+  private def mapEvent(offset: String): (Any => Unit) = {
     case x: PayOrderEvt =>
       Await.ready(order.retrieve()
-        .invoke(
-          RetrieveOrderCmd.newBuilder()
-            .setOrderId(x.getOrderId())
-            .build()
-        ).map(o => o.getItemsList.asScala
+        .invoke(RetrieveOrderCmd(x.orderId))
+        .map(o => o.items
         .map(i =>
-          product.retrieve().invoke(
-            RetrieveProductCmd.newBuilder()
-              .setProductId(i.getProductId)
-              .build()
-          ).map(p =>
-            inventory.reduce().invoke(
-              ReduceStorageCmd.newBuilder()
-                .setSku(p.getSku)
-                .setQuantity(i.getQuantity)
-                .build()
-            )
+          product.retrieve().invoke(RetrieveProductCmd(i.productId))
+          .map(p =>
+            inventory.reduce().invoke(ReduceStorageCmd(p.sku, i.quantity))
           )
         )
         .foreach(x => Await.ready(x, duration))

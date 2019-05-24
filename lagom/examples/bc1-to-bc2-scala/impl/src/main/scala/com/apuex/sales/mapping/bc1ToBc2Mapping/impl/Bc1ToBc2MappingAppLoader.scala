@@ -36,11 +36,11 @@ abstract class Bc1ToBc2MappingApp(context: LagomApplicationContext)
     import mappingConfig._
 
     override def serializers: Seq[JsonSerializer[_]] = Seq(
-      JsonSerializer(jsonFormat(classOf[RetrieveOrderCmd])),
-      JsonSerializer(jsonFormat(classOf[OrderVo])),
-      JsonSerializer(jsonFormat(classOf[RetrieveProductCmd])),
-      JsonSerializer(jsonFormat(classOf[ProductVo])),
-      JsonSerializer(jsonFormat(classOf[ReduceStorageCmd]))
+      JsonSerializer(jsonFormat[RetrieveOrderCmd]),
+      JsonSerializer(jsonFormat[OrderVo]),
+      JsonSerializer(jsonFormat[RetrieveProductCmd]),
+      JsonSerializer(jsonFormat[ProductVo]),
+      JsonSerializer(jsonFormat[ReduceStorageCmd])
     )
   })
 

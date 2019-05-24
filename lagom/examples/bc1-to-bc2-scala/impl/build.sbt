@@ -12,7 +12,6 @@ libraryDependencies ++= {
   Seq(
     playEvents,
     playGuice,
-    serializer,
     akkaPersistence,
     akkaPersistenceQuery,
     akkaClusterSharding,
