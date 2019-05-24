@@ -1,4 +1,3 @@
-
 import Dependencies._
 import sbtassembly.MergeStrategy
 
@@ -43,4 +42,3 @@ assemblyMergeStrategy in assembly := {
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
 }
-       

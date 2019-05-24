@@ -1,4 +1,3 @@
-
 import Dependencies._
 import sbtassembly.MergeStrategy
 
@@ -19,4 +18,3 @@ libraryDependencies ++= {
     scalaTest      % Test
   )
 }
-       

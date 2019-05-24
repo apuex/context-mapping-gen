@@ -1,4 +1,3 @@
-
 import Dependencies._
 
 name         := "bc1-to-bc2-mapping-api"
