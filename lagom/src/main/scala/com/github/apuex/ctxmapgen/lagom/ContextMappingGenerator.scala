@@ -184,7 +184,8 @@ class ContextMappingGenerator(mappingFile: String) {
   }
 
   private def mapEvent(node: Node): String = {
-    node.child.filter(x => x.label == "map")
+    node.child
+      .filter(x => x.label == "map")
       .map(x => {
         s"""case ${cToCamel(x.\@("alias"))}: ${cToPascal(x.\@("message"))} =>
            |  ${indent(mapEventImpl(x), 2)}
@@ -196,6 +197,50 @@ class ContextMappingGenerator(mappingFile: String) {
   }
 
   private def mapEventImpl(node: Node): String = {
+    node.child
+      .filter(x => x.label == "and-then")
+      .map(x => generateOperation(x))
+      .reduceOption((x, y) => s"${x}\n${y}")
+      .getOrElse("")
+  }
+
+  private def generateOperation(node: Node): String = {
+    node.child
+      .map(x => x.label match {
+        case "service-call" => generateServiceCall(x)
+        case "flat-map" => generateFlatMap(x)
+        case "map" => generateMap(x)
+        case x => ""// s"// FIXME: unknown operation `${x}`"
+      })
+      .filter(_.trim != "")
+      .reduceOption((x, y) => s"${x}\n${y}")
+      .getOrElse("")
+  }
+
+  private def generateFlatMap(node: Node): String = {
     ""
   }
+
+  private def generateMap(node: Node): String = {
+    ""
+  }
+
+  private def generateServiceCall(node: Node): String = {
+    val to = node.\@("to")
+    val operation = node.\@("operation")
+    val responseType = if ("" == node.\@("response-type")) to else node.\@("response-type")
+    val cmd = s"${operation}_${responseType}_cmd"
+    s"""
+       |${to}.${operation}().invoke(${cToPascal(cmd)}(${generateParamSubstutions(node)}))
+     """.stripMargin.trim
+  }
+
+  private def generateParamSubstutions(node: Node): String = {
+    node.child
+      .filter(x => x.label == "field")
+      .map(x => s"${cToCamel(x.\@("to"))} = ${cToCamel(x.\@("alias"))}.${cToCamel(x.\@("name"))}")
+      .reduceOption((l, r) => s"${l}, ${r}")
+      .getOrElse("")
+  }
+
 }

@@ -12,6 +12,7 @@ bin/
 tmp/
 
 **/*.protobin
+**/*.swp
 
 RUNNING_PID
 logs/
