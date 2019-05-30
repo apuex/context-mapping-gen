@@ -28,46 +28,38 @@
     @message - imput message
   -->
   <map message="pay_order_evt" alias="evt">
-    <and-then>
+    <!--
+      implies send RetrieveOrderCmd, to OrderService
+    -->
+    <service-call to="order" operation="retrieve" response-type="order"> <!-- -->
+      <field alias="evt" name="order_id" type="string" to="order_id" to-type="string"/>
+    </service-call>
+    <!--
+      implies OrderVo received, from OrderService
+      extracts product and quantity from order items.
+    -->
+    <flat-map field="items" alias="item">
       <!--
-        implies send RetrieveOrderCmd, to OrderService
+        implies send RetrieveProductCmd, to ProductService
       -->
-      <service-call to="order" operation="retrieve" response-type="order"> <!-- -->
-        <field alias="evt" name="order_id" type="string" to="order_id" to-type="string"/>
+      <service-call to="product" operation="retrieve" request-type="retrieve_product" response-type="product">
+        <field alias="item" name="product_id" type="string" to="product_id" to-type="string"/>
       </service-call>
-    </and-then>
-    <and-then>
       <!--
-        implies OrderVo received, from OrderService
-        extracts product and quantity from order items.
+        implies send ReduceInventoryCmd, to InventoryService
       -->
-      <flat-map field="order_items" alias="item">
-        <and-then>
-          <!--
-            implies send RetrieveProductCmd, to ProductService
-          -->
-          <service-call to="product" operation="retrieve" request-type="retrieve_product" response-type="product">
-            <field alias="item" name="product_id" type="string" to="product_id" to-type="string"/>
-          </service-call>
-        </and-then>
-        <and-then>
-          <!--
-            implies send ReduceInventoryCmd, to InventoryService
-          -->
-          <service-call to="inventory" operation="reduce" request-type="reduce_storage">
-            <field name="sku" type="string" to="sku" to-type="string"/>
-            <field alias="item" name="order_quantity" type="big_decimal" to="quantity" to-type="big_decimal"/>
-          </service-call>
-        </and-then>
-        <!--
-          TODO: not implemented yet.
-        -->
-        <!--
-        <and-then>
-          <pipe to="another"/>
-        </and-then>
-        -->
-      </flat-map>
-    </and-then>
+      <map alias="x">
+        <service-call to="inventory" operation="reduce" request-type="reduce_storage">
+          <field name="sku" type="string" to="sku" to-type="string"/>
+          <field alias="item" name="quantity" type="big_decimal" to="quantity" to-type="big_decimal"/>
+        </service-call>
+      </map>
+      <!--
+        TODO: not implemented yet.
+      -->
+      <!--
+        <pipe to="another"/>
+      -->
+    </flat-map>
   </map>
 </mapping>

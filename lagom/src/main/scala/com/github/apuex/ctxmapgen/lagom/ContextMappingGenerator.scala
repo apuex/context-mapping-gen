@@ -188,7 +188,10 @@ class ContextMappingGenerator(mappingFile: String) {
       .filter(x => x.label == "map")
       .map(x => {
         s"""case ${cToCamel(x.\@("alias"))}: ${cToPascal(x.\@("message"))} =>
-           |  ${indent(mapEventImpl(x), 2)}
+           |  Await.ready(${indent(mapEventImpl(x), 4)}
+           |    .map(_ => {
+           |      persist(offset)(updateState)
+           |    }), duration)
          """
           .stripMargin
           .trim
@@ -198,47 +201,53 @@ class ContextMappingGenerator(mappingFile: String) {
 
   private def mapEventImpl(node: Node): String = {
     node.child
-      .filter(x => x.label == "and-then")
       .map(x => generateOperation(x))
-      .reduceOption((x, y) => s"${x}\n${y}")
-      .getOrElse("")
-  }
-
-  private def generateOperation(node: Node): String = {
-    node.child
-      .map(x => x.label match {
-        case "service-call" => generateServiceCall(x)
-        case "flat-map" => generateFlatMap(x)
-        case "map" => generateMap(x)
-        case x => ""// s"// FIXME: unknown operation `${x}`"
-      })
       .filter(_.trim != "")
       .reduceOption((x, y) => s"${x}\n${y}")
       .getOrElse("")
   }
 
+  private def generateOperation(node: Node): String = {
+    node.label match {
+      case "service-call" => generateServiceCall(node)
+      case "flat-map" => generateFlatMap(node)
+      case "map" => generateMap(node)
+      case _ => "" // s"// FIXME: unknown operation `${x}`"
+    }
+  }
+
   private def generateFlatMap(node: Node): String = {
-    ""
+    s"""
+       |.map(x => x.${cToCamel(node.\@("field"))}
+       |  .map(${cToCamel(node.\@("alias"))} => ${indent(mapEventImpl(node), 4)})
+       |)
+     """.stripMargin
+      .trim
   }
 
   private def generateMap(node: Node): String = {
-    ""
+    s"""
+       |.map(${cToCamel(node.\@("alias"))} => ${indent(mapEventImpl(node), 2)})
+     """.stripMargin
+      .trim
   }
 
   private def generateServiceCall(node: Node): String = {
     val to = node.\@("to")
     val operation = node.\@("operation")
     val responseType = if ("" == node.\@("response-type")) to else node.\@("response-type")
-    val cmd = s"${operation}_${responseType}_cmd"
+    val cmd = if("" == node.\@("request-type")) s"${operation}_${responseType}_cmd" else s"${node.\@("request-type")}_cmd"
     s"""
-       |${to}.${operation}().invoke(${cToPascal(cmd)}(${generateParamSubstutions(node)}))
-     """.stripMargin.trim
+       |${to}.${operation}().invoke(${cToPascal(cmd)}(${generateParamSubstitution(node)}))
+     """.stripMargin
+      .trim
   }
 
-  private def generateParamSubstutions(node: Node): String = {
+  private def generateParamSubstitution(node: Node): String = {
     node.child
       .filter(x => x.label == "field")
-      .map(x => s"${cToCamel(x.\@("to"))} = ${cToCamel(x.\@("alias"))}.${cToCamel(x.\@("name"))}")
+      //.map(x => s"${cToCamel(x.\@("to"))} = ${cToCamel(if("" == x.\@("alias")) "x" else x.\@("alias"))}.${cToCamel(x.\@("name"))}")
+      .map(x => s"${cToCamel(if("" == x.\@("alias")) "x" else x.\@("alias"))}.${cToCamel(x.\@("name"))}")
       .reduceOption((l, r) => s"${l}, ${r}")
       .getOrElse("")
   }

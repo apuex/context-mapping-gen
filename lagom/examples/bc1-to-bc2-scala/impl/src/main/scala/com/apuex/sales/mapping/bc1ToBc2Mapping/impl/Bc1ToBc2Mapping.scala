@@ -14,12 +14,12 @@ object Bc1ToBc2Mapping {
   def name = "Bc1ToBc2Mapping"
 }
 
-class Bc1ToBc2Mapping (
-    val config: MappingConfig,
-    val order: OrderService,
-    val product: ProductService,
-    val inventory: InventoryService
-  )
+class Bc1ToBc2Mapping(
+                       val config: MappingConfig,
+                       val order: OrderService,
+                       val product: ProductService,
+                       val inventory: InventoryService
+                     )
   extends PersistentActor
     with ActorLogging {
 
@@ -32,6 +32,7 @@ class Bc1ToBc2Mapping (
 
   // state
   var offset: Option[String] = None
+
   override def receiveRecover: Receive = {
     case SnapshotOffer(metadata: SnapshotMetadata, snapshot: String) =>
       offset = Some(snapshot)
@@ -58,20 +59,16 @@ class Bc1ToBc2Mapping (
   }
 
   private def mapEvent(offset: String): (Any => Unit) = {
-    case x: PayOrderEvt =>
-      Await.ready(order.retrieve()
-        .invoke(RetrieveOrderCmd(x.orderId))
-        .map(o => o.items
-        .map(i =>
-          product.retrieve().invoke(RetrieveProductCmd(i.productId))
-          .map(p =>
-            inventory.reduce().invoke(ReduceStorageCmd(p.sku, i.quantity))
-          )
+    // TODO: add message mappings here.
+    case evt: PayOrderEvt =>
+      Await.ready(order.retrieve().invoke(RetrieveOrderCmd(evt.orderId))
+        .map(x => x.items
+          .map(item => product.retrieve().invoke(RetrieveProductCmd(item.productId))
+            .map(x => inventory.reduce().invoke(ReduceStorageCmd(x.sku, item.quantity))))
         )
-        .foreach(x => Await.ready(x, duration))
-      ).map(_ => {
-        persist(offset)(updateState)
-      }), duration)
+        .map(_ => {
+          persist(offset)(updateState)
+        }), duration)
     case x =>
       log.debug("unhandled: {}", x)
   }
