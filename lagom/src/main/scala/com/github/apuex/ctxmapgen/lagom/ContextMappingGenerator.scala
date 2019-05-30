@@ -220,6 +220,7 @@ class ContextMappingGenerator(mappingFile: String) {
     s"""
        |.map(x => x.${cToCamel(node.\@("field"))}
        |  .map(${cToCamel(node.\@("alias"))} => ${indent(mapEventImpl(node), 4)})
+       |    .foreach(x => Await.ready(x, duration))
        |)
      """.stripMargin
       .trim

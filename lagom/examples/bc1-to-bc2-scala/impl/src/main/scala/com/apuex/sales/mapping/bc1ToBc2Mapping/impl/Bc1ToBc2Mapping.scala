@@ -14,12 +14,12 @@ object Bc1ToBc2Mapping {
   def name = "Bc1ToBc2Mapping"
 }
 
-class Bc1ToBc2Mapping(
-                       val config: MappingConfig,
-                       val order: OrderService,
-                       val product: ProductService,
-                       val inventory: InventoryService
-                     )
+class Bc1ToBc2Mapping (
+    val config: MappingConfig,
+    val order: OrderService,
+    val product: ProductService,
+    val inventory: InventoryService
+  )
   extends PersistentActor
     with ActorLogging {
 
@@ -32,7 +32,6 @@ class Bc1ToBc2Mapping(
 
   // state
   var offset: Option[String] = None
-
   override def receiveRecover: Receive = {
     case SnapshotOffer(metadata: SnapshotMetadata, snapshot: String) =>
       offset = Some(snapshot)
@@ -65,6 +64,7 @@ class Bc1ToBc2Mapping(
         .map(x => x.items
           .map(item => product.retrieve().invoke(RetrieveProductCmd(item.productId))
             .map(x => inventory.reduce().invoke(ReduceStorageCmd(x.sku, item.quantity))))
+            .foreach(x => Await.ready(x, duration))
         )
         .map(_ => {
           persist(offset)(updateState)
