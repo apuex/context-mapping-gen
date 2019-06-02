@@ -10,7 +10,7 @@ object Dependencies {
   lazy val playVersion           = "2.6.9"
   lazy val playSilhouetteVersion = "5.0.3"
 
-  lazy val sbRuntime        = "com.github.apuex.springbootsolution" %% "runtime"                   % "1.0.7"
+  lazy val sbRuntime        = "com.github.apuex.springbootsolution" %% "runtime"                   % "1.0.8"
   lazy val scalaXml         = "org.scala-lang.modules"    %%  "scala-xml"                          % "1.2.0"
   lazy val scalaParserComb  = "org.scala-lang.modules"    %% "scala-parser-combinators"            % "1.1.2"
   lazy val cassandraDriver  = "com.datastax.cassandra"    %   "cassandra-driver-core"              % "3.6.0"
