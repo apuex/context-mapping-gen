@@ -10,19 +10,20 @@ lazy val root = (project in file("."))
   .aggregate(
     play,
     lagom,
+    table,
     util,
   )
 
 lazy val play = (project in file("play"))
   .dependsOn(util)
-  .enablePlugins(ProtobufPlugin)
   .enablePlugins(GraalVMNativeImagePlugin)
 lazy val lagom = (project in file("lagom"))
   .dependsOn(util)
-  .enablePlugins(ProtobufPlugin)
+  .enablePlugins(GraalVMNativeImagePlugin)
+lazy val table = (project in file("table"))
+  .dependsOn(util)
   .enablePlugins(GraalVMNativeImagePlugin)
 lazy val util = (project in file("util"))
-  .enablePlugins(ProtobufPlugin)
   .enablePlugins(GraalVMNativeImagePlugin)
 publishTo := sonatypePublishTo.value
 
