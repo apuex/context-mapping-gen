@@ -2,7 +2,7 @@ package com.github.apuex.ctxmapgen.table
 
 import com.github.apuex.springbootsolution.runtime.SymbolConverters._
 
-import _root_.scala.xml.parsing._
+import scala.xml.parsing._
 import scala.xml._
 
 object MappingLoader {
@@ -35,6 +35,7 @@ object MappingLoader {
 
 class MappingLoader(val xml: Node) {
   val mapping = "mapping"
+  val impl = "impl"
   val srcSystem = xml.\@("from")
   val destSystem = xml.\@("to")
   val modelName = if("" == xml.\@("name").trim) s"${srcSystem}_${destSystem}_${mapping}" else xml.\@("name")
@@ -42,7 +43,9 @@ class MappingLoader(val xml: Node) {
   val modelVersion = xml.\@("version")
   val modelMaintainer = xml.\@("maintainer")
   val outputDir = s"${System.getProperty("output.dir", "target/generated")}"
-  val projectDir = s"${outputDir}/${cToShell(modelName)}"
   val projectName = s"${cToShell(modelName)}"
+  val projectDir = s"${outputDir}/${projectName}"
+  val projectSrcPackage = s"${modelPackage}.${impl}"
+  val projectSrcDir = s"${projectDir}/src/main/scala/${projectSrcPackage.replace('.', '/')}"
   val hyphen = if ("microsoft" == s"${System.getProperty("symbol.naming", "microsoft")}") "" else "-"
 }

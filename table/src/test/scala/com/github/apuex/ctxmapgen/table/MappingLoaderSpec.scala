@@ -18,6 +18,8 @@ class MappingLoaderSpec extends FlatSpec with Matchers {
     outputDir should be(s"${System.getProperty("output.dir", "target/generated")}")
     projectName should be("src-dest-mapping")
     projectDir should be(s"${outputDir}/src-dest-mapping")
+    projectSrcPackage should be("com.github.apuex.mapping.impl")
+    projectSrcDir should be(s"${outputDir}/src-dest-mapping/src/main/scala/com/github/apuex/mapping/impl")
     hyphen should be(if ("microsoft" == s"${System.getProperty("symbol.naming", "microsoft")}") "" else "-")
   }
 }
