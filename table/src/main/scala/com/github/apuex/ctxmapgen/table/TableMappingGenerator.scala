@@ -40,7 +40,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
       s"""
          |class ${cToPascal(tableName)}Mapping (src: ${cToPascal(srcSystem)}Service, dest: ${cToPascal(destSystem)}Service) extends TableMapping {
          |
-         |  override def insert(tableName: String, rowid: String): Unit = {
+         |  override def create(tableName: String, rowid: String): Unit = {
          |    ${indent(insertFromRowId(table), 4)}
          |  }
          |
@@ -61,18 +61,21 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
     s"""
        |${srcSystem}.retrieve${cToPascal(tableName)}ByRowid().invoke(RetrieveByRowidCmd(evt.rowid))
        |  .map(t => {
-       |    ${indent(insertFromTableMapping(table), 4)}
+       |    ${indent(insertFromTableMapping(table, "t"), 4)}
        |  })
      """.stripMargin.trim
   }
 
-  def insertFromTableMapping(table: Node): String = {
-    (table.child.filter(x => x.label == "dest-table")
-      .map(insertDestinationTable(_, "t")) ++
-      table.child.filter(x => x.label == "view")
-        .map(insertFromView(_)))
+  def insertFromTableMapping(table: Node, from: String): String = {
+    val tables = insertDestinationTables(table, from)
+    val views = table.child.filter(x => x.label == "view")
+      .map(insertFromView(_))
       .reduceOption((l, r) => s"${l}\n${r}")
       .getOrElse("")
+    s"""
+       |${tables}
+       |${views}
+     """.stripMargin.trim
   }
 
   def insertFromView(view: Node): String = {
@@ -80,8 +83,17 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
     val keys = keyColumns(view)
     s"""
        |${srcSystem}.retrieve${cToPascal(tableName)}().invoke(Retrieve${cToPascal(tableName)}Cmd(${paramSubstitutions(keys, "t")}))
-       |  .map(v => ${view.child.filter(_.label == "dest-table").map(insertDestinationTable(_, "v"))})
+       |  .map(v => {
+       |    ${indent(insertDestinationTables(view, "v"), 4)}
+       |  })
      """.stripMargin.trim
+  }
+
+  def insertDestinationTables(view: Node, from: String): String = {
+    view.child.filter(_.label == "dest-table")
+      .map(x => insertDestinationTable(x, from))
+      .reduceOption((l, r) => s"${l}\n${r}")
+      .getOrElse("")
   }
 
   def insertDestinationTable(table: Node, from: String): String = {

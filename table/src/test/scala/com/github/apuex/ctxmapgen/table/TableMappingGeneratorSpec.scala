@@ -21,11 +21,61 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
   }
 
   it should "generate insert dest-table from view" in {
-    fail("test not implemented.")
+    val table =
+      <view name="src_view_1">
+        <key>
+          <column name="col_1"/>
+          <column name="col_2"/>
+        </key>
+        <dest-table name="dest_table_1">
+          <column no="1" name="col_1" from-column="col_1"/>
+          <column no="2" name="col_2" from-column="col_2"/>
+          <column no="3" name="col_3" from-column="col_3"/>
+          <column no="4" name="col_4" from-column="col_4"/>
+          <key>
+            <column name="col_1"/>
+            <column name="col_2"/>
+          </key>
+        </dest-table>
+        <dest-table name="dest_table_2">
+          <column no="1" name="col_1" from-column="col_1"/>
+          <column no="2" name="col_2" from-column="col_2"/>
+          <column no="3" name="col_3" from-column="col_3"/>
+          <column no="4" name="col_4" from-column="col_4"/>
+          <key>
+            <column name="col_1"/>
+            <column name="col_2"/>
+          </key>
+        </dest-table>
+      </view>
+
+    insertFromView(table) should be(
+      s"""
+         |src.retrieveSrcView1().invoke(RetrieveSrcView1Cmd(t.col1, t.col2))
+         |  .map(v => {
+         |    dest.createDestTable1().invoke(CreateDestTable1Cmd(v.col1, v.col2, v.col3, v.col4))
+         |    dest.createDestTable2().invoke(CreateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
+         |  })
+       """.stripMargin.trim)
   }
 
   it should "generate insert dest-table" in {
-    fail("test not implemented.")
+    val table =
+      <dest-table name="dest_table_1">
+        <column no="1" name="col_1" from-column="col_1"/>
+        <column no="2" name="col_2" from-column="col_2"/>
+        <column no="3" name="col_3" from-column="col_3"/>
+        <column no="4" name="col_4" from-column="col_4"/>
+        <key>
+          <column name="col_1"/>
+          <column name="col_2"/>
+        </key>
+      </dest-table>
+
+    insertDestinationTable(table, "x") should be(
+      s"""
+         |dest.createDestTable1().invoke(CreateDestTable1Cmd(x.col1, x.col2, x.col3, x.col4))
+       """.stripMargin.trim)
   }
 
   it should "generate update dest-table from rowid" in {
