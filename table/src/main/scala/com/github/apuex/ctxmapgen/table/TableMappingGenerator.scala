@@ -38,6 +38,10 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
     val tableName = table.\@("name")
     val mappingImpl =
       s"""
+         |package ${modelPackage}
+         |
+         |import scala.concurrent.ExecutionContext
+         |
          |class ${cToPascal(tableName)}Mapping (
          |    src: ${cToPascal(srcSystem)}Service,
          |    dest: ${cToPascal(destSystem)}Service,

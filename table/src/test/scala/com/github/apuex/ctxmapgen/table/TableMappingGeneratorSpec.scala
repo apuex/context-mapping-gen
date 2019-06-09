@@ -78,6 +78,10 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
     tableMapping._1 should be("src_table_1")
     tableMapping._2 should be(
       s"""
+         |package com.github.apuex.mapping
+         |
+         |import scala.concurrent.ExecutionContext
+         |
          |class SrcTable1Mapping (
          |    src: SrcService,
          |    dest: DestService,
