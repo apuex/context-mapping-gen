@@ -38,7 +38,11 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
     val tableName = table.\@("name")
     val mappingImpl =
       s"""
-         |class ${cToPascal(tableName)}Mapping (src: ${cToPascal(srcSystem)}Service, dest: ${cToPascal(destSystem)}Service) extends TableMapping {
+         |class ${cToPascal(tableName)}Mapping (
+         |    src: ${cToPascal(srcSystem)}Service,
+         |    dest: ${cToPascal(destSystem)}Service,
+         |    implicit val ec: ExecutionContext
+         |  ) extends TableMapping {
          |
          |  override def create(tableName: String, rowid: String): Unit = {
          |    ${indent(insertFromRowId(table), 4)}
@@ -59,7 +63,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
   def insertFromRowId(table: Node): String = {
     val tableName = table.\@("name")
     s"""
-       |${srcSystem}.retrieve${cToPascal(tableName)}ByRowid().invoke(RetrieveByRowidCmd(evt.rowid))
+       |${srcSystem}.retrieve${cToPascal(tableName)}ByRowid().invoke(RetrieveByRowidCmd(rowid))
        |  .map(t => {
        |    ${indent(insertFromTableMapping(table, "t"), 4)}
        |  })
@@ -106,7 +110,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
   def updateFromRowId(table: Node): String = {
     val tableName = table.\@("name")
     s"""
-       |${srcSystem}.retrieve${cToPascal(tableName)}ByRowid().invoke(RetrieveByRowidCmd(evt.rowid))
+       |${srcSystem}.retrieve${cToPascal(tableName)}ByRowid().invoke(RetrieveByRowidCmd(rowid))
        |  .map(t => {
        |    ${indent(updateFromTableMapping(table, "t"), 4)}
        |  })

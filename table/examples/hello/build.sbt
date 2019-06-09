@@ -6,6 +6,9 @@ organization := artifactGroupName
 version      := artifactVersionNumber
 maintainer   := artifactMaintainer
 
+lazy val `hello` = (project in file("."))
+  .enablePlugins(LagomScala)
+
 libraryDependencies ++= Seq(
   scalaXml,
   sbRuntime,

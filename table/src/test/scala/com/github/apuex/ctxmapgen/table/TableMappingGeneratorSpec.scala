@@ -67,10 +67,14 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
     tableMapping._1 should be("src_table_1")
     tableMapping._2 should be(
       s"""
-         |class SrcTable1Mapping (src: SrcService, dest: DestService) extends TableMapping {
+         |class SrcTable1Mapping (
+         |    src: SrcService,
+         |    dest: DestService,
+         |    implicit val ec: ExecutionContext
+         |  ) extends TableMapping {
          |
          |  override def create(tableName: String, rowid: String): Unit = {
-         |    src.retrieveSrcTable1ByRowid().invoke(RetrieveByRowidCmd(evt.rowid))
+         |    src.retrieveSrcTable1ByRowid().invoke(RetrieveByRowidCmd(rowid))
          |      .map(t => {
          |        dest.createDestTable1().invoke(CreateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
          |        src.retrieveSrcView1().invoke(RetrieveSrcView1Cmd(t.col1, t.col2))
@@ -85,7 +89,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
          |  }
          |
          |  override def update(tableName: String, rowid: String): Unit = {
-         |    src.retrieveSrcTable1ByRowid().invoke(RetrieveByRowidCmd(evt.rowid))
+         |    src.retrieveSrcTable1ByRowid().invoke(RetrieveByRowidCmd(rowid))
          |      .map(t => {
          |        dest.updateDestTable1().invoke(UpdateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
          |        src.retrieveSrcView1().invoke(RetrieveSrcView1Cmd(t.col1, t.col2))
@@ -162,7 +166,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
     insertFromRowId(table) should be(
       s"""
-         |src.retrieveSrcTable1ByRowid().invoke(RetrieveByRowidCmd(evt.rowid))
+         |src.retrieveSrcTable1ByRowid().invoke(RetrieveByRowidCmd(rowid))
          |  .map(t => {
          |    dest.createDestTable1().invoke(CreateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
          |    src.retrieveSrcView1().invoke(RetrieveSrcView1Cmd(t.col1, t.col2))
@@ -359,7 +363,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
     updateFromRowId(table) should be(
       s"""
-         |src.retrieveSrcTable1ByRowid().invoke(RetrieveByRowidCmd(evt.rowid))
+         |src.retrieveSrcTable1ByRowid().invoke(RetrieveByRowidCmd(rowid))
          |  .map(t => {
          |    dest.updateDestTable1().invoke(UpdateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
          |    src.retrieveSrcView1().invoke(RetrieveSrcView1Cmd(t.col1, t.col2))
