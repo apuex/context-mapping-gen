@@ -41,6 +41,8 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
          |class ${cToPascal(tableName)}Mapping (
          |    src: ${cToPascal(srcSystem)}Service,
          |    dest: ${cToPascal(destSystem)}Service,
+         |    addDelete: (String, String, Any) => Unit,
+         |    getDeletes: (String, String) => Seq[Any],
          |    implicit val ec: ExecutionContext
          |  ) extends TableMapping {
          |
@@ -103,6 +105,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
   def insertDestinationTable(table: Node, from: String): String = {
     val tableName = table.\@("name")
     s"""
+       |addDelete(tableName, rowid, Delete${cToPascal(tableName)}Cmd(${paramSubstitutions(keyColumns(table), from)}))
        |dest.create${cToPascal(tableName)}().invoke(Create${cToPascal(tableName)}Cmd(${paramSubstitutions(columns(table), from)}))
      """.stripMargin.trim
   }
@@ -120,7 +123,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
   def updateFromTableMapping(table: Node, from: String): String = {
     val tables = updateDestinationTables(table, from)
     val views = table.child.filter(x => x.label == "view")
-        .map(updateFromView(_))
+      .map(updateFromView(_))
       .reduceOption((l, r) => s"${l}\n${r}")
       .getOrElse("")
     s"""
@@ -155,10 +158,31 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
   }
 
   def deleteFromRowId(table: Node): String = {
-    val tableName = table.\@("name")
     s"""
-       |
+       |getDeletes(tableName, rowid)
+       |  .foreach({
+       |    ${indent(deletes(destTableNames(table)), 4)}
+       |  })
      """.stripMargin.trim
+  }
+
+  def deletes(tableNames: Seq[String]): String = {
+    tableNames
+      .map(x =>
+        s"""
+           |case x: Delete${cToPascal(x)}Cmd =>
+           |  dest.delete${cToPascal(x)}().invoke(x)
+         """.stripMargin.trim)
+      .reduceOption((l, r) => s"${l}\n${r}")
+      .getOrElse("")
+  }
+
+  def destTableNames(view: Node): Seq[String] = {
+    view.child.filter(_.label == "dest-table")
+      .map(_.\@("name")) ++
+      view.child.filter(_.label != "dest-table")
+        .map(destTableNames(_))
+        .flatMap(x => x)
   }
 
   def columns(view: Node): Seq[String] = {

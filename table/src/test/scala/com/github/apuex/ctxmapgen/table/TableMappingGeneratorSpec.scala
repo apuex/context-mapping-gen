@@ -62,7 +62,18 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
         </view>
       </src-table>
 
-    fail("test not implemented.")
+    val destTables = destTableNames(table)
+    destTables should be(Seq("dest_table_1", "dest_table_2", "dest_table_5"))
+    deletes(destTables) should be(
+      s"""
+         |case x: DeleteDestTable1Cmd =>
+         |  dest.deleteDestTable1().invoke(x)
+         |case x: DeleteDestTable2Cmd =>
+         |  dest.deleteDestTable2().invoke(x)
+         |case x: DeleteDestTable5Cmd =>
+         |  dest.deleteDestTable5().invoke(x)
+       """.stripMargin.trim)
+
     val tableMapping = generateTableMapping(table)
     tableMapping._1 should be("src_table_1")
     tableMapping._2 should be(
@@ -70,19 +81,24 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
          |class SrcTable1Mapping (
          |    src: SrcService,
          |    dest: DestService,
+         |    addDelete: (String, String, Any) => Unit,
+         |    getDeletes: (String, String) => Seq[Any],
          |    implicit val ec: ExecutionContext
          |  ) extends TableMapping {
          |
          |  override def create(tableName: String, rowid: String): Unit = {
          |    src.retrieveSrcTable1ByRowid().invoke(RetrieveByRowidCmd(rowid))
          |      .map(t => {
+         |        addDelete(tableName, rowid, DeleteDestTable1Cmd(t.col1, t.col2))
          |        dest.createDestTable1().invoke(CreateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
          |        src.retrieveSrcView1().invoke(RetrieveSrcView1Cmd(t.col1, t.col2))
          |          .map(v => {
+         |            addDelete(tableName, rowid, DeleteDestTable2Cmd(v.col1, v.col2))
          |            dest.createDestTable2().invoke(CreateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
          |          })
          |        src.retrieveSrcView2().invoke(RetrieveSrcView2Cmd(t.col1))
          |          .map(v => {
+         |            addDelete(tableName, rowid, DeleteDestTable5Cmd(v.col1))
          |            dest.createDestTable5().invoke(CreateDestTable5Cmd(v.col1, v.col2, v.col3))
          |          })
          |      })
@@ -104,7 +120,15 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
          |  }
          |
          |  override def delete(tableName: String, rowid: String): Unit = {
-         |
+         |    getDeletes(tableName, rowid)
+         |      .foreach({
+         |        case x: DeleteDestTable1Cmd =>
+         |          dest.deleteDestTable1().invoke(x)
+         |        case x: DeleteDestTable2Cmd =>
+         |          dest.deleteDestTable2().invoke(x)
+         |        case x: DeleteDestTable5Cmd =>
+         |          dest.deleteDestTable5().invoke(x)
+         |      })
          |  }
          |}
        """.stripMargin.trim)
@@ -168,13 +192,16 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
       s"""
          |src.retrieveSrcTable1ByRowid().invoke(RetrieveByRowidCmd(rowid))
          |  .map(t => {
+         |    addDelete(tableName, rowid, DeleteDestTable1Cmd(t.col1, t.col2))
          |    dest.createDestTable1().invoke(CreateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
          |    src.retrieveSrcView1().invoke(RetrieveSrcView1Cmd(t.col1, t.col2))
          |      .map(v => {
+         |        addDelete(tableName, rowid, DeleteDestTable2Cmd(v.col1, v.col2))
          |        dest.createDestTable2().invoke(CreateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
          |      })
          |    src.retrieveSrcView2().invoke(RetrieveSrcView2Cmd(t.col1))
          |      .map(v => {
+         |        addDelete(tableName, rowid, DeleteDestTable5Cmd(v.col1))
          |        dest.createDestTable5().invoke(CreateDestTable5Cmd(v.col1, v.col2, v.col3))
          |      })
          |  })
@@ -237,13 +264,16 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
     insertFromTableMapping(table, "t") should be(
       s"""
+         |addDelete(tableName, rowid, DeleteDestTable1Cmd(t.col1, t.col2))
          |dest.createDestTable1().invoke(CreateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
          |src.retrieveSrcView1().invoke(RetrieveSrcView1Cmd(t.col1, t.col2))
          |  .map(v => {
+         |    addDelete(tableName, rowid, DeleteDestTable2Cmd(v.col1, v.col2))
          |    dest.createDestTable2().invoke(CreateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
          |  })
          |src.retrieveSrcView2().invoke(RetrieveSrcView2Cmd(t.col1))
          |  .map(v => {
+         |    addDelete(tableName, rowid, DeleteDestTable5Cmd(v.col1))
          |    dest.createDestTable5().invoke(CreateDestTable5Cmd(v.col1, v.col2, v.col3))
          |  })
        """.stripMargin.trim)
@@ -282,7 +312,9 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
       s"""
          |src.retrieveSrcView1().invoke(RetrieveSrcView1Cmd(t.col1, t.col2))
          |  .map(v => {
+         |    addDelete(tableName, rowid, DeleteDestTable1Cmd(v.col1, v.col2))
          |    dest.createDestTable1().invoke(CreateDestTable1Cmd(v.col1, v.col2, v.col3, v.col4))
+         |    addDelete(tableName, rowid, DeleteDestTable2Cmd(v.col1, v.col2))
          |    dest.createDestTable2().invoke(CreateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
          |  })
        """.stripMargin.trim)
@@ -303,6 +335,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
     insertDestinationTable(table, "x") should be(
       s"""
+         |addDelete(tableName, rowid, DeleteDestTable1Cmd(x.col1, x.col2))
          |dest.createDestTable1().invoke(CreateDestTable1Cmd(x.col1, x.col2, x.col3, x.col4))
        """.stripMargin.trim)
   }
@@ -506,19 +539,70 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
   it should "generate delete from dest-table from rowid" in {
     val table =
-      <dest-table name="dest_table_1">
-        <column no="1" name="col_1" from-column="col_1"/>
-        <column no="2" name="col_2" from-column="col_2"/>
-        <column no="3" name="col_3" from-column="col_3"/>
-        <column no="4" name="col_4" from-column="col_4"/>
+      <src-table name="src_table_1">
+        <!--
+          key columns, or rowid
+        -->
         <key>
           <column name="col_1"/>
           <column name="col_2"/>
         </key>
-      </dest-table>
+        <dest-table name="dest_table_1">
+          <column no="1" name="col_1" from-column="col_1"/>
+          <column no="2" name="col_2" from-column="col_2"/>
+          <column no="3" name="col_3" from-column="col_3"/>
+          <column no="4" name="col_4" from-column="col_4"/>
+          <key>
+            <column name="col_1"/>
+            <column name="col_2"/>
+          </key>
+        </dest-table>
+        <!--
+          affected views by source table change.
+        -->
+        <view name="src_view_1">
+          <key>
+            <column name="col_1"/>
+            <column name="col_2"/>
+          </key>
+          <dest-table name="dest_table_2">
+            <column no="1" name="col_1" from-column="col_1"/>
+            <column no="2" name="col_2" from-column="col_2"/>
+            <column no="3" name="col_3" from-column="col_3"/>
+            <column no="4" name="col_4" from-column="col_4"/>
+            <key>
+              <column name="col_1"/>
+              <column name="col_2"/>
+            </key>
+          </dest-table>
+        </view>
+        <view name="src_view_2">
+          <key>
+            <column name="col_1"/>
+          </key>
+          <dest-table name="dest_table_5">
+            <column no="1" name="col_1" from-column="col_1"/>
+            <column no="2" name="col_2" from-column="col_2"/>
+            <column no="3" name="col_3" from-column="col_3"/>
+            <key>
+              <column name="col_1"/>
+            </key>
+          </dest-table>
+        </view>
+      </src-table>
 
-    fail("test not implemented.")
-    deleteFromRowId(table) should be("-")
+    deleteFromRowId(table) should be(
+      s"""
+         |getDeletes(tableName, rowid)
+         |  .foreach({
+         |    case x: DeleteDestTable1Cmd =>
+         |      dest.deleteDestTable1().invoke(x)
+         |    case x: DeleteDestTable2Cmd =>
+         |      dest.deleteDestTable2().invoke(x)
+         |    case x: DeleteDestTable5Cmd =>
+         |      dest.deleteDestTable5().invoke(x)
+         |  })
+       """.stripMargin.trim)
   }
 
   it should "generate parameter substitutions" in {
