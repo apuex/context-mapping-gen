@@ -2,6 +2,7 @@ package com.github.apuex.ctxmapgen.table
 
 import java.io.{File, PrintWriter}
 
+import com.github.apuex.ctxmapgen.table.TableMappingGenerator._
 import com.github.apuex.springbootsolution.runtime.SymbolConverters._
 import com.github.apuex.springbootsolution.runtime.TextUtils.indent
 
@@ -11,6 +12,37 @@ object TableMappingGenerator {
   def apply(mappingFile: String): TableMappingGenerator = TableMappingGenerator(MappingLoader(mappingFile))
 
   def apply(mappingLoader: MappingLoader): TableMappingGenerator = new TableMappingGenerator(mappingLoader)
+
+  def destTableNames(view: Node): Seq[String] = {
+    view.child.filter(_.label == "dest-table")
+      .map(_.\@("name")) ++
+      view.child.filter(_.label != "dest-table")
+        .map(destTableNames(_))
+        .flatMap(x => x)
+  }
+
+  def columns(view: Node): Seq[String] = {
+    view.child.filter(p => p.label == "column")
+      .sortWith((l, r) => l.\@("no") < r.\@("no"))
+      .map(_.\@("name"))
+  }
+
+  def keyColumns(view: Node): Seq[String] = {
+    val keys = view.child.filter(x => x.label == "key")
+      .flatMap(x => x.child.filter(p => p.label == "column"))
+      .map(_.\@("name"))
+    val cols = columns(view)
+
+    if (cols.isEmpty) keys else cols.filter(keys.contains(_))
+  }
+
+  def paramSubstitutions(paramNames: Seq[String], from: String): String = {
+    paramNames
+      .map(cToCamel(_))
+      .map(x => s"${from}.${x}")
+      .reduceOption((l, r) => s"${l}, ${r}")
+      .getOrElse("")
+  }
 }
 
 class TableMappingGenerator(mappingLoader: MappingLoader) {
@@ -43,8 +75,8 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
          |import scala.concurrent.ExecutionContext
          |
          |class ${cToPascal(tableName)}Mapping (
-         |    src: ${cToPascal(srcSystem)}Service,
-         |    dest: ${cToPascal(destSystem)}Service,
+         |    ${cToCamel(srcSystem)}: ${cToPascal(srcSystem)}Service,
+         |    ${cToCamel(destSystem)}: ${cToPascal(destSystem)}Service,
          |    addDelete: (String, String, Any) => Unit,
          |    getDeletes: (String, String) => Seq[Any],
          |    implicit val ec: ExecutionContext
@@ -110,7 +142,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
     val tableName = table.\@("name")
     s"""
        |addDelete(tableName, rowid, Delete${cToPascal(tableName)}Cmd(${paramSubstitutions(keyColumns(table), from)}))
-       |dest.create${cToPascal(tableName)}().invoke(Create${cToPascal(tableName)}Cmd(${paramSubstitutions(columns(table), from)}))
+       |${cToCamel(destSystem)}.create${cToPascal(tableName)}().invoke(Create${cToPascal(tableName)}Cmd(${paramSubstitutions(columns(table), from)}))
      """.stripMargin.trim
   }
 
@@ -157,7 +189,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
   def updateDestinationTable(table: Node, from: String): String = {
     val tableName = table.\@("name")
     s"""
-       |dest.update${cToPascal(tableName)}().invoke(Update${cToPascal(tableName)}Cmd(${paramSubstitutions(columns(table), from)}))
+       |${cToCamel(destSystem)}.update${cToPascal(tableName)}().invoke(Update${cToPascal(tableName)}Cmd(${paramSubstitutions(columns(table), from)}))
      """.stripMargin.trim
   }
 
@@ -181,36 +213,6 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
       .getOrElse("")
   }
 
-  def destTableNames(view: Node): Seq[String] = {
-    view.child.filter(_.label == "dest-table")
-      .map(_.\@("name")) ++
-      view.child.filter(_.label != "dest-table")
-        .map(destTableNames(_))
-        .flatMap(x => x)
-  }
-
-  def columns(view: Node): Seq[String] = {
-    view.child.filter(p => p.label == "column")
-      .sortWith((l, r) => l.\@("no") < r.\@("no"))
-      .map(_.\@("name"))
-  }
-
-  def keyColumns(view: Node): Seq[String] = {
-    val keys = view.child.filter(x => x.label == "key")
-      .flatMap(x => x.child.filter(p => p.label == "column"))
-      .map(_.\@("name"))
-    val cols = columns(view)
-
-    if (cols.isEmpty) keys else cols.filter(keys.contains(_))
-  }
-
-  def paramSubstitutions(paramNames: Seq[String], from: String): String = {
-    paramNames
-      .map(cToCamel(_))
-      .map(x => s"${from}.${x}")
-      .reduceOption((l, r) => s"${l}, ${r}")
-      .getOrElse("")
-  }
 }
 
 

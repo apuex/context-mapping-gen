@@ -1,10 +1,19 @@
 package com.github.apuex.ctxmapgen.table
 
-import com.github.apuex.ctxmapgen.util.ClasspathXmlLoader
+import com.github.apuex.ctxmapgen.table.TableMappingGenerator._
 import org.scalatest.{FlatSpec, Matchers}
 
 class TableMappingGeneratorSpec extends FlatSpec with Matchers {
-  val m = TableMappingGenerator(MappingLoader(ClasspathXmlLoader("com/github/apuex/ctxmapgen/table/mappings.xml").xml))
+
+  val mappingXml =
+    <table-mappings from="src"
+                    to="dest"
+                    package="com.github.apuex.mapping"
+                    version="1.0.0"
+                    maintainer="xtwxy@hotmail.com">
+    </table-mappings>
+
+  val m = TableMappingGenerator(MappingLoader(mappingXml))
 
   import m._
 
