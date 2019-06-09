@@ -7,7 +7,8 @@ class HelloTableMapping (
                           dest: DestService,
                           addDelete: (String, String, Any) => Unit,
                           getDeletes: (String, String) => Seq[Any],
-                          implicit val ec: ExecutionContext) extends TableMapping {
+                          implicit val ec: ExecutionContext
+                        ) extends TableMapping {
 
   override def create(tableName: String, rowid: String): Unit = {
     src.retrieveSrcTable1ByRowid().invoke(RetrieveByRowidCmd(rowid))
