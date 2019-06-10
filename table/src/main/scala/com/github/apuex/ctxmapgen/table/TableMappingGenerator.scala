@@ -27,8 +27,8 @@ object TableMappingGenerator {
       .map(_.\@("name"))
   }
 
-  def keyColumns(view: Node): Seq[String] = {
-    val keys = view.child.filter(x => x.label == "key")
+  def filterKeyColumns(view: Node): Seq[String] = {
+    val keys = view.child.filter(x => x.label == "filter-key")
       .flatMap(x => x.child.filter(p => p.label == "column"))
       .map(_.\@("name"))
     val cols = columns(view)
@@ -122,7 +122,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
 
   def insertFromView(view: Node): String = {
     val tableName = view.\@("name")
-    val keys = keyColumns(view)
+    val keys = filterKeyColumns(view)
     s"""
        |${srcSystem}.retrieve${cToPascal(tableName)}().invoke(Retrieve${cToPascal(tableName)}Cmd(${paramSubstitutions(keys, "t")}))
        |  .map(v => {
@@ -141,7 +141,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
   def insertDestinationTable(table: Node, from: String): String = {
     val tableName = table.\@("name")
     s"""
-       |addDelete(tableName, rowid, Delete${cToPascal(tableName)}Cmd(${paramSubstitutions(keyColumns(table), from)}))
+       |addDelete(tableName, rowid, Delete${cToPascal(tableName)}Cmd(${paramSubstitutions(filterKeyColumns(table), from)}))
        |${cToCamel(destSystem)}.create${cToPascal(tableName)}().invoke(Create${cToPascal(tableName)}Cmd(${paramSubstitutions(columns(table), from)}))
      """.stripMargin.trim
   }
@@ -170,7 +170,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
 
   def updateFromView(view: Node): String = {
     val tableName = view.\@("name")
-    val keys = keyColumns(view)
+    val keys = filterKeyColumns(view)
     s"""
        |${srcSystem}.retrieve${cToPascal(tableName)}().invoke(Retrieve${cToPascal(tableName)}Cmd(${paramSubstitutions(keys, "t")}))
        |  .map(v => {

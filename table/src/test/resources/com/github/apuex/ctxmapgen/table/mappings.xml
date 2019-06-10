@@ -7,78 +7,78 @@
 
   <src-table name="src_table_1">
     <!--
-      key columns, or rowid
+      filter-key columns, or rowid
     -->
-    <key>
+    <filter-key>
       <column name="col_1"/>
       <column name="col_2"/>
-    </key>
+    </filter-key>
     <dest-table name="dest_table_1">
       <column no="1" name="col_1" from-column="col_1"/>
       <column no="2" name="col_2" from-column="col_2"/>
       <column no="3" name="col_3" from-column="col_3"/>
       <column no="4" name="col_4" from-column="col_4"/>
-      <key>
+      <filter-key>
         <column name="col_1"/>
         <column name="col_2"/>
-      </key>
+      </filter-key>
     </dest-table>
     <!--
       affected views by source table change.
     -->
     <view name="src_view_1">
-      <key>
+      <filter-key>
         <column name="col_1"/>
         <column name="col_2"/>
-      </key>
+      </filter-key>
       <dest-table name="dest_table_2">
         <column no="1" name="col_1" from-column="col_1"/>
         <column no="2" name="col_2" from-column="col_2"/>
         <column no="3" name="col_3" from-column="col_3"/>
         <column no="4" name="col_4" from-column="col_4"/>
-        <key>
+        <filter-key>
           <column name="col_1"/>
           <column name="col_2"/>
-        </key>
+        </filter-key>
       </dest-table>
     </view>
     <view name="src_view_2">
-      <key>
+      <filter-key>
         <column name="col_1"/>
-      </key>
+      </filter-key>
       <dest-table name="dest_table_5">
         <column no="1" name="col_1" from-column="col_1"/>
         <column no="2" name="col_2" from-column="col_2"/>
         <column no="3" name="col_3" from-column="col_3"/>
-        <key>
+        <filter-key>
           <column name="col_1"/>
-        </key>
+        </filter-key>
       </dest-table>
     </view>
   </src-table>
   
   <src-table name="src_table_2">
-    <key>
+    <filter-key>
       <column name="col_1"/>
-    </key>
+    </filter-key>
     <dest-table name="dest_table_3">
       <column no="1" name="col_1" from-column="col_1"/>
       <column no="2" name="col_2" from-column="col_2"/>
       <column no="3" name="col_3" from-column="col_3"/>
       <column no="4" name="col_4" from-column="col_4"/>
-      <key>
+      <filter-key>
         <column name="col_1"/>
         <column name="col_2"/>
-      </key>
+      </filter-key>
     </dest-table>
     <dest-table name="dest_table_4">
       <column no="1" name="col_1" from-column="col_1"/>
       <column no="2" name="col_2" from-column="col_2"/>
       <column no="3" name="col_3" from-column="col_3"/>
       <column no="4" name="col_4" from-column="col_4"/>
-      <key>
+      <filter-key>
         <column name="col_1"/>
-      </key>
+      </filter-key>
     </dest-table>
   </src-table>
 </table-mappings>
