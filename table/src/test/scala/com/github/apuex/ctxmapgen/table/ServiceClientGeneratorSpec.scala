@@ -137,7 +137,94 @@ class ServiceClientGeneratorSpec extends FlatSpec with Matchers {
          |      ).withAutoAcl(true)
          |  }
          |}
-         |
        """.stripMargin.trim)
+  }
+
+  it should "generate source service calls" in {
+    srcCalls() should be(
+      s"""
+         |def retrieveSrcTable1ByRowid: ServiceCall[RetrieveByRowidCmd, SrcTable1Vo]
+         |def querySrcView1: ServiceCall[QueryCommand, SrcView1ListVo]
+         |def querySrcView2: ServiceCall[QueryCommand, SrcView2ListVo]
+       """.stripMargin.trim
+    )
+  }
+
+  it should "generate source service call descriptors" in {
+    srcCallDescs() should be(
+      s"""
+         |pathCall("/api/retrieve-src-table-1-by-rowid", retrieveSrcTable1ByRowid _),
+         |pathCall("/api/query-src-view-1", querySrcView1 _),
+         |pathCall("/api/query-src-view-2", querySrcView2 _),
+       """.stripMargin.trim
+    )
+  }
+
+  it should "generate destination service calls" in {
+    destCalls() should be(
+      s"""
+         |def createDestTable1: ServiceCall[CreateDestTable1Cmd, NotUsed]
+         |def updateDestTable1: ServiceCall[UpdateDestTable1Cmd, NotUsed]
+         |def deleteDestTable1: ServiceCall[DeleteDestTable1Cmd, NotUsed]
+         |def createDestTable2: ServiceCall[CreateDestTable2Cmd, NotUsed]
+         |def updateDestTable2: ServiceCall[UpdateDestTable2Cmd, NotUsed]
+         |def deleteDestTable2: ServiceCall[DeleteDestTable2Cmd, NotUsed]
+         |def createDestTable5: ServiceCall[CreateDestTable5Cmd, NotUsed]
+         |def updateDestTable5: ServiceCall[UpdateDestTable5Cmd, NotUsed]
+         |def deleteDestTable5: ServiceCall[DeleteDestTable5Cmd, NotUsed]
+       """.stripMargin.trim
+    )
+  }
+
+  it should "generate destination service call descriptors" in {
+    destCallDescs() should be(
+      s"""
+         |pathCall("/api/create-dest-table-1", createDestTable1 _),
+         |pathCall("/api/update-dest-table-1", updateDestTable1 _),
+         |pathCall("/api/delete-dest-table-1", deleteDestTable1 _),
+         |pathCall("/api/create-dest-table-2", createDestTable2 _),
+         |pathCall("/api/update-dest-table-2", updateDestTable2 _),
+         |pathCall("/api/delete-dest-table-2", deleteDestTable2 _),
+         |pathCall("/api/create-dest-table-5", createDestTable5 _),
+         |pathCall("/api/update-dest-table-5", updateDestTable5 _),
+         |pathCall("/api/delete-dest-table-5", deleteDestTable5 _),
+       """.stripMargin.trim
+    )
+  }
+
+  it should "generate retrieve by rowid" in {
+    retrieveByRowid("table_view") should be(
+      "def retrieveTableViewByRowid: ServiceCall[RetrieveByRowidCmd, TableViewVo]"
+    )
+  }
+
+  it should "generate create" in {
+    create("table_view") should be(
+      "def createTableView: ServiceCall[CreateTableViewCmd, NotUsed]"
+    )
+  }
+
+  it should "generate retrieve" in {
+    retrieve("table_view") should be(
+      "def retrieveTableView: ServiceCall[RetrieveTableViewCmd, TableViewVo]"
+    )
+  }
+
+  it should "generate query" in {
+    query("table_view") should be(
+      "def queryTableView: ServiceCall[QueryCommand, TableViewListVo]"
+    )
+  }
+
+  it should "generate update" in {
+    update("table_view") should be(
+      "def updateTableView: ServiceCall[UpdateTableViewCmd, NotUsed]"
+    )
+  }
+
+  it should "generate delete" in {
+    delete("table_view") should be(
+      "def deleteTableView: ServiceCall[DeleteTableViewCmd, NotUsed]"
+    )
   }
 }
