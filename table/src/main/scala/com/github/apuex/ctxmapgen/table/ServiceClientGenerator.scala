@@ -56,66 +56,66 @@ class ServiceClientGenerator(mappingLoader: MappingLoader) {
   import mappingLoader._
 
   def generate(): Unit = {
-    generateSrcServiceClient()
-    generateDestServiceClient()
-  }
-
-  def generateSrcServiceClient(): Unit = {
     saveService(
       srcSystem,
-      s"""
-         |package ${modelPackage}
-         |
-         |import akka._
-         |import akka.stream.scaladsl._
-         |import com.lightbend.lagom.scaladsl.api._
-         |
-         |trait ${cToPascal(srcSystem)}Service extends Service {
-         |  ${indent(srcCalls(), 2)}
-         |  def events(offset: Option[String]): ServiceCall[Source[String, NotUsed], Source[String, NotUsed]]
-         |
-         |  override def descriptor: Descriptor = {
-         |    import Service._
-         |
-         |    named("${cToShell(srcSystem)}")
-         |      .withCalls(
-         |        ${indent(srcCallDescs(), 6)}
-         |        pathCall("/api/events?offset", events _)
-         |      ).withAutoAcl(true)
-         |  }
-         |}
-     """.stripMargin.trim)
-  }
-
-  def generateDestServiceClient(): Unit = {
+      generateSrcServiceClient())
     saveService(
       destSystem,
-      s"""
-         |package ${modelPackage}
-         |
-         |import akka._
-         |import akka.stream.scaladsl._
-         |import com.lightbend.lagom.scaladsl.api._
-         |
-         |trait ${cToPascal(destSystem)}Service extends Service {
-         |  ${indent(destCalls(), 2)}
-         |  def events(offset: Option[String]): ServiceCall[Source[String, NotUsed], Source[String, NotUsed]]
-         |
-         |  override def descriptor: Descriptor = {
-         |    import Service._
-         |
-         |    named("${cToShell(srcSystem)}")
-         |      .withCalls(
-         |        ${indent(destCallDescs(), 6)}
-         |        pathCall("/api/events?offset", events _)
-         |      ).withAutoAcl(true)
-         |  }
-         |}
-     """.stripMargin.trim)
+      generateDestServiceClient())
+  }
+
+  def generateSrcServiceClient(): String = {
+    s"""
+       |package ${modelPackage}
+       |
+       |import akka._
+       |import akka.stream.scaladsl._
+       |import com.lightbend.lagom.scaladsl.api._
+       |
+       |trait ${cToPascal(srcSystem)}Service extends Service {
+       |  ${indent(srcCalls(), 2)}
+       |  def events(offset: Option[String]): ServiceCall[Source[String, NotUsed], Source[String, NotUsed]]
+       |
+       |  override def descriptor: Descriptor = {
+       |    import Service._
+       |
+       |    named("${cToShell(srcSystem)}")
+       |      .withCalls(
+       |        ${indent(srcCallDescs(), 8)}
+       |        pathCall("/api/events?offset", events _)
+       |      ).withAutoAcl(true)
+       |  }
+       |}
+     """.stripMargin.trim
+  }
+
+  def generateDestServiceClient(): String = {
+    s"""
+       |package ${modelPackage}
+       |
+       |import akka._
+       |import akka.stream.scaladsl._
+       |import com.lightbend.lagom.scaladsl.api._
+       |
+       |trait ${cToPascal(destSystem)}Service extends Service {
+       |  ${indent(destCalls(), 2)}
+       |  def events(offset: Option[String]): ServiceCall[Source[String, NotUsed], Source[String, NotUsed]]
+       |
+       |  override def descriptor: Descriptor = {
+       |    import Service._
+       |
+       |    named("${cToShell(destSystem)}")
+       |      .withCalls(
+       |        ${indent(destCallDescs(), 8)}
+       |        pathCall("/api/events?offset", events _)
+       |      ).withAutoAcl(true)
+       |  }
+       |}
+     """.stripMargin.trim
   }
 
   def srcCalls(): String = {
-    val srcTables = xml.filter(x => x.label == "src-table")
+    val srcTables = xml.child.filter(x => x.label == "src-table")
     val byRowids = srcTables
       .map(x => retrieveByRowid(x.\@("name")))
 
@@ -130,7 +130,7 @@ class ServiceClientGenerator(mappingLoader: MappingLoader) {
   }
 
   def srcCallDescs(): String = {
-    val srcTables = xml.filter(x => x.label == "src-table")
+    val srcTables = xml.child.filter(x => x.label == "src-table")
     val byRowids = srcTables
       .map(_.\@("name"))
       .map(x =>
