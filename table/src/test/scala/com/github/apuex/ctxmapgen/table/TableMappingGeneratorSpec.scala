@@ -654,7 +654,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
         </filter-key>
       </dest-table>
 
-    filterKeyColumns(table) should be(Seq("column_1", "column_2"))
+    filterKeyColumns(table) should be(Seq(("column_1", "string"), ("column_2", "long")))
+    filterKeyColumnNames(table) should be(Seq("column_1", "column_2"))
   }
 
   it should "extract empty filter-key columns from src-table with no filter-key" in {
@@ -663,6 +664,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
       </src-table>
 
     filterKeyColumns(table) should be(Seq())
+    filterKeyColumnNames(table) should be(Seq())
   }
 
   it should "extract empty filter-key columns from src-table with empty filter-key" in {
@@ -673,6 +675,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
       </src-table>
 
     filterKeyColumns(table) should be(Seq())
+    filterKeyColumnNames(table) should be(Seq())
   }
 
   it should "extract filter-key columns from src-table" in {
@@ -684,7 +687,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
         </filter-key>
       </src-table>
 
-    filterKeyColumns(table) should be(Seq("column_1", "column_2"))
+    filterKeyColumns(table) should be(Seq(("column_1", "string"), ("column_2", "long")))
+    filterKeyColumnNames(table) should be(Seq("column_1", "column_2"))
   }
 
   it should "extract filter-key columns from view" in {
@@ -696,6 +700,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
         </filter-key>
       </view>
 
-    filterKeyColumns(table) should be(Seq("column_1", "column_2"))
+    filterKeyColumns(table) should be(Seq(("column_1", "string"), ("column_2", "long")))
+    filterKeyColumnNames(table) should be(Seq("column_1", "column_2"))
   }
 }

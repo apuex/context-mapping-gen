@@ -27,10 +27,15 @@ object TableMappingGenerator {
       .map(_.\@("name"))
   }
 
-  def filterKeyColumns(view: Node): Seq[String] = {
-    val keys = view.child.filter(x => x.label == "filter-key")
+  def filterKeyColumns(view: Node): Seq[(String, String)] = {
+    view.child.filter(x => x.label == "filter-key")
       .flatMap(x => x.child.filter(p => p.label == "column"))
-      .map(_.\@("name"))
+      .map(x => (x.\@("name"), x.\@("type")))
+  }
+
+  def filterKeyColumnNames(view: Node): Seq[String] = {
+    val keys = filterKeyColumns(view)
+      .map(_._1)
     val cols = columns(view)
 
     if (cols.isEmpty) keys else cols.filter(keys.contains(_))
@@ -48,6 +53,24 @@ object TableMappingGenerator {
     paramNames
       .map(cToPascal(_))
       .reduceOption((l, r) => s"${l}${r}")
+      .getOrElse("")
+  }
+
+  def queryCommand(view: Node): String = {
+    s"""
+       |def query${cToPascal(view.\@("name"))}By${by(filterKeyColumnNames(view))}(q: QueryCommand) = {
+       |}
+     """.stripMargin
+  }
+
+  def deletes(tableNames: Seq[String]): String = {
+    tableNames
+      .map(x =>
+        s"""
+           |case x: Delete${cToPascal(x)}Cmd =>
+           |  dest.delete${cToPascal(x)}().invoke(x)
+         """.stripMargin.trim)
+      .reduceOption((l, r) => s"${l}\n${r}")
       .getOrElse("")
   }
 }
@@ -129,7 +152,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
 
   def insertFromView(view: Node): String = {
     val tableName = view.\@("name")
-    val keys = filterKeyColumns(view)
+    val keys = filterKeyColumnNames(view)
     s"""
        |${srcSystem}.query${cToPascal(tableName)}By${by(keys)}().invoke(query${cToPascal(tableName)}By${by(keys)}Cmd(${paramSubstitutions(keys, "t")}))
        |  .map(v => {
@@ -148,7 +171,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
   def insertDestinationTable(table: Node, from: String): String = {
     val tableName = table.\@("name")
     s"""
-       |addDelete(tableName, rowid, Delete${cToPascal(tableName)}Cmd(${paramSubstitutions(filterKeyColumns(table), from)}))
+       |addDelete(tableName, rowid, Delete${cToPascal(tableName)}Cmd(${paramSubstitutions(filterKeyColumnNames(table), from)}))
        |${cToCamel(destSystem)}.create${cToPascal(tableName)}().invoke(Create${cToPascal(tableName)}Cmd(${paramSubstitutions(columns(table), from)}))
      """.stripMargin.trim
   }
@@ -177,7 +200,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
 
   def updateFromView(view: Node): String = {
     val tableName = view.\@("name")
-    val keys = filterKeyColumns(view)
+    val keys = filterKeyColumnNames(view)
     s"""
        |${srcSystem}.query${cToPascal(tableName)}By${by(keys)}().invoke(query${cToPascal(tableName)}By${by(keys)}Cmd(${paramSubstitutions(keys, "t")}))
        |  .map(v => {
@@ -207,17 +230,6 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
        |    ${indent(deletes(destTableNames(table)), 4)}
        |  })
      """.stripMargin.trim
-  }
-
-  def deletes(tableNames: Seq[String]): String = {
-    tableNames
-      .map(x =>
-        s"""
-           |case x: Delete${cToPascal(x)}Cmd =>
-           |  dest.delete${cToPascal(x)}().invoke(x)
-         """.stripMargin.trim)
-      .reduceOption((l, r) => s"${l}\n${r}")
-      .getOrElse("")
   }
 
 }
