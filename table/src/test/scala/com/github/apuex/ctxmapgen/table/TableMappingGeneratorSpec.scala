@@ -24,8 +24,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
           filter-key columns, or rowid
         -->
         <filter-key>
-          <column name="col_1"/>
-          <column name="col_2"/>
+          <column name="col_1" type="string"/>
+          <column name="col_2" type="long"/>
         </filter-key>
         <dest-table name="dest_table_1">
           <column no="1" name="col_1" from-column="col_1"/>
@@ -33,8 +33,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
           <column no="3" name="col_3" from-column="col_3"/>
           <column no="4" name="col_4" from-column="col_4"/>
           <filter-key>
-            <column name="col_1"/>
-            <column name="col_2"/>
+            <column name="col_1" type="string"/>
+            <column name="col_2" type="long"/>
           </filter-key>
         </dest-table>
         <!--
@@ -42,8 +42,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
         -->
         <view name="src_view_1">
           <filter-key>
-            <column name="col_1"/>
-            <column name="col_2"/>
+            <column name="col_1" type="string"/>
+            <column name="col_2" type="long"/>
           </filter-key>
           <dest-table name="dest_table_2">
             <column no="1" name="col_1" from-column="col_1"/>
@@ -51,21 +51,21 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
             <column no="3" name="col_3" from-column="col_3"/>
             <column no="4" name="col_4" from-column="col_4"/>
             <filter-key>
-              <column name="col_1"/>
-              <column name="col_2"/>
+              <column name="col_1" type="string"/>
+              <column name="col_2" type="long"/>
             </filter-key>
           </dest-table>
         </view>
         <view name="src_view_2">
           <filter-key>
-            <column name="col_1"/>
+            <column name="col_1" type="string"/>
           </filter-key>
           <dest-table name="dest_table_5">
             <column no="1" name="col_1" from-column="col_1"/>
             <column no="2" name="col_2" from-column="col_2"/>
             <column no="3" name="col_3" from-column="col_3"/>
             <filter-key>
-              <column name="col_1"/>
+              <column name="col_1" type="string"/>
             </filter-key>
           </dest-table>
         </view>
@@ -104,12 +104,12 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
          |      .map(t => {
          |        addDelete(tableName, rowid, DeleteDestTable1Cmd(t.col1, t.col2))
          |        dest.createDestTable1().invoke(CreateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
-         |        src.retrieveSrcView1().invoke(RetrieveSrcView1Cmd(t.col1, t.col2))
+         |        src.querySrcView1ByCol1Col2().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
          |          .map(v => {
          |            addDelete(tableName, rowid, DeleteDestTable2Cmd(v.col1, v.col2))
          |            dest.createDestTable2().invoke(CreateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
          |          })
-         |        src.retrieveSrcView2().invoke(RetrieveSrcView2Cmd(t.col1))
+         |        src.querySrcView2ByCol1().invoke(querySrcView2ByCol1Cmd(t.col1))
          |          .map(v => {
          |            addDelete(tableName, rowid, DeleteDestTable5Cmd(v.col1))
          |            dest.createDestTable5().invoke(CreateDestTable5Cmd(v.col1, v.col2, v.col3))
@@ -121,11 +121,11 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
          |    src.retrieveSrcTable1ByRowid().invoke(RetrieveByRowidCmd(rowid))
          |      .map(t => {
          |        dest.updateDestTable1().invoke(UpdateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
-         |        src.retrieveSrcView1().invoke(RetrieveSrcView1Cmd(t.col1, t.col2))
+         |        src.querySrcView1ByCol1Col2().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
          |          .map(v => {
          |            dest.updateDestTable2().invoke(UpdateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
          |          })
-         |        src.retrieveSrcView2().invoke(RetrieveSrcView2Cmd(t.col1))
+         |        src.querySrcView2ByCol1().invoke(querySrcView2ByCol1Cmd(t.col1))
          |          .map(v => {
          |            dest.updateDestTable5().invoke(UpdateDestTable5Cmd(v.col1, v.col2, v.col3))
          |          })
@@ -154,8 +154,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
           filter-key columns, or rowid
         -->
         <filter-key>
-          <column name="col_1"/>
-          <column name="col_2"/>
+          <column name="col_1" type="string"/>
+          <column name="col_2" type="long"/>
         </filter-key>
         <dest-table name="dest_table_1">
           <column no="1" name="col_1" from-column="col_1"/>
@@ -163,8 +163,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
           <column no="3" name="col_3" from-column="col_3"/>
           <column no="4" name="col_4" from-column="col_4"/>
           <filter-key>
-            <column name="col_1"/>
-            <column name="col_2"/>
+            <column name="col_1" type="string"/>
+            <column name="col_2" type="long"/>
           </filter-key>
         </dest-table>
         <!--
@@ -172,8 +172,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
         -->
         <view name="src_view_1">
           <filter-key>
-            <column name="col_1"/>
-            <column name="col_2"/>
+            <column name="col_1" type="string"/>
+            <column name="col_2" type="long"/>
           </filter-key>
           <dest-table name="dest_table_2">
             <column no="1" name="col_1" from-column="col_1"/>
@@ -181,21 +181,21 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
             <column no="3" name="col_3" from-column="col_3"/>
             <column no="4" name="col_4" from-column="col_4"/>
             <filter-key>
-              <column name="col_1"/>
-              <column name="col_2"/>
+              <column name="col_1" type="string"/>
+              <column name="col_2" type="long"/>
             </filter-key>
           </dest-table>
         </view>
         <view name="src_view_2">
           <filter-key>
-            <column name="col_1"/>
+            <column name="col_1" type="string"/>
           </filter-key>
           <dest-table name="dest_table_5">
             <column no="1" name="col_1" from-column="col_1"/>
             <column no="2" name="col_2" from-column="col_2"/>
             <column no="3" name="col_3" from-column="col_3"/>
             <filter-key>
-              <column name="col_1"/>
+              <column name="col_1" type="string"/>
             </filter-key>
           </dest-table>
         </view>
@@ -207,12 +207,12 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
          |  .map(t => {
          |    addDelete(tableName, rowid, DeleteDestTable1Cmd(t.col1, t.col2))
          |    dest.createDestTable1().invoke(CreateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
-         |    src.retrieveSrcView1().invoke(RetrieveSrcView1Cmd(t.col1, t.col2))
+         |    src.querySrcView1ByCol1Col2().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
          |      .map(v => {
          |        addDelete(tableName, rowid, DeleteDestTable2Cmd(v.col1, v.col2))
          |        dest.createDestTable2().invoke(CreateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
          |      })
-         |    src.retrieveSrcView2().invoke(RetrieveSrcView2Cmd(t.col1))
+         |    src.querySrcView2ByCol1().invoke(querySrcView2ByCol1Cmd(t.col1))
          |      .map(v => {
          |        addDelete(tableName, rowid, DeleteDestTable5Cmd(v.col1))
          |        dest.createDestTable5().invoke(CreateDestTable5Cmd(v.col1, v.col2, v.col3))
@@ -228,8 +228,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
           filter-key columns, or rowid
         -->
         <filter-key>
-          <column name="col_1"/>
-          <column name="col_2"/>
+          <column name="col_1" type="string"/>
+          <column name="col_2" type="long"/>
         </filter-key>
         <dest-table name="dest_table_1">
           <column no="1" name="col_1" from-column="col_1"/>
@@ -237,8 +237,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
           <column no="3" name="col_3" from-column="col_3"/>
           <column no="4" name="col_4" from-column="col_4"/>
           <filter-key>
-            <column name="col_1"/>
-            <column name="col_2"/>
+            <column name="col_1" type="string"/>
+            <column name="col_2" type="long"/>
           </filter-key>
         </dest-table>
         <!--
@@ -246,8 +246,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
         -->
         <view name="src_view_1">
           <filter-key>
-            <column name="col_1"/>
-            <column name="col_2"/>
+            <column name="col_1" type="string"/>
+            <column name="col_2" type="long"/>
           </filter-key>
           <dest-table name="dest_table_2">
             <column no="1" name="col_1" from-column="col_1"/>
@@ -255,21 +255,21 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
             <column no="3" name="col_3" from-column="col_3"/>
             <column no="4" name="col_4" from-column="col_4"/>
             <filter-key>
-              <column name="col_1"/>
-              <column name="col_2"/>
+              <column name="col_1" type="string"/>
+              <column name="col_2" type="long"/>
             </filter-key>
           </dest-table>
         </view>
         <view name="src_view_2">
           <filter-key>
-            <column name="col_1"/>
+            <column name="col_1" type="string"/>
           </filter-key>
           <dest-table name="dest_table_5">
             <column no="1" name="col_1" from-column="col_1"/>
             <column no="2" name="col_2" from-column="col_2"/>
             <column no="3" name="col_3" from-column="col_3"/>
             <filter-key>
-              <column name="col_1"/>
+              <column name="col_1" type="string"/>
             </filter-key>
           </dest-table>
         </view>
@@ -279,12 +279,12 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
       s"""
          |addDelete(tableName, rowid, DeleteDestTable1Cmd(t.col1, t.col2))
          |dest.createDestTable1().invoke(CreateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
-         |src.retrieveSrcView1().invoke(RetrieveSrcView1Cmd(t.col1, t.col2))
+         |src.querySrcView1ByCol1Col2().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
          |  .map(v => {
          |    addDelete(tableName, rowid, DeleteDestTable2Cmd(v.col1, v.col2))
          |    dest.createDestTable2().invoke(CreateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
          |  })
-         |src.retrieveSrcView2().invoke(RetrieveSrcView2Cmd(t.col1))
+         |src.querySrcView2ByCol1().invoke(querySrcView2ByCol1Cmd(t.col1))
          |  .map(v => {
          |    addDelete(tableName, rowid, DeleteDestTable5Cmd(v.col1))
          |    dest.createDestTable5().invoke(CreateDestTable5Cmd(v.col1, v.col2, v.col3))
@@ -296,8 +296,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
     val table =
       <view name="src_view_1">
         <filter-key>
-          <column name="col_1"/>
-          <column name="col_2"/>
+          <column name="col_1" type="string"/>
+          <column name="col_2" type="long"/>
         </filter-key>
         <dest-table name="dest_table_1">
           <column no="1" name="col_1" from-column="col_1"/>
@@ -305,8 +305,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
           <column no="3" name="col_3" from-column="col_3"/>
           <column no="4" name="col_4" from-column="col_4"/>
           <filter-key>
-            <column name="col_1"/>
-            <column name="col_2"/>
+            <column name="col_1" type="string"/>
+            <column name="col_2" type="long"/>
           </filter-key>
         </dest-table>
         <dest-table name="dest_table_2">
@@ -315,15 +315,15 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
           <column no="3" name="col_3" from-column="col_3"/>
           <column no="4" name="col_4" from-column="col_4"/>
           <filter-key>
-            <column name="col_1"/>
-            <column name="col_2"/>
+            <column name="col_1" type="string"/>
+            <column name="col_2" type="long"/>
           </filter-key>
         </dest-table>
       </view>
 
     insertFromView(table) should be(
       s"""
-         |src.retrieveSrcView1().invoke(RetrieveSrcView1Cmd(t.col1, t.col2))
+         |src.querySrcView1ByCol1Col2().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
          |  .map(v => {
          |    addDelete(tableName, rowid, DeleteDestTable1Cmd(v.col1, v.col2))
          |    dest.createDestTable1().invoke(CreateDestTable1Cmd(v.col1, v.col2, v.col3, v.col4))
@@ -341,8 +341,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
         <column no="3" name="col_3" from-column="col_3"/>
         <column no="4" name="col_4" from-column="col_4"/>
         <filter-key>
-          <column name="col_1"/>
-          <column name="col_2"/>
+          <column name="col_1" type="string"/>
+          <column name="col_2" type="long"/>
         </filter-key>
       </dest-table>
 
@@ -360,8 +360,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
           filter-key columns, or rowid
         -->
         <filter-key>
-          <column name="col_1"/>
-          <column name="col_2"/>
+          <column name="col_1" type="string"/>
+          <column name="col_2" type="long"/>
         </filter-key>
         <dest-table name="dest_table_1">
           <column no="1" name="col_1" from-column="col_1"/>
@@ -369,8 +369,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
           <column no="3" name="col_3" from-column="col_3"/>
           <column no="4" name="col_4" from-column="col_4"/>
           <filter-key>
-            <column name="col_1"/>
-            <column name="col_2"/>
+            <column name="col_1" type="string"/>
+            <column name="col_2" type="long"/>
           </filter-key>
         </dest-table>
         <!--
@@ -378,8 +378,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
         -->
         <view name="src_view_1">
           <filter-key>
-            <column name="col_1"/>
-            <column name="col_2"/>
+            <column name="col_1" type="string"/>
+            <column name="col_2" type="long"/>
           </filter-key>
           <dest-table name="dest_table_2">
             <column no="1" name="col_1" from-column="col_1"/>
@@ -387,21 +387,21 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
             <column no="3" name="col_3" from-column="col_3"/>
             <column no="4" name="col_4" from-column="col_4"/>
             <filter-key>
-              <column name="col_1"/>
-              <column name="col_2"/>
+              <column name="col_1" type="string"/>
+              <column name="col_2" type="long"/>
             </filter-key>
           </dest-table>
         </view>
         <view name="src_view_2">
           <filter-key>
-            <column name="col_1"/>
+            <column name="col_1" type="string"/>
           </filter-key>
           <dest-table name="dest_table_5">
             <column no="1" name="col_1" from-column="col_1"/>
             <column no="2" name="col_2" from-column="col_2"/>
             <column no="3" name="col_3" from-column="col_3"/>
             <filter-key>
-              <column name="col_1"/>
+              <column name="col_1" type="string"/>
             </filter-key>
           </dest-table>
         </view>
@@ -412,11 +412,11 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
          |src.retrieveSrcTable1ByRowid().invoke(RetrieveByRowidCmd(rowid))
          |  .map(t => {
          |    dest.updateDestTable1().invoke(UpdateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
-         |    src.retrieveSrcView1().invoke(RetrieveSrcView1Cmd(t.col1, t.col2))
+         |    src.querySrcView1ByCol1Col2().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
          |      .map(v => {
          |        dest.updateDestTable2().invoke(UpdateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
          |      })
-         |    src.retrieveSrcView2().invoke(RetrieveSrcView2Cmd(t.col1))
+         |    src.querySrcView2ByCol1().invoke(querySrcView2ByCol1Cmd(t.col1))
          |      .map(v => {
          |        dest.updateDestTable5().invoke(UpdateDestTable5Cmd(v.col1, v.col2, v.col3))
          |      })
@@ -431,8 +431,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
           filter-key columns, or rowid
         -->
         <filter-key>
-          <column name="col_1"/>
-          <column name="col_2"/>
+          <column name="col_1" type="string"/>
+          <column name="col_2" type="long"/>
         </filter-key>
         <dest-table name="dest_table_1">
           <column no="1" name="col_1" from-column="col_1"/>
@@ -440,8 +440,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
           <column no="3" name="col_3" from-column="col_3"/>
           <column no="4" name="col_4" from-column="col_4"/>
           <filter-key>
-            <column name="col_1"/>
-            <column name="col_2"/>
+            <column name="col_1" type="string"/>
+            <column name="col_2" type="long"/>
           </filter-key>
         </dest-table>
         <!--
@@ -449,8 +449,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
         -->
         <view name="src_view_1">
           <filter-key>
-            <column name="col_1"/>
-            <column name="col_2"/>
+            <column name="col_1" type="string"/>
+            <column name="col_2" type="long"/>
           </filter-key>
           <dest-table name="dest_table_2">
             <column no="1" name="col_1" from-column="col_1"/>
@@ -458,21 +458,21 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
             <column no="3" name="col_3" from-column="col_3"/>
             <column no="4" name="col_4" from-column="col_4"/>
             <filter-key>
-              <column name="col_1"/>
-              <column name="col_2"/>
+              <column name="col_1" type="string"/>
+              <column name="col_2" type="long"/>
             </filter-key>
           </dest-table>
         </view>
         <view name="src_view_2">
           <filter-key>
-            <column name="col_1"/>
+            <column name="col_1" type="string"/>
           </filter-key>
           <dest-table name="dest_table_5">
             <column no="1" name="col_1" from-column="col_1"/>
             <column no="2" name="col_2" from-column="col_2"/>
             <column no="3" name="col_3" from-column="col_3"/>
             <filter-key>
-              <column name="col_1"/>
+              <column name="col_1" type="string"/>
             </filter-key>
           </dest-table>
         </view>
@@ -481,11 +481,11 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
     updateFromTableMapping(table, "t") should be(
       s"""
          |dest.updateDestTable1().invoke(UpdateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
-         |src.retrieveSrcView1().invoke(RetrieveSrcView1Cmd(t.col1, t.col2))
+         |src.querySrcView1ByCol1Col2().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
          |  .map(v => {
          |    dest.updateDestTable2().invoke(UpdateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
          |  })
-         |src.retrieveSrcView2().invoke(RetrieveSrcView2Cmd(t.col1))
+         |src.querySrcView2ByCol1().invoke(querySrcView2ByCol1Cmd(t.col1))
          |  .map(v => {
          |    dest.updateDestTable5().invoke(UpdateDestTable5Cmd(v.col1, v.col2, v.col3))
          |  })
@@ -496,8 +496,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
     val table =
       <view name="src_view_1">
         <filter-key>
-          <column name="col_1"/>
-          <column name="col_2"/>
+          <column name="col_1" type="string"/>
+          <column name="col_2" type="long"/>
         </filter-key>
         <dest-table name="dest_table_1">
           <column no="1" name="col_1" from-column="col_1"/>
@@ -505,8 +505,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
           <column no="3" name="col_3" from-column="col_3"/>
           <column no="4" name="col_4" from-column="col_4"/>
           <filter-key>
-            <column name="col_1"/>
-            <column name="col_2"/>
+            <column name="col_1" type="string"/>
+            <column name="col_2" type="long"/>
           </filter-key>
         </dest-table>
         <dest-table name="dest_table_2">
@@ -515,15 +515,15 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
           <column no="3" name="col_3" from-column="col_3"/>
           <column no="4" name="col_4" from-column="col_4"/>
           <filter-key>
-            <column name="col_1"/>
-            <column name="col_2"/>
+            <column name="col_1" type="string"/>
+            <column name="col_2" type="long"/>
           </filter-key>
         </dest-table>
       </view>
 
     updateFromView(table) should be(
       s"""
-         |src.retrieveSrcView1().invoke(RetrieveSrcView1Cmd(t.col1, t.col2))
+         |src.querySrcView1ByCol1Col2().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
          |  .map(v => {
          |    dest.updateDestTable1().invoke(UpdateDestTable1Cmd(v.col1, v.col2, v.col3, v.col4))
          |    dest.updateDestTable2().invoke(UpdateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
@@ -539,8 +539,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
         <column no="3" name="col_3" from-column="col_3"/>
         <column no="4" name="col_4" from-column="col_4"/>
         <filter-key>
-          <column name="col_1"/>
-          <column name="col_2"/>
+          <column name="col_1" type="string"/>
+          <column name="col_2" type="long"/>
         </filter-key>
       </dest-table>
 
@@ -557,8 +557,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
           filter-key columns, or rowid
         -->
         <filter-key>
-          <column name="col_1"/>
-          <column name="col_2"/>
+          <column name="col_1" type="string"/>
+          <column name="col_2" type="long"/>
         </filter-key>
         <dest-table name="dest_table_1">
           <column no="1" name="col_1" from-column="col_1"/>
@@ -566,8 +566,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
           <column no="3" name="col_3" from-column="col_3"/>
           <column no="4" name="col_4" from-column="col_4"/>
           <filter-key>
-            <column name="col_1"/>
-            <column name="col_2"/>
+            <column name="col_1" type="string"/>
+            <column name="col_2" type="long"/>
           </filter-key>
         </dest-table>
         <!--
@@ -575,8 +575,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
         -->
         <view name="src_view_1">
           <filter-key>
-            <column name="col_1"/>
-            <column name="col_2"/>
+            <column name="col_1" type="string"/>
+            <column name="col_2" type="long"/>
           </filter-key>
           <dest-table name="dest_table_2">
             <column no="1" name="col_1" from-column="col_1"/>
@@ -584,21 +584,21 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
             <column no="3" name="col_3" from-column="col_3"/>
             <column no="4" name="col_4" from-column="col_4"/>
             <filter-key>
-              <column name="col_1"/>
-              <column name="col_2"/>
+              <column name="col_1" type="string"/>
+              <column name="col_2" type="long"/>
             </filter-key>
           </dest-table>
         </view>
         <view name="src_view_2">
           <filter-key>
-            <column name="col_1"/>
+            <column name="col_1" type="string"/>
           </filter-key>
           <dest-table name="dest_table_5">
             <column no="1" name="col_1" from-column="col_1"/>
             <column no="2" name="col_2" from-column="col_2"/>
             <column no="3" name="col_3" from-column="col_3"/>
             <filter-key>
-              <column name="col_1"/>
+              <column name="col_1" type="string"/>
             </filter-key>
           </dest-table>
         </view>
@@ -630,6 +630,17 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
     paramSubstitutions(params, alias) should be("x.tableId, x.columnOne, x.columnTwo, x.columnThree")
   }
 
+  it should "generate by column names postfix" in {
+    val params = Seq(
+      "table_id",
+      "column_one",
+      "column_two",
+      "column_three"
+    )
+
+    by(params) should be("TableIdColumnOneColumnTwoColumnThree")
+  }
+
   it should "extract filter-key columns from dest-table" in {
     val table =
       <dest-table>
@@ -638,8 +649,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
         <column no="3" name="column_3" from-column="column_3"/>
         <column no="4" name="column_4" from-column="column_4"/>
         <filter-key>
-          <column name="column_1"/>
-          <column name="column_2"/>
+          <column name="column_1" type="string"/>
+          <column name="column_2" type="long"/>
         </filter-key>
       </dest-table>
 
@@ -668,8 +679,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
     val table =
       <src-table>
         <filter-key>
-          <column name="column_1"/>
-          <column name="column_2"/>
+          <column name="column_1" type="string"/>
+          <column name="column_2" type="long"/>
         </filter-key>
       </src-table>
 
@@ -680,8 +691,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
     val table =
       <view>
         <filter-key>
-          <column name="column_1"/>
-          <column name="column_2"/>
+          <column name="column_1" type="string"/>
+          <column name="column_2" type="long"/>
         </filter-key>
       </view>
 

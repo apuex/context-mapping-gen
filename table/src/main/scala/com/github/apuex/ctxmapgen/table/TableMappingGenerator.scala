@@ -43,6 +43,13 @@ object TableMappingGenerator {
       .reduceOption((l, r) => s"${l}, ${r}")
       .getOrElse("")
   }
+
+  def by(paramNames: Seq[String]): String = {
+    paramNames
+      .map(cToPascal(_))
+      .reduceOption((l, r) => s"${l}${r}")
+      .getOrElse("")
+  }
 }
 
 class TableMappingGenerator(mappingLoader: MappingLoader) {
@@ -124,7 +131,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
     val tableName = view.\@("name")
     val keys = filterKeyColumns(view)
     s"""
-       |${srcSystem}.retrieve${cToPascal(tableName)}().invoke(Retrieve${cToPascal(tableName)}Cmd(${paramSubstitutions(keys, "t")}))
+       |${srcSystem}.query${cToPascal(tableName)}By${by(keys)}().invoke(query${cToPascal(tableName)}By${by(keys)}Cmd(${paramSubstitutions(keys, "t")}))
        |  .map(v => {
        |    ${indent(insertDestinationTables(view, "v"), 4)}
        |  })
@@ -172,7 +179,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
     val tableName = view.\@("name")
     val keys = filterKeyColumns(view)
     s"""
-       |${srcSystem}.retrieve${cToPascal(tableName)}().invoke(Retrieve${cToPascal(tableName)}Cmd(${paramSubstitutions(keys, "t")}))
+       |${srcSystem}.query${cToPascal(tableName)}By${by(keys)}().invoke(query${cToPascal(tableName)}By${by(keys)}Cmd(${paramSubstitutions(keys, "t")}))
        |  .map(v => {
        |    ${indent(updateDestinationTables(view, "v"), 4)}
        |  })
