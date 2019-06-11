@@ -41,6 +41,22 @@ object TableMappingGenerator {
     if (cols.isEmpty) keys else cols.filter(keys.contains(_))
   }
 
+  def filterKeyParamsDef(keyColumns: Seq[(String, String)]): String = {
+    keyColumns.map(x => s"${cToCamel(x._1)}: ${cToPascal(x._2)}")
+      .reduceOption((l, r) => s"${l}, ${r}")
+      .getOrElse("")
+  }
+
+  def filterKeyParamsMap(keyColumnNames: Seq[String]): String = {
+    keyColumnNames.map(cToCamel(_))
+      .map(x =>
+        s"""
+           |"${x}" -> ${x}
+         """.stripMargin.trim)
+      .reduceOption((l, r) => s"${l},\n${r}")
+      .getOrElse("")
+  }
+
   def paramSubstitutions(paramNames: Seq[String], from: String): String = {
     paramNames
       .map(cToCamel(_))
@@ -57,10 +73,28 @@ object TableMappingGenerator {
   }
 
   def queryCommand(view: Node): String = {
+    val keyColumns = filterKeyColumns(view)
+    val keys = filterKeyColumnNames(view)
+    val map = if (keys.isEmpty) "Map()"
+    else
+      s"""
+         |Map(
+         |  ${indent(filterKeyParamsMap(keys), 2)}
+         |)
+     """.stripMargin.trim
     s"""
-       |def query${cToPascal(view.\@("name"))}By${by(filterKeyColumnNames(view))}(q: QueryCommand) = {
-       |}
-     """.stripMargin
+       |def query${cToPascal(view.\@("name"))}By${by(keys)}Cmd(${filterKeyParamsDef(keyColumns)}): QueryCommand = andCommand(
+       |  ${indent(map, 2)}
+       |)
+     """.stripMargin.trim
+  }
+
+  def queryCommands(view: Node): String = {
+    view
+      .flatMap(x => x.child.filter(_.label == "view"))
+      .map(queryCommand(_))
+      .reduceOption((l, r) => s"${l}\n\n${r}")
+      .getOrElse("")
   }
 
   def deletes(tableNames: Seq[String]): String = {
@@ -80,10 +114,10 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
   import mappingLoader._
 
   def generate(): Unit = {
-    generateTableMappings()
+    tableMappings(xml)
   }
 
-  def generateTableMappings(): Unit = {
+  def tableMappings(xml: Node): Unit = {
     xml.filter(x => x.label == "src-table")
       .map(generateTableMapping(_))
       .foreach(x => saveTableMappingImpl(x._1, x._2))
@@ -102,6 +136,8 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
       s"""
          |package ${modelPackage}
          |
+         |import com.github.apuex.springbootsolution.runtime._
+         |import com.github.apuex.springbootsolution.runtime.QueryCommandMethods._
          |import scala.concurrent.ExecutionContext
          |
          |class ${cToPascal(tableName)}Mapping (
@@ -123,6 +159,8 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
          |  override def delete(tableName: String, rowid: String): Unit = {
          |    ${indent(deleteFromRowId(table), 4)}
          |  }
+         |
+         |  ${indent(queryCommands(table), 2)}
          |}
      """.stripMargin.trim
     (tableName, mappingImpl)
@@ -155,9 +193,9 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
     val keys = filterKeyColumnNames(view)
     s"""
        |${srcSystem}.query${cToPascal(tableName)}By${by(keys)}().invoke(query${cToPascal(tableName)}By${by(keys)}Cmd(${paramSubstitutions(keys, "t")}))
-       |  .map(v => {
+       |  .map(_.items.map(v => {
        |    ${indent(insertDestinationTables(view, "v"), 4)}
-       |  })
+       |  }))
      """.stripMargin.trim
   }
 
@@ -203,9 +241,9 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
     val keys = filterKeyColumnNames(view)
     s"""
        |${srcSystem}.query${cToPascal(tableName)}By${by(keys)}().invoke(query${cToPascal(tableName)}By${by(keys)}Cmd(${paramSubstitutions(keys, "t")}))
-       |  .map(v => {
+       |  .map(_.items.map(v => {
        |    ${indent(updateDestinationTables(view, "v"), 4)}
-       |  })
+       |  }))
      """.stripMargin.trim
   }
 

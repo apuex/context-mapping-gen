@@ -89,6 +89,8 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
       s"""
          |package com.github.apuex.mapping
          |
+         |import com.github.apuex.springbootsolution.runtime._
+         |import com.github.apuex.springbootsolution.runtime.QueryCommandMethods._
          |import scala.concurrent.ExecutionContext
          |
          |class SrcTable1Mapping (
@@ -105,15 +107,15 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
          |        addDelete(tableName, rowid, DeleteDestTable1Cmd(t.col1, t.col2))
          |        dest.createDestTable1().invoke(CreateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
          |        src.querySrcView1ByCol1Col2().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
-         |          .map(v => {
+         |          .map(_.items.map(v => {
          |            addDelete(tableName, rowid, DeleteDestTable2Cmd(v.col1, v.col2))
          |            dest.createDestTable2().invoke(CreateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
-         |          })
+         |          }))
          |        src.querySrcView2ByCol1().invoke(querySrcView2ByCol1Cmd(t.col1))
-         |          .map(v => {
+         |          .map(_.items.map(v => {
          |            addDelete(tableName, rowid, DeleteDestTable5Cmd(v.col1))
          |            dest.createDestTable5().invoke(CreateDestTable5Cmd(v.col1, v.col2, v.col3))
-         |          })
+         |          }))
          |      })
          |  }
          |
@@ -122,13 +124,13 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
          |      .map(t => {
          |        dest.updateDestTable1().invoke(UpdateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
          |        src.querySrcView1ByCol1Col2().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
-         |          .map(v => {
+         |          .map(_.items.map(v => {
          |            dest.updateDestTable2().invoke(UpdateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
-         |          })
+         |          }))
          |        src.querySrcView2ByCol1().invoke(querySrcView2ByCol1Cmd(t.col1))
-         |          .map(v => {
+         |          .map(_.items.map(v => {
          |            dest.updateDestTable5().invoke(UpdateDestTable5Cmd(v.col1, v.col2, v.col3))
-         |          })
+         |          }))
          |      })
          |  }
          |
@@ -143,6 +145,19 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
          |          dest.deleteDestTable5().invoke(x)
          |      })
          |  }
+         |
+         |  def querySrcView1ByCol1Col2Cmd(col1: String, col2: Long): QueryCommand = andCommand(
+         |    Map(
+         |      "col1" -> col1,
+         |      "col2" -> col2
+         |    )
+         |  )
+         |
+         |  def querySrcView2ByCol1Cmd(col1: String): QueryCommand = andCommand(
+         |    Map(
+         |      "col1" -> col1
+         |    )
+         |  )
          |}
        """.stripMargin.trim)
   }
@@ -208,15 +223,15 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
          |    addDelete(tableName, rowid, DeleteDestTable1Cmd(t.col1, t.col2))
          |    dest.createDestTable1().invoke(CreateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
          |    src.querySrcView1ByCol1Col2().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
-         |      .map(v => {
+         |      .map(_.items.map(v => {
          |        addDelete(tableName, rowid, DeleteDestTable2Cmd(v.col1, v.col2))
          |        dest.createDestTable2().invoke(CreateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
-         |      })
+         |      }))
          |    src.querySrcView2ByCol1().invoke(querySrcView2ByCol1Cmd(t.col1))
-         |      .map(v => {
+         |      .map(_.items.map(v => {
          |        addDelete(tableName, rowid, DeleteDestTable5Cmd(v.col1))
          |        dest.createDestTable5().invoke(CreateDestTable5Cmd(v.col1, v.col2, v.col3))
-         |      })
+         |      }))
          |  })
        """.stripMargin.trim)
   }
@@ -280,15 +295,15 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
          |addDelete(tableName, rowid, DeleteDestTable1Cmd(t.col1, t.col2))
          |dest.createDestTable1().invoke(CreateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
          |src.querySrcView1ByCol1Col2().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
-         |  .map(v => {
+         |  .map(_.items.map(v => {
          |    addDelete(tableName, rowid, DeleteDestTable2Cmd(v.col1, v.col2))
          |    dest.createDestTable2().invoke(CreateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
-         |  })
+         |  }))
          |src.querySrcView2ByCol1().invoke(querySrcView2ByCol1Cmd(t.col1))
-         |  .map(v => {
+         |  .map(_.items.map(v => {
          |    addDelete(tableName, rowid, DeleteDestTable5Cmd(v.col1))
          |    dest.createDestTable5().invoke(CreateDestTable5Cmd(v.col1, v.col2, v.col3))
-         |  })
+         |  }))
        """.stripMargin.trim)
   }
 
@@ -324,12 +339,12 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
     insertFromView(table) should be(
       s"""
          |src.querySrcView1ByCol1Col2().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
-         |  .map(v => {
+         |  .map(_.items.map(v => {
          |    addDelete(tableName, rowid, DeleteDestTable1Cmd(v.col1, v.col2))
          |    dest.createDestTable1().invoke(CreateDestTable1Cmd(v.col1, v.col2, v.col3, v.col4))
          |    addDelete(tableName, rowid, DeleteDestTable2Cmd(v.col1, v.col2))
          |    dest.createDestTable2().invoke(CreateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
-         |  })
+         |  }))
        """.stripMargin.trim)
   }
 
@@ -413,13 +428,13 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
          |  .map(t => {
          |    dest.updateDestTable1().invoke(UpdateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
          |    src.querySrcView1ByCol1Col2().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
-         |      .map(v => {
+         |      .map(_.items.map(v => {
          |        dest.updateDestTable2().invoke(UpdateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
-         |      })
+         |      }))
          |    src.querySrcView2ByCol1().invoke(querySrcView2ByCol1Cmd(t.col1))
-         |      .map(v => {
+         |      .map(_.items.map(v => {
          |        dest.updateDestTable5().invoke(UpdateDestTable5Cmd(v.col1, v.col2, v.col3))
-         |      })
+         |      }))
          |  })
        """.stripMargin.trim)
   }
@@ -482,13 +497,13 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
       s"""
          |dest.updateDestTable1().invoke(UpdateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
          |src.querySrcView1ByCol1Col2().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
-         |  .map(v => {
+         |  .map(_.items.map(v => {
          |    dest.updateDestTable2().invoke(UpdateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
-         |  })
+         |  }))
          |src.querySrcView2ByCol1().invoke(querySrcView2ByCol1Cmd(t.col1))
-         |  .map(v => {
+         |  .map(_.items.map(v => {
          |    dest.updateDestTable5().invoke(UpdateDestTable5Cmd(v.col1, v.col2, v.col3))
-         |  })
+         |  }))
        """.stripMargin.trim)
   }
 
@@ -524,10 +539,10 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
     updateFromView(table) should be(
       s"""
          |src.querySrcView1ByCol1Col2().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
-         |  .map(v => {
+         |  .map(_.items.map(v => {
          |    dest.updateDestTable1().invoke(UpdateDestTable1Cmd(v.col1, v.col2, v.col3, v.col4))
          |    dest.updateDestTable2().invoke(UpdateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
-         |  })
+         |  }))
        """.stripMargin.trim)
   }
 
@@ -639,6 +654,14 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
     )
 
     by(params) should be("TableIdColumnOneColumnTwoColumnThree")
+    filterKeyParamsMap(params) should be(
+      s"""
+         |"tableId" -> tableId,
+         |"columnOne" -> columnOne,
+         |"columnTwo" -> columnTwo,
+         |"columnThree" -> columnThree
+       """.stripMargin.trim
+    )
   }
 
   it should "extract filter-key columns from dest-table" in {
@@ -656,31 +679,56 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
     filterKeyColumns(table) should be(Seq(("column_1", "string"), ("column_2", "long")))
     filterKeyColumnNames(table) should be(Seq("column_1", "column_2"))
+    filterKeyParamsDef(filterKeyColumns(table)) should be("column1: String, column2: Long")
+    filterKeyParamsMap(filterKeyColumnNames(table)) should be(
+      s"""
+         |"column1" -> column1,
+         |"column2" -> column2
+       """.stripMargin.trim
+    )
   }
 
   it should "extract empty filter-key columns from src-table with no filter-key" in {
     val table =
-      <src-table>
+      <src-table name="my_table_1">
       </src-table>
 
     filterKeyColumns(table) should be(Seq())
     filterKeyColumnNames(table) should be(Seq())
+    filterKeyParamsDef(filterKeyColumns(table)) should be("")
+    filterKeyParamsMap(filterKeyColumnNames(table)) should be("")
+    queryCommand(table) should be(
+      s"""
+         |def queryMyTable1ByCmd(): QueryCommand = andCommand(
+         |  Map()
+         |)
+       """.stripMargin.trim
+    )
   }
 
   it should "extract empty filter-key columns from src-table with empty filter-key" in {
     val table =
-      <src-table>
+      <src-table name="my_table_1">
         <filter-key>
         </filter-key>
       </src-table>
 
     filterKeyColumns(table) should be(Seq())
     filterKeyColumnNames(table) should be(Seq())
+    filterKeyParamsDef(filterKeyColumns(table)) should be("")
+    filterKeyParamsMap(filterKeyColumnNames(table)) should be("")
+    queryCommand(table) should be(
+      s"""
+         |def queryMyTable1ByCmd(): QueryCommand = andCommand(
+         |  Map()
+         |)
+       """.stripMargin.trim
+    )
   }
 
   it should "extract filter-key columns from src-table" in {
     val table =
-      <src-table>
+      <src-table name="my_table_1">
         <filter-key>
           <column name="column_1" type="string"/>
           <column name="column_2" type="long"/>
@@ -689,11 +737,28 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
     filterKeyColumns(table) should be(Seq(("column_1", "string"), ("column_2", "long")))
     filterKeyColumnNames(table) should be(Seq("column_1", "column_2"))
+    filterKeyParamsDef(filterKeyColumns(table)) should be("column1: String, column2: Long")
+    filterKeyParamsMap(filterKeyColumnNames(table)) should be(
+      s"""
+         |"column1" -> column1,
+         |"column2" -> column2
+       """.stripMargin.trim
+    )
+    queryCommand(table) should be(
+      s"""
+         |def queryMyTable1ByColumn1Column2Cmd(column1: String, column2: Long): QueryCommand = andCommand(
+         |  Map(
+         |    "column1" -> column1,
+         |    "column2" -> column2
+         |  )
+         |)
+       """.stripMargin.trim
+    )
   }
 
   it should "extract filter-key columns from view" in {
     val table =
-      <view>
+      <view name="my_view_1">
         <filter-key>
           <column name="column_1" type="string"/>
           <column name="column_2" type="long"/>
@@ -702,5 +767,118 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
     filterKeyColumns(table) should be(Seq(("column_1", "string"), ("column_2", "long")))
     filterKeyColumnNames(table) should be(Seq("column_1", "column_2"))
+    filterKeyParamsDef(filterKeyColumns(table)) should be("column1: String, column2: Long")
+    filterKeyParamsMap(filterKeyColumnNames(table)) should be(
+      s"""
+         |"column1" -> column1,
+         |"column2" -> column2
+       """.stripMargin.trim
+    )
+    queryCommand(table) should be(
+      s"""
+         |def queryMyView1ByColumn1Column2Cmd(column1: String, column2: Long): QueryCommand = andCommand(
+         |  Map(
+         |    "column1" -> column1,
+         |    "column2" -> column2
+         |  )
+         |)
+       """.stripMargin.trim
+    )
+  }
+
+  it should "generate no query commands from table with no view" in {
+    val table =
+      <src-table name="my_table_1">
+        <filter-key>
+          <column name="column_1" type="string"/>
+          <column name="column_2" type="long"/>
+        </filter-key>
+      </src-table>
+
+    queryCommands(table) should be("")
+  }
+
+  it should "generate no query commands from view" in {
+    val table =
+      <view name="my_view_1">
+        <filter-key>
+          <column name="column_1" type="string"/>
+          <column name="column_2" type="long"/>
+        </filter-key>
+      </view>
+
+    queryCommands(table) should be("")
+  }
+
+  it should "generate query command from src-table with views" in {
+    val table =
+      <src-table name="src_table_1">
+        <!--
+          filter-key columns, or rowid
+        -->
+        <filter-key>
+          <column name="col_1" type="string"/>
+          <column name="col_2" type="long"/>
+        </filter-key>
+        <dest-table name="dest_table_1">
+          <column no="1" name="col_1" from-column="col_1"/>
+          <column no="2" name="col_2" from-column="col_2"/>
+          <column no="3" name="col_3" from-column="col_3"/>
+          <column no="4" name="col_4" from-column="col_4"/>
+          <filter-key>
+            <column name="col_1" type="string"/>
+            <column name="col_2" type="long"/>
+          </filter-key>
+        </dest-table>
+        <!--
+          affected views by source table change.
+        -->
+        <view name="src_view_1">
+          <filter-key>
+            <column name="col_1" type="string"/>
+            <column name="col_2" type="long"/>
+          </filter-key>
+          <dest-table name="dest_table_2">
+            <column no="1" name="col_1" from-column="col_1"/>
+            <column no="2" name="col_2" from-column="col_2"/>
+            <column no="3" name="col_3" from-column="col_3"/>
+            <column no="4" name="col_4" from-column="col_4"/>
+            <filter-key>
+              <column name="col_1" type="string"/>
+              <column name="col_2" type="long"/>
+            </filter-key>
+          </dest-table>
+        </view>
+        <view name="src_view_2">
+          <filter-key>
+            <column name="col_1" type="string"/>
+          </filter-key>
+          <dest-table name="dest_table_5">
+            <column no="1" name="col_1" from-column="col_1"/>
+            <column no="2" name="col_2" from-column="col_2"/>
+            <column no="3" name="col_3" from-column="col_3"/>
+            <filter-key>
+              <column name="col_1" type="string"/>
+            </filter-key>
+          </dest-table>
+        </view>
+      </src-table>
+
+    queryCommands(table) should be(
+      s"""
+         |def querySrcView1ByCol1Col2Cmd(col1: String, col2: Long): QueryCommand = andCommand(
+         |  Map(
+         |    "col1" -> col1,
+         |    "col2" -> col2
+         |  )
+         |)
+         |
+         |def querySrcView2ByCol1Cmd(col1: String): QueryCommand = andCommand(
+         |  Map(
+         |    "col1" -> col1
+         |  )
+         |)
+       """.stripMargin.trim
+    )
   }
 }

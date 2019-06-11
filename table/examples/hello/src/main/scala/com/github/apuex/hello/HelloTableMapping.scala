@@ -1,30 +1,33 @@
 package com.github.apuex.hello
 
+import com.github.apuex.springbootsolution.runtime.QueryCommandMethods._
+import com.github.apuex.springbootsolution.runtime._
+
 import scala.concurrent.ExecutionContext
 
-class HelloTableMapping (
-                          src: SrcService,
-                          dest: DestService,
-                          addDelete: (String, String, Any) => Unit,
-                          getDeletes: (String, String) => Seq[Any],
-                          implicit val ec: ExecutionContext
-                        ) extends TableMapping {
+class HelloTableMapping(
+                         src: SrcService,
+                         dest: DestService,
+                         addDelete: (String, String, Any) => Unit,
+                         getDeletes: (String, String) => Seq[Any],
+                         implicit val ec: ExecutionContext
+                       ) extends TableMapping {
 
   override def create(tableName: String, rowid: String): Unit = {
     src.retrieveSrcTable1ByRowid().invoke(RetrieveByRowidCmd(rowid))
       .map(t => {
         addDelete(tableName, rowid, DeleteDestTable1Cmd(t.col1, t.col2))
         dest.createDestTable1().invoke(CreateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
-        src.retrieveSrcView1().invoke(RetrieveSrcView1Cmd(t.col1, t.col2))
-          .map(v => {
+        src.querySrcView1ByCol1Col2().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
+          .map(_.items.map(v => {
             addDelete(tableName, rowid, DeleteDestTable1Cmd(v.col1, v.col2))
             dest.createDestTable2().invoke(CreateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
-          })
-        src.retrieveSrcView2().invoke(RetrieveSrcView2Cmd(t.col1))
-          .map(v => {
+          }))
+        src.querySrcView2ByCol1().invoke(querySrcView2ByCol1Cmd(t.col1))
+          .map(_.items.map(v => {
             addDelete(tableName, rowid, DeleteDestTable1Cmd(v.col1, v.col2))
             dest.createDestTable5().invoke(CreateDestTable5Cmd(v.col1, v.col2, v.col3))
-          })
+          }))
       })
   }
 
@@ -32,14 +35,14 @@ class HelloTableMapping (
     src.retrieveSrcTable1ByRowid().invoke(RetrieveByRowidCmd(rowid))
       .map(t => {
         dest.updateDestTable1().invoke(UpdateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
-        src.retrieveSrcView1().invoke(RetrieveSrcView1Cmd(t.col1, t.col2))
-          .map(v => {
+        src.querySrcView1ByCol1Col2().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
+          .map(_.items.map(v => {
             dest.updateDestTable2().invoke(UpdateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
-          })
-        src.retrieveSrcView2().invoke(RetrieveSrcView2Cmd(t.col1))
-          .map(v => {
+          }))
+        src.querySrcView2ByCol1().invoke(querySrcView2ByCol1Cmd(t.col1))
+          .map(_.items.map(v => {
             dest.updateDestTable5().invoke(UpdateDestTable5Cmd(v.col1, v.col2, v.col3))
-          })
+          }))
       })
   }
 
@@ -54,4 +57,17 @@ class HelloTableMapping (
           dest.deleteDestTable5().invoke(x)
       })
   }
+
+  private def querySrcView1ByCol1Col2Cmd(col1: String, col2: String): QueryCommand = andCommand(
+    Map(
+      "col1" -> col1,
+      "col2" -> col2
+    )
+  )
+
+  private def querySrcView2ByCol1Cmd(col1: String): QueryCommand = andCommand(
+    Map(
+      "col1" -> col1
+    )
+  )
 }
