@@ -1,5 +1,7 @@
 package com.github.apuex.hello
 
+import com.github.apuex.springbootsolution.runtime.QueryCommand
+
 import scala.concurrent.ExecutionContext
 
 class HelloTableMapping (
@@ -53,5 +55,9 @@ class HelloTableMapping (
         case x: DeleteDestTable5Cmd =>
           dest.deleteDestTable5().invoke(x)
       })
+  }
+
+  def querySrcView2ByCol1(col1: String): QueryCommand = {
+
   }
 }
