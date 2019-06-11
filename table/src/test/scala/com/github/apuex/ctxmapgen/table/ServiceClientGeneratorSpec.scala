@@ -76,6 +76,7 @@ class ServiceClientGeneratorSpec extends FlatSpec with Matchers {
          |import akka._
          |import akka.stream.scaladsl._
          |import com.lightbend.lagom.scaladsl.api._
+         |import com.github.apuex.springbootsolution.runtime._
          |
          |trait SrcService extends Service {
          |  def retrieveSrcTable1ByRowid: ServiceCall[RetrieveByRowidCmd, SrcTable1Vo]

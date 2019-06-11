@@ -71,6 +71,7 @@ class ServiceClientGenerator(mappingLoader: MappingLoader) {
        |import akka._
        |import akka.stream.scaladsl._
        |import com.lightbend.lagom.scaladsl.api._
+       |import com.github.apuex.springbootsolution.runtime._
        |
        |trait ${cToPascal(srcSystem)}Service extends Service {
        |  ${indent(srcCalls(), 2)}

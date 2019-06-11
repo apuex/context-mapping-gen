@@ -192,7 +192,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
     val tableName = view.\@("name")
     val keys = filterKeyColumnNames(view)
     s"""
-       |${srcSystem}.query${cToPascal(tableName)}By${by(keys)}().invoke(query${cToPascal(tableName)}By${by(keys)}Cmd(${paramSubstitutions(keys, "t")}))
+       |${srcSystem}.query${cToPascal(tableName)}().invoke(query${cToPascal(tableName)}By${by(keys)}Cmd(${paramSubstitutions(keys, "t")}))
        |  .map(_.items.map(v => {
        |    ${indent(insertDestinationTables(view, "v"), 4)}
        |  }))
@@ -240,7 +240,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
     val tableName = view.\@("name")
     val keys = filterKeyColumnNames(view)
     s"""
-       |${srcSystem}.query${cToPascal(tableName)}By${by(keys)}().invoke(query${cToPascal(tableName)}By${by(keys)}Cmd(${paramSubstitutions(keys, "t")}))
+       |${srcSystem}.query${cToPascal(tableName)}().invoke(query${cToPascal(tableName)}By${by(keys)}Cmd(${paramSubstitutions(keys, "t")}))
        |  .map(_.items.map(v => {
        |    ${indent(updateDestinationTables(view, "v"), 4)}
        |  }))

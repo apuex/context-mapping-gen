@@ -106,12 +106,12 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
          |      .map(t => {
          |        addDelete(tableName, rowid, DeleteDestTable1Cmd(t.col1, t.col2))
          |        dest.createDestTable1().invoke(CreateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
-         |        src.querySrcView1ByCol1Col2().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
+         |        src.querySrcView1().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
          |          .map(_.items.map(v => {
          |            addDelete(tableName, rowid, DeleteDestTable2Cmd(v.col1, v.col2))
          |            dest.createDestTable2().invoke(CreateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
          |          }))
-         |        src.querySrcView2ByCol1().invoke(querySrcView2ByCol1Cmd(t.col1))
+         |        src.querySrcView2().invoke(querySrcView2ByCol1Cmd(t.col1))
          |          .map(_.items.map(v => {
          |            addDelete(tableName, rowid, DeleteDestTable5Cmd(v.col1))
          |            dest.createDestTable5().invoke(CreateDestTable5Cmd(v.col1, v.col2, v.col3))
@@ -123,11 +123,11 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
          |    src.retrieveSrcTable1ByRowid().invoke(RetrieveByRowidCmd(rowid))
          |      .map(t => {
          |        dest.updateDestTable1().invoke(UpdateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
-         |        src.querySrcView1ByCol1Col2().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
+         |        src.querySrcView1().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
          |          .map(_.items.map(v => {
          |            dest.updateDestTable2().invoke(UpdateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
          |          }))
-         |        src.querySrcView2ByCol1().invoke(querySrcView2ByCol1Cmd(t.col1))
+         |        src.querySrcView2().invoke(querySrcView2ByCol1Cmd(t.col1))
          |          .map(_.items.map(v => {
          |            dest.updateDestTable5().invoke(UpdateDestTable5Cmd(v.col1, v.col2, v.col3))
          |          }))
@@ -222,12 +222,12 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
          |  .map(t => {
          |    addDelete(tableName, rowid, DeleteDestTable1Cmd(t.col1, t.col2))
          |    dest.createDestTable1().invoke(CreateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
-         |    src.querySrcView1ByCol1Col2().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
+         |    src.querySrcView1().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
          |      .map(_.items.map(v => {
          |        addDelete(tableName, rowid, DeleteDestTable2Cmd(v.col1, v.col2))
          |        dest.createDestTable2().invoke(CreateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
          |      }))
-         |    src.querySrcView2ByCol1().invoke(querySrcView2ByCol1Cmd(t.col1))
+         |    src.querySrcView2().invoke(querySrcView2ByCol1Cmd(t.col1))
          |      .map(_.items.map(v => {
          |        addDelete(tableName, rowid, DeleteDestTable5Cmd(v.col1))
          |        dest.createDestTable5().invoke(CreateDestTable5Cmd(v.col1, v.col2, v.col3))
@@ -294,12 +294,12 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
       s"""
          |addDelete(tableName, rowid, DeleteDestTable1Cmd(t.col1, t.col2))
          |dest.createDestTable1().invoke(CreateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
-         |src.querySrcView1ByCol1Col2().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
+         |src.querySrcView1().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
          |  .map(_.items.map(v => {
          |    addDelete(tableName, rowid, DeleteDestTable2Cmd(v.col1, v.col2))
          |    dest.createDestTable2().invoke(CreateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
          |  }))
-         |src.querySrcView2ByCol1().invoke(querySrcView2ByCol1Cmd(t.col1))
+         |src.querySrcView2().invoke(querySrcView2ByCol1Cmd(t.col1))
          |  .map(_.items.map(v => {
          |    addDelete(tableName, rowid, DeleteDestTable5Cmd(v.col1))
          |    dest.createDestTable5().invoke(CreateDestTable5Cmd(v.col1, v.col2, v.col3))
@@ -338,7 +338,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
     insertFromView(table) should be(
       s"""
-         |src.querySrcView1ByCol1Col2().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
+         |src.querySrcView1().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
          |  .map(_.items.map(v => {
          |    addDelete(tableName, rowid, DeleteDestTable1Cmd(v.col1, v.col2))
          |    dest.createDestTable1().invoke(CreateDestTable1Cmd(v.col1, v.col2, v.col3, v.col4))
@@ -427,11 +427,11 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
          |src.retrieveSrcTable1ByRowid().invoke(RetrieveByRowidCmd(rowid))
          |  .map(t => {
          |    dest.updateDestTable1().invoke(UpdateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
-         |    src.querySrcView1ByCol1Col2().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
+         |    src.querySrcView1().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
          |      .map(_.items.map(v => {
          |        dest.updateDestTable2().invoke(UpdateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
          |      }))
-         |    src.querySrcView2ByCol1().invoke(querySrcView2ByCol1Cmd(t.col1))
+         |    src.querySrcView2().invoke(querySrcView2ByCol1Cmd(t.col1))
          |      .map(_.items.map(v => {
          |        dest.updateDestTable5().invoke(UpdateDestTable5Cmd(v.col1, v.col2, v.col3))
          |      }))
@@ -496,11 +496,11 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
     updateFromTableMapping(table, "t") should be(
       s"""
          |dest.updateDestTable1().invoke(UpdateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
-         |src.querySrcView1ByCol1Col2().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
+         |src.querySrcView1().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
          |  .map(_.items.map(v => {
          |    dest.updateDestTable2().invoke(UpdateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
          |  }))
-         |src.querySrcView2ByCol1().invoke(querySrcView2ByCol1Cmd(t.col1))
+         |src.querySrcView2().invoke(querySrcView2ByCol1Cmd(t.col1))
          |  .map(_.items.map(v => {
          |    dest.updateDestTable5().invoke(UpdateDestTable5Cmd(v.col1, v.col2, v.col3))
          |  }))
@@ -538,7 +538,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
     updateFromView(table) should be(
       s"""
-         |src.querySrcView1ByCol1Col2().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
+         |src.querySrcView1().invoke(querySrcView1ByCol1Col2Cmd(t.col1, t.col2))
          |  .map(_.items.map(v => {
          |    dest.updateDestTable1().invoke(UpdateDestTable1Cmd(v.col1, v.col2, v.col3, v.col4))
          |    dest.updateDestTable2().invoke(UpdateDestTable2Cmd(v.col1, v.col2, v.col3, v.col4))
