@@ -77,15 +77,26 @@ class ServiceClientGeneratorSpec extends FlatSpec with Matchers {
          |import akka.stream.scaladsl._
          |import com.lightbend.lagom.scaladsl.api._
          |import com.github.apuex.springbootsolution.runtime._
+         |import play.api.libs.json.Json
          |
          |trait SrcService extends Service {
-         |  def retrieveSrcTable1ByRowid: ServiceCall[RetrieveByRowidCmd, SrcTable1Vo]
-         |  def querySrcView1: ServiceCall[QueryCommand, SrcView1ListVo]
-         |  def querySrcView2: ServiceCall[QueryCommand, SrcView2ListVo]
+         |
+         |  def retrieveSrcTable1ByRowid(): ServiceCall[RetrieveByRowidCmd, SrcTable1Vo]
+         |  def querySrcView1(): ServiceCall[QueryCommand, SrcView1ListVo]
+         |  def querySrcView2(): ServiceCall[QueryCommand, SrcView2ListVo]
+         |
          |  def events(offset: Option[String]): ServiceCall[Source[String, NotUsed], Source[String, NotUsed]]
          |
          |  override def descriptor: Descriptor = {
          |    import Service._
+         |
+         |    implicit val queryCommandFormat = Json.format[QueryCommand]
+         |    implicit val retrieveSrcTable1ByRowidFormat = Json.format[RetrieveSrcTable1ByRowidCmd]
+         |    implicit val srcTable1VoFormat = Json.format[SrcTable1Vo]
+         |    implicit val srcView1VoFormat = Json.format[SrcView1Vo]
+         |    implicit val srcView1ListVoFormat = Json.format[SrcView1ListVo]
+         |    implicit val srcView2VoFormat = Json.format[SrcView2Vo]
+         |    implicit val srcView2ListVoFormat = Json.format[SrcView2ListVo]
          |
          |    named("src")
          |      .withCalls(
@@ -107,21 +118,34 @@ class ServiceClientGeneratorSpec extends FlatSpec with Matchers {
          |import akka._
          |import akka.stream.scaladsl._
          |import com.lightbend.lagom.scaladsl.api._
+         |import play.api.libs.json.Json
          |
          |trait DestService extends Service {
-         |  def createDestTable1: ServiceCall[CreateDestTable1Cmd, NotUsed]
-         |  def updateDestTable1: ServiceCall[UpdateDestTable1Cmd, NotUsed]
-         |  def deleteDestTable1: ServiceCall[DeleteDestTable1Cmd, NotUsed]
-         |  def createDestTable2: ServiceCall[CreateDestTable2Cmd, NotUsed]
-         |  def updateDestTable2: ServiceCall[UpdateDestTable2Cmd, NotUsed]
-         |  def deleteDestTable2: ServiceCall[DeleteDestTable2Cmd, NotUsed]
-         |  def createDestTable5: ServiceCall[CreateDestTable5Cmd, NotUsed]
-         |  def updateDestTable5: ServiceCall[UpdateDestTable5Cmd, NotUsed]
-         |  def deleteDestTable5: ServiceCall[DeleteDestTable5Cmd, NotUsed]
+         |
+         |  def createDestTable1(): ServiceCall[CreateDestTable1Cmd, NotUsed]
+         |  def updateDestTable1(): ServiceCall[UpdateDestTable1Cmd, NotUsed]
+         |  def deleteDestTable1(): ServiceCall[DeleteDestTable1Cmd, NotUsed]
+         |  def createDestTable2(): ServiceCall[CreateDestTable2Cmd, NotUsed]
+         |  def updateDestTable2(): ServiceCall[UpdateDestTable2Cmd, NotUsed]
+         |  def deleteDestTable2(): ServiceCall[DeleteDestTable2Cmd, NotUsed]
+         |  def createDestTable5(): ServiceCall[CreateDestTable5Cmd, NotUsed]
+         |  def updateDestTable5(): ServiceCall[UpdateDestTable5Cmd, NotUsed]
+         |  def deleteDestTable5(): ServiceCall[DeleteDestTable5Cmd, NotUsed]
+         |
          |  def events(offset: Option[String]): ServiceCall[Source[String, NotUsed], Source[String, NotUsed]]
          |
          |  override def descriptor: Descriptor = {
          |    import Service._
+         |
+         |    implicit val createDestTable1CmdFormat = Json.format[CreateDestTable1Cmd]
+         |    implicit val updateDestTable1CmdFormat = Json.format[UpdateDestTable1Cmd]
+         |    implicit val deleteDestTable1CmdFormat = Json.format[DeleteDestTable1Cmd]
+         |    implicit val createDestTable2CmdFormat = Json.format[CreateDestTable2Cmd]
+         |    implicit val updateDestTable2CmdFormat = Json.format[UpdateDestTable2Cmd]
+         |    implicit val deleteDestTable2CmdFormat = Json.format[DeleteDestTable2Cmd]
+         |    implicit val createDestTable5CmdFormat = Json.format[CreateDestTable5Cmd]
+         |    implicit val updateDestTable5CmdFormat = Json.format[UpdateDestTable5Cmd]
+         |    implicit val deleteDestTable5CmdFormat = Json.format[DeleteDestTable5Cmd]
          |
          |    named("dest")
          |      .withCalls(
@@ -144,9 +168,9 @@ class ServiceClientGeneratorSpec extends FlatSpec with Matchers {
   it should "generate source service calls" in {
     srcCalls() should be(
       s"""
-         |def retrieveSrcTable1ByRowid: ServiceCall[RetrieveByRowidCmd, SrcTable1Vo]
-         |def querySrcView1: ServiceCall[QueryCommand, SrcView1ListVo]
-         |def querySrcView2: ServiceCall[QueryCommand, SrcView2ListVo]
+         |def retrieveSrcTable1ByRowid(): ServiceCall[RetrieveByRowidCmd, SrcTable1Vo]
+         |def querySrcView1(): ServiceCall[QueryCommand, SrcView1ListVo]
+         |def querySrcView2(): ServiceCall[QueryCommand, SrcView2ListVo]
        """.stripMargin.trim
     )
   }
@@ -164,15 +188,15 @@ class ServiceClientGeneratorSpec extends FlatSpec with Matchers {
   it should "generate destination service calls" in {
     destCalls() should be(
       s"""
-         |def createDestTable1: ServiceCall[CreateDestTable1Cmd, NotUsed]
-         |def updateDestTable1: ServiceCall[UpdateDestTable1Cmd, NotUsed]
-         |def deleteDestTable1: ServiceCall[DeleteDestTable1Cmd, NotUsed]
-         |def createDestTable2: ServiceCall[CreateDestTable2Cmd, NotUsed]
-         |def updateDestTable2: ServiceCall[UpdateDestTable2Cmd, NotUsed]
-         |def deleteDestTable2: ServiceCall[DeleteDestTable2Cmd, NotUsed]
-         |def createDestTable5: ServiceCall[CreateDestTable5Cmd, NotUsed]
-         |def updateDestTable5: ServiceCall[UpdateDestTable5Cmd, NotUsed]
-         |def deleteDestTable5: ServiceCall[DeleteDestTable5Cmd, NotUsed]
+         |def createDestTable1(): ServiceCall[CreateDestTable1Cmd, NotUsed]
+         |def updateDestTable1(): ServiceCall[UpdateDestTable1Cmd, NotUsed]
+         |def deleteDestTable1(): ServiceCall[DeleteDestTable1Cmd, NotUsed]
+         |def createDestTable2(): ServiceCall[CreateDestTable2Cmd, NotUsed]
+         |def updateDestTable2(): ServiceCall[UpdateDestTable2Cmd, NotUsed]
+         |def deleteDestTable2(): ServiceCall[DeleteDestTable2Cmd, NotUsed]
+         |def createDestTable5(): ServiceCall[CreateDestTable5Cmd, NotUsed]
+         |def updateDestTable5(): ServiceCall[UpdateDestTable5Cmd, NotUsed]
+         |def deleteDestTable5(): ServiceCall[DeleteDestTable5Cmd, NotUsed]
        """.stripMargin.trim
     )
   }
@@ -195,37 +219,37 @@ class ServiceClientGeneratorSpec extends FlatSpec with Matchers {
 
   it should "generate retrieve by rowid" in {
     retrieveByRowid("table_view") should be(
-      "def retrieveTableViewByRowid: ServiceCall[RetrieveByRowidCmd, TableViewVo]"
+      "def retrieveTableViewByRowid(): ServiceCall[RetrieveByRowidCmd, TableViewVo]"
     )
   }
 
   it should "generate create" in {
     create("table_view") should be(
-      "def createTableView: ServiceCall[CreateTableViewCmd, NotUsed]"
+      "def createTableView(): ServiceCall[CreateTableViewCmd, NotUsed]"
     )
   }
 
   it should "generate retrieve" in {
     retrieve("table_view") should be(
-      "def retrieveTableView: ServiceCall[RetrieveTableViewCmd, TableViewVo]"
+      "def retrieveTableView(): ServiceCall[RetrieveTableViewCmd, TableViewVo]"
     )
   }
 
   it should "generate query" in {
     query("table_view") should be(
-      "def queryTableView: ServiceCall[QueryCommand, TableViewListVo]"
+      "def queryTableView(): ServiceCall[QueryCommand, TableViewListVo]"
     )
   }
 
   it should "generate update" in {
     update("table_view") should be(
-      "def updateTableView: ServiceCall[UpdateTableViewCmd, NotUsed]"
+      "def updateTableView(): ServiceCall[UpdateTableViewCmd, NotUsed]"
     )
   }
 
   it should "generate delete" in {
     delete("table_view") should be(
-      "def deleteTableView: ServiceCall[DeleteTableViewCmd, NotUsed]"
+      "def deleteTableView(): ServiceCall[DeleteTableViewCmd, NotUsed]"
     )
   }
 }

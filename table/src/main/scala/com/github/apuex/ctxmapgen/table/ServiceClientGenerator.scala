@@ -16,37 +16,37 @@ object ServiceClientGenerator {
 
   def retrieveByRowid(name: String): String = {
     s"""
-       |def retrieve${cToPascal(name)}ByRowid: ServiceCall[RetrieveByRowidCmd, ${cToPascal(name)}Vo]
+       |def retrieve${cToPascal(name)}ByRowid(): ServiceCall[RetrieveByRowidCmd, ${cToPascal(name)}Vo]
      """.stripMargin.trim
   }
 
   def create(name: String): String = {
     s"""
-       |def create${cToPascal(name)}: ServiceCall[Create${cToPascal(name)}Cmd, NotUsed]
+       |def create${cToPascal(name)}(): ServiceCall[Create${cToPascal(name)}Cmd, NotUsed]
      """.stripMargin.trim
   }
 
   def retrieve(name: String): String = {
     s"""
-       |def retrieve${cToPascal(name)}: ServiceCall[Retrieve${cToPascal(name)}Cmd, ${cToPascal(name)}Vo]
+       |def retrieve${cToPascal(name)}(): ServiceCall[Retrieve${cToPascal(name)}Cmd, ${cToPascal(name)}Vo]
      """.stripMargin.trim
   }
 
   def query(name: String): String = {
     s"""
-       |def query${cToPascal(name)}: ServiceCall[QueryCommand, ${cToPascal(name)}ListVo]
+       |def query${cToPascal(name)}(): ServiceCall[QueryCommand, ${cToPascal(name)}ListVo]
      """.stripMargin.trim
   }
 
   def update(name: String): String = {
     s"""
-       |def update${cToPascal(name)}: ServiceCall[Update${cToPascal(name)}Cmd, NotUsed]
+       |def update${cToPascal(name)}(): ServiceCall[Update${cToPascal(name)}Cmd, NotUsed]
      """.stripMargin.trim
   }
 
   def delete(name: String): String = {
     s"""
-       |def delete${cToPascal(name)}: ServiceCall[Delete${cToPascal(name)}Cmd, NotUsed]
+       |def delete${cToPascal(name)}(): ServiceCall[Delete${cToPascal(name)}Cmd, NotUsed]
      """.stripMargin.trim
   }
 }
@@ -72,13 +72,18 @@ class ServiceClientGenerator(mappingLoader: MappingLoader) {
        |import akka.stream.scaladsl._
        |import com.lightbend.lagom.scaladsl.api._
        |import com.github.apuex.springbootsolution.runtime._
+       |import play.api.libs.json.Json
        |
        |trait ${cToPascal(srcSystem)}Service extends Service {
+       |
        |  ${indent(srcCalls(), 2)}
+       |
        |  def events(offset: Option[String]): ServiceCall[Source[String, NotUsed], Source[String, NotUsed]]
        |
        |  override def descriptor: Descriptor = {
        |    import Service._
+       |
+       |    ${indent(srcCallJsonFormats(), 4)}
        |
        |    named("${cToShell(srcSystem)}")
        |      .withCalls(
@@ -97,13 +102,18 @@ class ServiceClientGenerator(mappingLoader: MappingLoader) {
        |import akka._
        |import akka.stream.scaladsl._
        |import com.lightbend.lagom.scaladsl.api._
+       |import play.api.libs.json.Json
        |
        |trait ${cToPascal(destSystem)}Service extends Service {
+       |
        |  ${indent(destCalls(), 2)}
+       |
        |  def events(offset: Option[String]): ServiceCall[Source[String, NotUsed], Source[String, NotUsed]]
        |
        |  override def descriptor: Descriptor = {
        |    import Service._
+       |
+       |    ${indent(destCallJsonFormats(), 4)}
        |
        |    named("${cToShell(destSystem)}")
        |      .withCalls(
@@ -115,12 +125,33 @@ class ServiceClientGenerator(mappingLoader: MappingLoader) {
      """.stripMargin.trim
   }
 
+  def srcCallJsonFormats(): String = {
+    (srcTables(xml)
+      .map(_.\@("name"))
+      .map(x =>
+        s"""
+           |implicit val queryCommandFormat = Json.format[QueryCommand]
+           |implicit val retrieve${cToPascal(x)}ByRowidFormat = Json.format[Retrieve${cToPascal(x)}ByRowidCmd]
+           |implicit val ${cToCamel(x)}VoFormat = Json.format[${cToPascal(x)}Vo]
+         """.stripMargin.trim) ++
+      srcViews(xml)
+        .map(_.\@("name"))
+        .map(x =>
+          s"""
+             |implicit val ${cToCamel(x)}VoFormat = Json.format[${cToPascal(x)}Vo]
+             |implicit val ${cToCamel(x)}ListVoFormat = Json.format[${cToPascal(x)}ListVo]
+           """.stripMargin.trim)
+      )
+      .reduceOption((l, r) => s"${l}\n${r}")
+      .getOrElse("")
+  }
+
   def srcCalls(): String = {
-    val srcTables = xml.child.filter(x => x.label == "src-table")
-    val byRowids = srcTables
+    val tables = srcTables(xml)
+    val byRowids = tables
       .map(x => retrieveByRowid(x.\@("name")))
 
-    val byKeys = srcTables
+    val byKeys = tables
       .map(x => x.child.filter(_.label == "view"))
       .flatMap(x => x)
       .map(x => query(x.\@("name")))
@@ -131,15 +162,15 @@ class ServiceClientGenerator(mappingLoader: MappingLoader) {
   }
 
   def srcCallDescs(): String = {
-    val srcTables = xml.child.filter(x => x.label == "src-table")
-    val byRowids = srcTables
+    val tables = srcTables(xml)
+    val byRowids = tables
       .map(_.\@("name"))
       .map(x =>
         s"""
            |pathCall("/api/retrieve-${cToShell(x)}-by-rowid", retrieve${cToPascal(x)}ByRowid _),
          """.stripMargin.trim)
 
-    val byKeys = srcTables
+    val byKeys = tables
       .map(x => x.child.filter(_.label == "view"))
       .flatMap(x => x)
       .map(_.\@("name"))
@@ -154,8 +185,23 @@ class ServiceClientGenerator(mappingLoader: MappingLoader) {
       .getOrElse("")
   }
 
+  def destCallJsonFormats(): String = {
+    destTables(xml)
+      .map(_.\@("name"))
+      .map(cToPascal(_))
+      .map(x =>
+        s"""
+           |implicit val create${x}CmdFormat = Json.format[Create${x}Cmd]
+           |implicit val update${x}CmdFormat = Json.format[Update${x}Cmd]
+           |implicit val delete${x}CmdFormat = Json.format[Delete${x}Cmd]
+         """.stripMargin.trim)
+      .reduceOption((l, r) => s"${l}\n${r}")
+      .getOrElse("")
+  }
+
   def destCalls(): String = {
-    destTableNames(xml)
+    destTables(xml)
+      .map(_.\@("name"))
       .map(x =>
         s"""
            |${create(x)}
@@ -167,7 +213,8 @@ class ServiceClientGenerator(mappingLoader: MappingLoader) {
   }
 
   def destCallDescs(): String = {
-    destTableNames(xml)
+    destTables(xml)
+      .map(_.\@("name"))
       .map(x =>
         s"""
            |pathCall("/api/create-${cToShell(x)}", create${cToPascal(x)} _),

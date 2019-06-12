@@ -11,6 +11,7 @@ object Dependencies {
   lazy val playSilhouetteVersion = "5.0.3"
 
   lazy val sbRuntime        = "com.github.apuex.springbootsolution" %% "scala-runtime"             % "1.0.9"
+  lazy val ctxmap           = "com.github.apuex"          %% "context-mapping-runtime"             % "1.0.0"
   lazy val scalaXml         = "org.scala-lang.modules"    %%  "scala-xml"                          % "1.2.0"
   lazy val scalaParserComb  = "org.scala-lang.modules"    %% "scala-parser-combinators"            % "1.1.2"
 

@@ -1,24 +1,27 @@
 package com.github.apuex.mapping.impl
 
 import com.github.apuex.mapping._
-import com.github.apuex.springbootsolution.runtime._
-import com.github.apuex.springbootsolution.runtime.QueryCommandMethods._
+import com.github.apuex.ctxmap._
+import com.github.apuex.springbootsolution.runtime.QueryCommand
+import com.github.apuex.springbootsolution.runtime.QueryCommandMethods.andCommand
 import scala.concurrent.ExecutionContext
 
 class SrcTable2Mapping (
     src: SrcService,
     dest: DestService,
-    addDelete: (String, String, Any) => Unit,
-    getDeletes: (String, String) => Seq[Any],
+    deleteQueue: StashedQueue,
     implicit val ec: ExecutionContext
   ) extends TableMapping {
+  import deleteQueue._
+
+  val tableName = "src_table_2"
 
   override def create(tableName: String, rowid: String): Unit = {
     src.retrieveSrcTable2ByRowid().invoke(RetrieveByRowidCmd(rowid))
       .map(t => {
-        addDelete(tableName, rowid, DeleteDestTable3Cmd(t.col1, t.col2))
+        stash(tableName, rowid, DeleteDestTable3Cmd(t.col1, t.col2))
         dest.createDestTable3().invoke(CreateDestTable3Cmd(t.col1, t.col2, t.col3, t.col4))
-        addDelete(tableName, rowid, DeleteDestTable4Cmd(t.col1, t.col2))
+        stash(tableName, rowid, DeleteDestTable4Cmd(t.col1, t.col2))
         dest.createDestTable4().invoke(CreateDestTable4Cmd(t.col1, t.col2, t.col3, t.col4))
       })
   }
@@ -31,14 +34,13 @@ class SrcTable2Mapping (
       })
   }
 
-  override def delete(tableName: String, rowid: String): Unit = {
-    getDeletes(tableName, rowid)
-      .foreach({
-        case x: DeleteDestTable3Cmd =>
-          dest.deleteDestTable3().invoke(x)
-        case x: DeleteDestTable4Cmd =>
-          dest.deleteDestTable4().invoke(x)
-      })
+  override def delete(cmds: Seq[Any]): Unit = {
+    cmds.foreach({
+      case x: DeleteDestTable3Cmd =>
+        dest.deleteDestTable3().invoke(x)
+      case x: DeleteDestTable4Cmd =>
+        dest.deleteDestTable4().invoke(x)
+    })
   }
 
   

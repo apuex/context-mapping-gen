@@ -11,6 +11,7 @@ lazy val `hello` = (project in file("."))
 
 libraryDependencies ++= Seq(
   scalaXml,
+  ctxmap,
   sbRuntime,
   slf4jSimple % Test,
   scalaTest % Test
