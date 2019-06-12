@@ -28,6 +28,13 @@ trait SrcService extends Service {
   override def descriptor: Descriptor = {
     import Service._
 
+    implicit val logicalPredicateTypeFormat = Json.format[PredicateType]
+    implicit val logicalPredicateVoFormat = Json.format[LogicalPredicateVo]
+    implicit val logicalConnectionTypeFormat = Json.format[LogicalConnectionType]
+    implicit val logicalConnectionVoFormat = Json.format[LogicalConnectionVo]
+    implicit val connectionClauseFormat = Json.format[FilterPredicate.Clause.Connection]
+    implicit val predicateClauseFormat = Json.format[FilterPredicate.Clause.Predicate]
+    implicit val filterPredicateFormat = Json.format[FilterPredicate]
     implicit val queryCommandFormat = Json.format[QueryCommand]
     implicit val retrieveByRowidFormat = Json.format[RetrieveByRowidCmd]
     implicit val srcTable1VoFormat = Json.format[SrcTable1Vo]
