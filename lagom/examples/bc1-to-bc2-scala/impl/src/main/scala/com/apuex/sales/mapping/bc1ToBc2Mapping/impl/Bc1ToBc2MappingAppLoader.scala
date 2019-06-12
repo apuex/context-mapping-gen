@@ -3,6 +3,7 @@ package com.apuex.sales.mapping.bc1ToBc2Mapping.impl
 
 import akka.actor.Props
 import com.apuex.sales.mapping.bc1ToBc2Mapping._
+import com.apuex.sales.mapping.bc1ToBc2Mapping.ScalapbJson._
 import com.lightbend.lagom.scaladsl.client._
 import com.lightbend.lagom.scaladsl.devmode._
 import com.lightbend.lagom.scaladsl.playjson._

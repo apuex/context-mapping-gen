@@ -6,6 +6,7 @@ import akka.persistence._
 import akka.stream._
 import akka.stream.scaladsl._
 import com.apuex.sales.mapping.bc1ToBc2Mapping._
+import com.apuex.sales.mapping.bc1ToBc2Mapping.ScalapbJson._
 import com.github.apuex.events.play._
 
 import scala.concurrent._

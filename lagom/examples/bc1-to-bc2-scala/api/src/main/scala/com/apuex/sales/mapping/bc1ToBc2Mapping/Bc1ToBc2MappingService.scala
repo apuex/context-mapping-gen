@@ -15,7 +15,8 @@ trait Bc1ToBc2MappingService extends Service {
 
   override final def descriptor: Descriptor = {
     import Service._
-  
+    import ScalapbJson._
+
     named("bc1-to-bc2-mapping")
       .withCalls(
         pathCall("/api/events?offset", events _)
