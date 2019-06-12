@@ -16,7 +16,7 @@ class SrcTable2Mapping (
 
   val tableName = "src_table_2"
 
-  override def create(tableName: String, rowid: String): Unit = {
+  override def create(rowid: String): Unit = {
     src.retrieveSrcTable2ByRowid().invoke(RetrieveByRowidCmd(rowid))
       .map(t => {
         stash(tableName, rowid, DeleteDestTable3Cmd(t.col1, t.col2))
@@ -26,7 +26,7 @@ class SrcTable2Mapping (
       })
   }
 
-  override def update(tableName: String, rowid: String): Unit = {
+  override def update(rowid: String): Unit = {
     src.retrieveSrcTable2ByRowid().invoke(RetrieveByRowidCmd(rowid))
       .map(t => {
         dest.updateDestTable3().invoke(UpdateDestTable3Cmd(t.col1, t.col2, t.col3, t.col4))

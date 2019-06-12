@@ -7,13 +7,13 @@ import com.github.apuex.springbootsolution.runtime._
 import play.api.libs.json.Json
 
 case class RetrieveByRowidCmd(rowid: String)
-case class SrcTable1Vo(col1: String, col2: String, col3: String, col4: String)
+case class SrcTable1Vo(col1: String, col2: Long, col3: String, col4: String)
 case class SrcTable1ListVo(items: Seq[SrcTable1Vo])
-case class SrcTable2Vo(col1: String, col2: String, col3: String, col4: String)
+case class SrcTable2Vo(col1: String, col2: Long, col3: String, col4: String)
 case class SrcTable2ListVo(items: Seq[SrcTable2Vo])
-case class SrcView1Vo(col1: String, col2: String, col3: String, col4: String)
+case class SrcView1Vo(col1: String, col2: Long, col3: String, col4: String)
 case class SrcView1ListVo(items: Seq[SrcView1Vo])
-case class SrcView2Vo(col1: String, col2: String, col3: String, col4: String)
+case class SrcView2Vo(col1: String, col2: Long, col3: String, col4: String)
 case class SrcView2ListVo(items: Seq[SrcView2Vo])
 
 trait SrcService extends Service {

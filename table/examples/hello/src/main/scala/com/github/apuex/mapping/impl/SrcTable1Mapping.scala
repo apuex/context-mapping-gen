@@ -60,7 +60,7 @@ class SrcTable1Mapping (
     })
   }
 
-  def querySrcView1ByCol1Col2Cmd(col1: String, col2: String): QueryCommand = andCommand(
+  def querySrcView1ByCol1Col2Cmd(col1: String, col2: Long): QueryCommand = andCommand(
     Map(
       "col1" -> col1,
       "col2" -> col2
