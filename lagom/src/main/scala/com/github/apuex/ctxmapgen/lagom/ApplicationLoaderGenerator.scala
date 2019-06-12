@@ -27,6 +27,7 @@ class ApplicationLoaderGenerator(mappingLoader: MappingLoader) {
        |
        |import akka.actor.Props
        |import ${apiSrcPackage}._
+       |import ${apiSrcPackage}.ScalapbJson._
        |import com.lightbend.lagom.scaladsl.client._
        |import com.lightbend.lagom.scaladsl.devmode._
        |import com.lightbend.lagom.scaladsl.playjson._

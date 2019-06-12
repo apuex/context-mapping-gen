@@ -15,29 +15,10 @@ class MappingConfigGenerator(mappingLoader: MappingLoader) {
        |
        |import akka.stream.scaladsl.Source
        |import akka.util.Timeout
-       |import com.github.apuex.events.play.{EventEnvelope, EventEnvelopeProto}
-       |import com.google.protobuf.any.Any
-       |import play.api.libs.json._
-       |import scalapb.{GeneratedMessage, GeneratedMessageCompanion, Message}
-       |import scalapb.json4s.JsonFormat.GenericCompanion
-       |import scalapb.json4s._
        |
        |import scala.concurrent.duration.Duration
        |
        |class MappingConfig {
-       |  // json parser and printer
-       |  val messagesCompanions = MappingsProto.messagesCompanions ++ EventEnvelopeProto.messagesCompanions
-       |  val registry: TypeRegistry = messagesCompanions
-       |    .foldLeft(TypeRegistry())((r, mc) => r.addMessageByCompanion(mc.asInstanceOf[GenericCompanion]))
-       |
-       |  val printer = new Printer().withTypeRegistry(registry)
-       |
-       |  val parser = new Parser().withTypeRegistry(registry)
-       |
-       |  // any packager for pack/unpack messages.
-       |  def unpack(any: Any): GeneratedMessage = registry.findType(any.typeUrl)
-       |    .map(_.parseFrom(any.value.newCodedInput())).get
-       |
        |  implicit val duration = Duration.apply(30, TimeUnit.SECONDS)
        |  implicit val timeout = Timeout(duration)
        |  val snapshotSequenceCount: Long = 1000
@@ -49,22 +30,6 @@ class MappingConfigGenerator(mappingLoader: MappingLoader) {
        |  })
        |    .throttle(1, duration)
        |    .map(_.toString)
-       |
-       |  def parseJson(json: String): EventEnvelope = {
-       |    parser.fromJsonString[EventEnvelope](json)
-       |  }
-       |
-       |  class MessageFormat[T <: GeneratedMessage with Message[T] : GeneratedMessageCompanion] extends OFormat[T] {
-       |    override def reads(json: JsValue): JsResult[T] = {
-       |      JsSuccess(parser.fromJsonString[T](json.toString()))
-       |    }
-       |
-       |    override def writes(o: T): JsObject = Json.parse(
-       |      printer.print(o)
-       |    ).validate[JsObject].get
-       |  }
-       |
-       |  def jsonFormat[T <: GeneratedMessage with Message[T] : GeneratedMessageCompanion]: OFormat[T] = new MessageFormat[T]
        |}
      """.stripMargin.trim
 

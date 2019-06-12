@@ -16,6 +16,7 @@ class ContextMappingGenerator(mappingFile: String) {
   val applicationConfGenerator = new ApplicationConfGenerator(model)
   val applicationLoaderGenerator = new ApplicationLoaderGenerator(model)
   val serviceGenerator = new ServiceGenerator(model)
+  val jsonSerializerGenerator = new JsonSerializerGenerator(model)
   val mappingConfigGenerator = new MappingConfigGenerator(model)
 
   def generate(): Unit = {
@@ -23,6 +24,7 @@ class ContextMappingGenerator(mappingFile: String) {
     applicationConfGenerator.generate()
     applicationLoaderGenerator.generate()
     serviceGenerator.generate()
+    jsonSerializerGenerator.generate()
     mappingConfigGenerator.generate()
     generateServiceMappings()
   }
@@ -40,6 +42,7 @@ class ContextMappingGenerator(mappingFile: String) {
          |import akka.stream._
          |import akka.stream.scaladsl._
          |import ${apiSrcPackage}._
+         |import ${apiSrcPackage}.ScalapbJson._
          |import com.github.apuex.events.play._
          |
          |import scala.concurrent._

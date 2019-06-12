@@ -47,17 +47,33 @@ object ServiceGenerator {
        |def ${cToCamel(operation.name)}(): ServiceCall[${req}, ${resp}]
      """.stripMargin
       .trim
+  }
 
+  def generateServiceCall(service: String, operation: OperationDescription): String = {
+    val req = if (operation.req.isEmpty) s"${cToPascal(s"${operation.name}_${service}_cmd")}" else cToPascal(s"${operation.req}_cmd")
+    val resp = if (operation.resp.isEmpty) "Done" else cToPascal(s"${operation.resp}_vo")
+    s"""
+       |pathCall("/api/${cToShell(operation.name)}", ${cToCamel(operation.name)} _)
+     """.stripMargin
+      .trim
   }
 
   def generateServiceDescriptor(service: (String, mutable.Set[OperationDescription])): String = {
+    val pathCalls: String = (
+      service._2
+        .map(x => generateServiceCall(service._1, x)) ++
+        Seq(s"""pathCall("/api/events?offset", events _)""")
+      )
+      .reduceOption((l, r) => s"${l},\n${r}")
+      .getOrElse("")
     s"""
        |override final def descriptor: Descriptor = {
        |  import Service._
+       |  import ScalapbJson._
        |
        |  named("${cToShell(service._1)}")
        |    .withCalls(
-       |      pathCall("/api/events?offset", events _)
+       |      ${indent(pathCalls, 6)}
        |    ).withAutoAcl(true)
        |}
      """.stripMargin
@@ -79,7 +95,6 @@ class ServiceGenerator(mappingLoader: MappingLoader) {
 
   def generateService(serviceCalls: (String, mutable.Set[OperationDescription])): Unit = {
     val serviceName = cToPascal(s"${serviceCalls._1}_${service}")
-    val jsonSupportName = cToPascal(s"${serviceCalls._1}_json_support")
     new File(apiSrcDir).mkdirs()
     val printWriter = new PrintWriter(s"${apiSrcDir}/${serviceName}.scala", "utf-8")
     // package definition
