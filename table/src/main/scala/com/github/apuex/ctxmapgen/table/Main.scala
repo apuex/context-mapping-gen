@@ -6,9 +6,16 @@ object Main extends App {
       "\tjava -jar <this jar> <arg list>")
   } else {
     args(0) match {
-      case "generate-context-mapping" => TableMappingGenerator(args.drop(1)(0)).generate()
+      case "generate-table-mapping" => TableMappingGenerator(args.drop(1)(0)).generate()
+      case "generate-service-client" => ServiceClientGenerator(args.drop(1)(0)).generate()
+      case "generate-all" => generateAll(args.drop(1)(0))
       case c =>
         println(s"unknown command '${c}'")
     }
+  }
+
+  def generateAll(fileName: String): Unit = {
+    TableMappingGenerator(fileName).generate()
+    ServiceClientGenerator(fileName).generate()
   }
 }

@@ -31,5 +31,5 @@ assemblyMergeStrategy in assembly := {
     oldStrategy(x)
 }
 
-mainClass in assembly := Some("com.github.apuex.ctxmapgen.lagom.Main")
+mainClass in assembly := Some(s"${artifactGroupName}.ctxmapgen.table.Main")
 assemblyJarName in assembly := s"${name.value}-${version.value}.jar"
