@@ -24,8 +24,8 @@ trait InventoryService extends Service {
 
     named("inventory")
       .withCalls(
-        pathCall("/api/reduce-storage", reduce _),
-        pathCall("/api/events?offset", events _)
+        pathCall("/api/events?offset", events _),
+        pathCall("/api/reduce", reduce _)
       ).withAutoAcl(true)
   }
 }

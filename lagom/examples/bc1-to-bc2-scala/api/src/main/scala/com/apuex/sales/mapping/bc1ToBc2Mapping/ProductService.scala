@@ -19,8 +19,10 @@ trait ProductService extends Service {
   override final def descriptor: Descriptor = {
     import Service._
     import ScalapbJson._
-    implicit val RetrieveProductCmdFormat = jsonFormat[RetrieveProductCmd]
-    implicit val ProductVoFormat = jsonFormat[ProductVo]
+
+    implicit val retrieveProductCmdFormat = jsonFormat[RetrieveProductCmd]
+    implicit val productVoFormat = jsonFormat[ProductVo]
+
     named("product")
       .withCalls(
         pathCall("/api/retrieve", retrieve _),

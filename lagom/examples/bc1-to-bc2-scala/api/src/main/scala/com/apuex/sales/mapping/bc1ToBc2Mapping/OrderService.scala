@@ -19,8 +19,9 @@ trait OrderService extends Service {
   override final def descriptor: Descriptor = {
     import Service._
     import ScalapbJson._
-    implicit val RetrieveOrderCmdFormat = jsonFormat[RetrieveOrderCmd]
-    implicit val OrderVoFormat = jsonFormat[OrderVo]
+
+    implicit val retrieveOrderCmdFormat = jsonFormat[RetrieveOrderCmd]
+    implicit val orderVoFormat = jsonFormat[OrderVo]
 
     named("order")
       .withCalls(

@@ -50,15 +50,31 @@ object ServiceGenerator {
   }
 
   def generateServiceCall(service: String, operation: OperationDescription): String = {
-    val req = if (operation.req.isEmpty) s"${cToPascal(s"${operation.name}_${service}_cmd")}" else cToPascal(s"${operation.req}_cmd")
-    val resp = if (operation.resp.isEmpty) "Done" else cToPascal(s"${operation.resp}_vo")
     s"""
        |pathCall("/api/${cToShell(operation.name)}", ${cToCamel(operation.name)} _)
      """.stripMargin
       .trim
   }
 
+  def generateMessageFormat(service: String, operation: OperationDescription): String = {
+    Seq(
+      if (operation.req.isEmpty) s"${s"${operation.name}_${service}_cmd"}" else s"${operation.req}_cmd",
+      if (operation.resp.isEmpty) "" else s"${operation.resp}_vo"
+    ).filter(!_.isEmpty)
+      .map(x =>
+        s"""
+           |implicit val ${cToCamel(x)}Format = jsonFormat[${cToPascal(x)}]
+         """.stripMargin.trim)
+      .reduceOption((l, r) => s"${l}\n${r}")
+      .getOrElse("")
+  }
+
   def generateServiceDescriptor(service: (String, mutable.Set[OperationDescription])): String = {
+    val messageFormats: String =
+      service._2
+        .map(x => generateMessageFormat(service._1, x))
+        .reduceOption((l, r) => s"${l}\n${r}")
+        .getOrElse("")
     val pathCalls: String = (
       service._2
         .map(x => generateServiceCall(service._1, x)) ++
@@ -70,6 +86,8 @@ object ServiceGenerator {
        |override final def descriptor: Descriptor = {
        |  import Service._
        |  import ScalapbJson._
+       |
+       |  ${indent(messageFormats, 2)}
        |
        |  named("${cToShell(service._1)}")
        |    .withCalls(
