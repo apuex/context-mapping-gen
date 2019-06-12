@@ -83,6 +83,8 @@ class ServiceClientGenerator(mappingLoader: MappingLoader) {
        |  override def descriptor: Descriptor = {
        |    import Service._
        |
+       |    implicit val queryCommandFormat = Json.format[QueryCommand]
+       |    implicit val retrieveByRowidFormat = Json.format[RetrieveByRowidCmd]
        |    ${indent(srcCallJsonFormats(), 4)}
        |
        |    named("${cToShell(srcSystem)}")
@@ -130,8 +132,6 @@ class ServiceClientGenerator(mappingLoader: MappingLoader) {
       .map(_.\@("name"))
       .map(x =>
         s"""
-           |implicit val queryCommandFormat = Json.format[QueryCommand]
-           |implicit val retrieve${cToPascal(x)}ByRowidFormat = Json.format[Retrieve${cToPascal(x)}ByRowidCmd]
            |implicit val ${cToCamel(x)}VoFormat = Json.format[${cToPascal(x)}Vo]
          """.stripMargin.trim) ++
       srcViews(xml)

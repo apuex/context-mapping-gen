@@ -16,7 +16,7 @@ class SrcTable1Mapping (
 
   val tableName = "src_table_1"
 
-  override def create(tableName: String, rowid: String): Unit = {
+  override def create(rowid: String): Unit = {
     src.retrieveSrcTable1ByRowid().invoke(RetrieveByRowidCmd(rowid))
       .map(t => {
         stash(tableName, rowid, DeleteDestTable1Cmd(t.col1, t.col2))
@@ -34,7 +34,7 @@ class SrcTable1Mapping (
       })
   }
 
-  override def update(tableName: String, rowid: String): Unit = {
+  override def update(rowid: String): Unit = {
     src.retrieveSrcTable1ByRowid().invoke(RetrieveByRowidCmd(rowid))
       .map(t => {
         dest.updateDestTable1().invoke(UpdateDestTable1Cmd(t.col1, t.col2, t.col3, t.col4))
@@ -60,7 +60,7 @@ class SrcTable1Mapping (
     })
   }
 
-  def querySrcView1ByCol1Col2Cmd(col1: String, col2: Long): QueryCommand = andCommand(
+  def querySrcView1ByCol1Col2Cmd(col1: String, col2: String): QueryCommand = andCommand(
     Map(
       "col1" -> col1,
       "col2" -> col2

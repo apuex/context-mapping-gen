@@ -167,11 +167,11 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
          |
          |  val tableName = "${tableName}"
          |
-         |  override def create(tableName: String, rowid: String): Unit = {
+         |  override def create(rowid: String): Unit = {
          |    ${indent(insertFromRowId(table), 4)}
          |  }
          |
-         |  override def update(tableName: String, rowid: String): Unit = {
+         |  override def update(rowid: String): Unit = {
          |    ${indent(updateFromRowId(table), 4)}
          |  }
          |

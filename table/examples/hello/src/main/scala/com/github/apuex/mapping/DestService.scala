@@ -3,23 +3,25 @@ package com.github.apuex.mapping
 import akka._
 import akka.stream.scaladsl._
 import com.lightbend.lagom.scaladsl.api._
+import play.api.libs.json.Json
 
-case class CreateDestTable1Cmd(col1: String)
-case class UpdateDestTable1Cmd(col1: String)
-case class DeleteDestTable1Cmd(col1: String)
-case class CreateDestTable2Cmd(col1: String)
-case class UpdateDestTable2Cmd(col1: String)
-case class DeleteDestTable2Cmd(col1: String)
-case class CreateDestTable3Cmd(col1: String)
-case class UpdateDestTable3Cmd(col1: String)
+case class CreateDestTable1Cmd(col1: String, col2: String, col3: String, col4: String)
+case class UpdateDestTable1Cmd(col1: String, col2: String, col3: String, col4: String)
+case class DeleteDestTable1Cmd(col1: String, col2: String)
+case class CreateDestTable2Cmd(col1: String, col2: String, col3: String, col4: String)
+case class UpdateDestTable2Cmd(col1: String, col2: String, col3: String, col4: String)
+case class DeleteDestTable2Cmd(col1: String, col2: String)
+case class CreateDestTable3Cmd(col1: String, col2: String, col3: String, col4: String)
+case class UpdateDestTable3Cmd(col1: String, col2: String, col3: String, col4: String)
 case class DeleteDestTable3Cmd(col1: String)
-case class CreateDestTable4Cmd(col1: String)
-case class UpdateDestTable4Cmd(col1: String)
+case class CreateDestTable4Cmd(col1: String, col2: String, col3: String, col4: String)
+case class UpdateDestTable4Cmd(col1: String, col2: String, col3: String, col4: String)
 case class DeleteDestTable4Cmd(col1: String)
-case class CreateDestTable5Cmd(col1: String)
-case class UpdateDestTable5Cmd(col1: String)
+case class CreateDestTable5Cmd(col1: String, col2: String, col3: String)
+case class UpdateDestTable5Cmd(col1: String, col2: String, col3: String)
 case class DeleteDestTable5Cmd(col1: String)
 trait DestService extends Service {
+
   def createDestTable1(): ServiceCall[CreateDestTable1Cmd, NotUsed]
   def updateDestTable1(): ServiceCall[UpdateDestTable1Cmd, NotUsed]
   def deleteDestTable1(): ServiceCall[DeleteDestTable1Cmd, NotUsed]
@@ -40,6 +42,22 @@ trait DestService extends Service {
 
   override def descriptor: Descriptor = {
     import Service._
+
+    implicit val createDestTable1CmdFormat = Json.format[CreateDestTable1Cmd]
+    implicit val updateDestTable1CmdFormat = Json.format[UpdateDestTable1Cmd]
+    implicit val deleteDestTable1CmdFormat = Json.format[DeleteDestTable1Cmd]
+    implicit val createDestTable2CmdFormat = Json.format[CreateDestTable2Cmd]
+    implicit val updateDestTable2CmdFormat = Json.format[UpdateDestTable2Cmd]
+    implicit val deleteDestTable2CmdFormat = Json.format[DeleteDestTable2Cmd]
+    implicit val createDestTable5CmdFormat = Json.format[CreateDestTable5Cmd]
+    implicit val updateDestTable5CmdFormat = Json.format[UpdateDestTable5Cmd]
+    implicit val deleteDestTable5CmdFormat = Json.format[DeleteDestTable5Cmd]
+    implicit val createDestTable3CmdFormat = Json.format[CreateDestTable3Cmd]
+    implicit val updateDestTable3CmdFormat = Json.format[UpdateDestTable3Cmd]
+    implicit val deleteDestTable3CmdFormat = Json.format[DeleteDestTable3Cmd]
+    implicit val createDestTable4CmdFormat = Json.format[CreateDestTable4Cmd]
+    implicit val updateDestTable4CmdFormat = Json.format[UpdateDestTable4Cmd]
+    implicit val deleteDestTable4CmdFormat = Json.format[DeleteDestTable4Cmd]
 
     named("dest")
       .withCalls(

@@ -91,7 +91,7 @@ class ServiceClientGeneratorSpec extends FlatSpec with Matchers {
          |    import Service._
          |
          |    implicit val queryCommandFormat = Json.format[QueryCommand]
-         |    implicit val retrieveSrcTable1ByRowidFormat = Json.format[RetrieveSrcTable1ByRowidCmd]
+         |    implicit val retrieveByRowidFormat = Json.format[RetrieveByRowidCmd]
          |    implicit val srcTable1VoFormat = Json.format[SrcTable1Vo]
          |    implicit val srcView1VoFormat = Json.format[SrcView1Vo]
          |    implicit val srcView1ListVoFormat = Json.format[SrcView1ListVo]
