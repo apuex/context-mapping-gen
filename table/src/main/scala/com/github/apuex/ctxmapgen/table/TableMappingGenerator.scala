@@ -118,7 +118,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
   }
 
   def tableMappings(xml: Node): Unit = {
-    xml.filter(x => x.label == "src-table")
+    xml.child.filter(x => x.label == "src-table")
       .map(generateTableMapping(_))
       .foreach(x => saveTableMappingImpl(x._1, x._2))
   }
