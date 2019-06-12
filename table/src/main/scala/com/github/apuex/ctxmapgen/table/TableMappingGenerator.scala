@@ -134,8 +134,9 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
     val tableName = table.\@("name")
     val mappingImpl =
       s"""
-         |package ${modelPackage}
+         |package ${projectSrcPackage}
          |
+         |import ${modelPackage}._
          |import com.github.apuex.springbootsolution.runtime._
          |import com.github.apuex.springbootsolution.runtime.QueryCommandMethods._
          |import scala.concurrent.ExecutionContext

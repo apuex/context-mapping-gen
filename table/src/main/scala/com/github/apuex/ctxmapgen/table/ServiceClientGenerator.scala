@@ -179,8 +179,8 @@ class ServiceClientGenerator(mappingLoader: MappingLoader) {
   }
 
   def saveService(name: String, definition: String): Unit = {
-    new File(projectSrcDir).mkdirs()
-    val pw = new PrintWriter(s"${projectSrcDir}/${cToPascal(name)}Service.scala", "utf-8")
+    new File(apiSrcDir).mkdirs()
+    val pw = new PrintWriter(s"${apiSrcDir}/${cToPascal(name)}Service.scala", "utf-8")
     pw.println(definition)
     pw.close()
   }

@@ -47,5 +47,6 @@ class MappingLoader(val xml: Node) {
   val projectDir = s"${outputDir}/${projectName}"
   val projectSrcPackage = s"${modelPackage}.${impl}"
   val projectSrcDir = s"${projectDir}/src/main/scala/${projectSrcPackage.replace('.', '/')}"
+  val apiSrcDir = s"${projectDir}/src/main/scala/${modelPackage.replace('.', '/')}"
   val hyphen = if ("microsoft" == s"${System.getProperty("symbol.naming", "microsoft")}") "" else "-"
 }

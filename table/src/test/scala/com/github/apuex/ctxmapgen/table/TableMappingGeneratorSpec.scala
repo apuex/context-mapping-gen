@@ -87,8 +87,9 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
     tableMapping._1 should be("src_table_1")
     tableMapping._2 should be(
       s"""
-         |package com.github.apuex.mapping
+         |package com.github.apuex.mapping.impl
          |
+         |import com.github.apuex.mapping._
          |import com.github.apuex.springbootsolution.runtime._
          |import com.github.apuex.springbootsolution.runtime.QueryCommandMethods._
          |import scala.concurrent.ExecutionContext
