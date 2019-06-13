@@ -89,14 +89,15 @@ class ServiceClientGeneratorSpec extends FlatSpec with Matchers {
          |
          |  override def descriptor: Descriptor = {
          |    import Service._
+         |    import ScalapbJson._
          |
-         |    implicit val queryCommandFormat = Json.format[QueryCommand]
-         |    implicit val retrieveByRowidFormat = Json.format[RetrieveByRowidCmd]
-         |    implicit val srcTable1VoFormat = Json.format[SrcTable1Vo]
-         |    implicit val srcView1VoFormat = Json.format[SrcView1Vo]
-         |    implicit val srcView1ListVoFormat = Json.format[SrcView1ListVo]
-         |    implicit val srcView2VoFormat = Json.format[SrcView2Vo]
-         |    implicit val srcView2ListVoFormat = Json.format[SrcView2ListVo]
+         |    implicit val queryCommandFormat = jsonFormat[QueryCommand]
+         |    implicit val retrieveByRowidFormat = jsonFormat[RetrieveByRowidCmd]
+         |    implicit val srcTable1VoFormat = jsonFormat[SrcTable1Vo]
+         |    implicit val srcView1VoFormat = jsonFormat[SrcView1Vo]
+         |    implicit val srcView1ListVoFormat = jsonFormat[SrcView1ListVo]
+         |    implicit val srcView2VoFormat = jsonFormat[SrcView2Vo]
+         |    implicit val srcView2ListVoFormat = jsonFormat[SrcView2ListVo]
          |
          |    named("src")
          |      .withCalls(
@@ -136,16 +137,17 @@ class ServiceClientGeneratorSpec extends FlatSpec with Matchers {
          |
          |  override def descriptor: Descriptor = {
          |    import Service._
+         |    import ScalapbJson._
          |
-         |    implicit val createDestTable1CmdFormat = Json.format[CreateDestTable1Cmd]
-         |    implicit val updateDestTable1CmdFormat = Json.format[UpdateDestTable1Cmd]
-         |    implicit val deleteDestTable1CmdFormat = Json.format[DeleteDestTable1Cmd]
-         |    implicit val createDestTable2CmdFormat = Json.format[CreateDestTable2Cmd]
-         |    implicit val updateDestTable2CmdFormat = Json.format[UpdateDestTable2Cmd]
-         |    implicit val deleteDestTable2CmdFormat = Json.format[DeleteDestTable2Cmd]
-         |    implicit val createDestTable5CmdFormat = Json.format[CreateDestTable5Cmd]
-         |    implicit val updateDestTable5CmdFormat = Json.format[UpdateDestTable5Cmd]
-         |    implicit val deleteDestTable5CmdFormat = Json.format[DeleteDestTable5Cmd]
+         |    implicit val createDestTable1CmdFormat = jsonFormat[CreateDestTable1Cmd]
+         |    implicit val updateDestTable1CmdFormat = jsonFormat[UpdateDestTable1Cmd]
+         |    implicit val deleteDestTable1CmdFormat = jsonFormat[DeleteDestTable1Cmd]
+         |    implicit val createDestTable2CmdFormat = jsonFormat[CreateDestTable2Cmd]
+         |    implicit val updateDestTable2CmdFormat = jsonFormat[UpdateDestTable2Cmd]
+         |    implicit val deleteDestTable2CmdFormat = jsonFormat[DeleteDestTable2Cmd]
+         |    implicit val createDestTable5CmdFormat = jsonFormat[CreateDestTable5Cmd]
+         |    implicit val updateDestTable5CmdFormat = jsonFormat[UpdateDestTable5Cmd]
+         |    implicit val deleteDestTable5CmdFormat = jsonFormat[DeleteDestTable5Cmd]
          |
          |    named("dest")
          |      .withCalls(

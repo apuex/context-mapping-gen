@@ -139,8 +139,8 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
   }
 
   def saveTableMappingImpl(tableName: String, mappingImpl: String): Unit = {
-    new File(projectSrcDir).mkdirs()
-    val pw = new PrintWriter(s"${projectSrcDir}/${cToPascal(tableName)}Mapping.scala", "utf-8")
+    new File(implSrcDir).mkdirs()
+    val pw = new PrintWriter(s"${implSrcDir}/${cToPascal(tableName)}Mapping.scala", "utf-8")
     pw.println(mappingImpl)
     pw.close()
   }
@@ -149,9 +149,9 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
     val tableName = table.\@("name")
     val mappingImpl =
       s"""
-         |package ${projectSrcPackage}
+         |package ${implSrcPackage}
          |
-         |import ${modelPackage}._
+         |import ${apiSrcPackage}._
          |import com.github.apuex.ctxmap._
          |import com.github.apuex.springbootsolution.runtime.QueryCommand
          |import com.github.apuex.springbootsolution.runtime.QueryCommandMethods.andCommand

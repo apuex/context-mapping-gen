@@ -82,9 +82,10 @@ class ServiceClientGenerator(mappingLoader: MappingLoader) {
        |
        |  override def descriptor: Descriptor = {
        |    import Service._
+       |    import ScalapbJson._
        |
-       |    implicit val queryCommandFormat = Json.format[QueryCommand]
-       |    implicit val retrieveByRowidFormat = Json.format[RetrieveByRowidCmd]
+       |    implicit val queryCommandFormat = jsonFormat[QueryCommand]
+       |    implicit val retrieveByRowidFormat = jsonFormat[RetrieveByRowidCmd]
        |    ${indent(srcCallJsonFormats(), 4)}
        |
        |    named("${cToShell(srcSystem)}")
@@ -114,6 +115,7 @@ class ServiceClientGenerator(mappingLoader: MappingLoader) {
        |
        |  override def descriptor: Descriptor = {
        |    import Service._
+       |    import ScalapbJson._
        |
        |    ${indent(destCallJsonFormats(), 4)}
        |
@@ -132,14 +134,14 @@ class ServiceClientGenerator(mappingLoader: MappingLoader) {
       .map(_.\@("name"))
       .map(x =>
         s"""
-           |implicit val ${cToCamel(x)}VoFormat = Json.format[${cToPascal(x)}Vo]
+           |implicit val ${cToCamel(x)}VoFormat = jsonFormat[${cToPascal(x)}Vo]
          """.stripMargin.trim) ++
       srcViews(xml)
         .map(_.\@("name"))
         .map(x =>
           s"""
-             |implicit val ${cToCamel(x)}VoFormat = Json.format[${cToPascal(x)}Vo]
-             |implicit val ${cToCamel(x)}ListVoFormat = Json.format[${cToPascal(x)}ListVo]
+             |implicit val ${cToCamel(x)}VoFormat = jsonFormat[${cToPascal(x)}Vo]
+             |implicit val ${cToCamel(x)}ListVoFormat = jsonFormat[${cToPascal(x)}ListVo]
            """.stripMargin.trim)
       )
       .reduceOption((l, r) => s"${l}\n${r}")
@@ -191,9 +193,9 @@ class ServiceClientGenerator(mappingLoader: MappingLoader) {
       .map(cToPascal(_))
       .map(x =>
         s"""
-           |implicit val create${x}CmdFormat = Json.format[Create${x}Cmd]
-           |implicit val update${x}CmdFormat = Json.format[Update${x}Cmd]
-           |implicit val delete${x}CmdFormat = Json.format[Delete${x}Cmd]
+           |implicit val create${x}CmdFormat = jsonFormat[Create${x}Cmd]
+           |implicit val update${x}CmdFormat = jsonFormat[Update${x}Cmd]
+           |implicit val delete${x}CmdFormat = jsonFormat[Delete${x}Cmd]
          """.stripMargin.trim)
       .reduceOption((l, r) => s"${l}\n${r}")
       .getOrElse("")

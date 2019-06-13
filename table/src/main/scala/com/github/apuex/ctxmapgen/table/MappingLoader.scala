@@ -35,6 +35,7 @@ object MappingLoader {
 
 class MappingLoader(val xml: Node) {
   val mapping = "mapping"
+  val api = "api"
   val impl = "impl"
   val srcSystem = xml.\@("from")
   val destSystem = xml.\@("to")
@@ -43,10 +44,15 @@ class MappingLoader(val xml: Node) {
   val modelVersion = xml.\@("version")
   val modelMaintainer = xml.\@("maintainer")
   val outputDir = s"${System.getProperty("output.dir", "target/generated")}"
-  val projectName = s"${cToShell(modelName)}"
-  val projectDir = s"${outputDir}/${projectName}"
-  val projectSrcPackage = s"${modelPackage}.${impl}"
-  val projectSrcDir = s"${projectDir}/src/main/scala/${projectSrcPackage.replace('.', '/')}"
-  val apiSrcDir = s"${projectDir}/src/main/scala/${modelPackage.replace('.', '/')}"
+  val rootProjectName = s"${cToShell(modelName)}"
+  val rootProjectDir = s"${outputDir}/${rootProjectName}"
+  val apiProjectName = s"${cToShell(modelName)}-${api}"
+  val apiProjectDir = s"${rootProjectDir}/${api}"
+  val apiSrcPackage = s"${modelPackage}"
+  val apiSrcDir = s"${apiProjectDir}/src/main/scala/${modelPackage.replace('.', '/')}"
+  val implProjectName = s"${cToShell(modelName)}-${impl}"
+  val implProjectDir = s"${rootProjectDir}/${impl}"
+  val implSrcPackage = s"${modelPackage}.${impl}"
+  val implSrcDir = s"${implProjectDir}/src/main/scala/${implSrcPackage.replace('.', '/')}"
   val hyphen = if ("microsoft" == s"${System.getProperty("symbol.naming", "microsoft")}") "" else "-"
 }
