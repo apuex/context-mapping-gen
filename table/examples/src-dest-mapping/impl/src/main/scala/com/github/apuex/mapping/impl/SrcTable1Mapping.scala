@@ -14,7 +14,7 @@ class SrcTable1Mapping (
   ) extends TableMapping {
   import deleteQueue._
 
-  val tableName = "src_table_1"
+  val tableName = "my_schema.src_table_1"
 
   override def create(rowid: String): Unit = {
     src.retrieveSrcTable1ByRowid().invoke(RetrieveByRowidCmd(rowid))

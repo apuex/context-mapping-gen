@@ -14,7 +14,7 @@ object TableMappingGenerator {
   def apply(mappingLoader: MappingLoader): TableMappingGenerator = new TableMappingGenerator(mappingLoader)
 
   def simpleName(name: String): String = {
-    if(null != name) name.split("\\.").last
+    if (null != name) name.split("\\.").last
     else name
   }
 
@@ -71,7 +71,7 @@ object TableMappingGenerator {
   }
 
   def filterKeyParamsMap(keyColumnNames: Seq[String], from: String = ""): String = {
-    val alias = if("" == from) from else s"${from}."
+    val alias = if ("" == from) from else s"${from}."
     keyColumnNames.map(cToCamel(_))
       .map(x =>
         s"""
@@ -136,6 +136,45 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
 
   def generate(): Unit = {
     tableMappings(xml)
+    tableMappingUtil(xml)
+  }
+
+  def tableMappingUtil(xml: Node): Unit = {
+    new File(implSrcDir).mkdirs()
+    val pw = new PrintWriter(s"${implSrcDir}/TableMappings.scala", "utf-8")
+    val mappings = xml.child.filter(x => x.label == "src-table")
+      .map(_.\@("name"))
+      .map(x =>
+        s"""
+           |"${x}" -> new ${cToPascal(simpleName(x))}Mapping(srcService, destService, deleteQueue, ec)
+           """.stripMargin.trim)
+      .reduceOption((l, r) => s"${l},\n${r}")
+      .getOrElse("")
+
+    pw.println(
+      s"""
+         |package ${implSrcPackage}
+         |
+         |import com.github.apuex.ctxmap._
+         |import ${apiSrcPackage}._
+         |
+         |import scala.concurrent.ExecutionContext
+         |
+         |object TableMappings {
+         |
+         |  def create(${cToCamel(srcSystem)}Service: ${cToPascal(srcSystem)}Service,
+         |             ${cToCamel(destSystem)}Service: ${cToPascal(destSystem)}Service,
+         |             deleteQueue: StashedQueue,
+         |             ec: ExecutionContext
+         |            ): Map[String, TableMapping] = {
+         |    Map(
+         |      ${indent(mappings, 6)}
+         |    )
+         |  }
+         |}
+       """.stripMargin.trim
+    )
+    pw.close()
   }
 
   def tableMappings(xml: Node): Unit = {

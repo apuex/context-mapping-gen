@@ -5,7 +5,7 @@ import com.github.apuex.mapping._
 
 import scala.concurrent.ExecutionContext
 
-object TableMappingImpl {
+object TableMappings {
 
   def create(srcService: SrcService,
              destService: DestService,
@@ -13,8 +13,8 @@ object TableMappingImpl {
              ec: ExecutionContext
             ): Map[String, TableMapping] = {
     Map(
-      "src_table_1" -> new SrcTable1Mapping(srcService, destService, deleteQueue, ec),
-      "src_table_1" -> new SrcTable1Mapping(srcService, destService, deleteQueue, ec)
+      "my_schema.src_table_1" -> new SrcTable1Mapping(srcService, destService, deleteQueue, ec),
+      "my_schema.src_table_2" -> new SrcTable2Mapping(srcService, destService, deleteQueue, ec)
     )
   }
 }
