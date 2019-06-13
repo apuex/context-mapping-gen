@@ -132,12 +132,14 @@ class ServiceClientGenerator(mappingLoader: MappingLoader) {
   def srcCallJsonFormats(): String = {
     (srcTables(xml)
       .map(_.\@("name"))
+      .map(simpleName(_))
       .map(x =>
         s"""
            |implicit val ${cToCamel(x)}VoFormat = jsonFormat[${cToPascal(x)}Vo]
          """.stripMargin.trim) ++
       srcViews(xml)
         .map(_.\@("name"))
+        .map(simpleName(_))
         .map(x =>
           s"""
              |implicit val ${cToCamel(x)}VoFormat = jsonFormat[${cToPascal(x)}Vo]
@@ -151,12 +153,14 @@ class ServiceClientGenerator(mappingLoader: MappingLoader) {
   def srcCalls(): String = {
     val tables = srcTables(xml)
     val byRowids = tables
-      .map(x => retrieveByRowid(x.\@("name")))
+      .map(x => retrieveByRowid(simpleName(x.\@("name"))))
 
     val byKeys = tables
       .map(x => x.child.filter(_.label == "view"))
       .flatMap(x => x)
-      .map(x => query(x.\@("name")))
+      .map(_.\@("name"))
+      .map(simpleName(_))
+      .map(query(_))
 
     (byRowids ++ byKeys)
       .reduceOption((l, r) => s"${l}\n${r}")
@@ -167,6 +171,7 @@ class ServiceClientGenerator(mappingLoader: MappingLoader) {
     val tables = srcTables(xml)
     val byRowids = tables
       .map(_.\@("name"))
+      .map(simpleName(_))
       .map(x =>
         s"""
            |pathCall("/api/retrieve-${cToShell(x)}-by-rowid", retrieve${cToPascal(x)}ByRowid _),
@@ -176,6 +181,7 @@ class ServiceClientGenerator(mappingLoader: MappingLoader) {
       .map(x => x.child.filter(_.label == "view"))
       .flatMap(x => x)
       .map(_.\@("name"))
+      .map(simpleName(_))
       .map(x =>
         s"""
            |pathCall("/api/query-${cToShell(x)}", query${cToPascal(x)} _),
@@ -190,6 +196,7 @@ class ServiceClientGenerator(mappingLoader: MappingLoader) {
   def destCallJsonFormats(): String = {
     destTables(xml)
       .map(_.\@("name"))
+      .map(simpleName(_))
       .map(cToPascal(_))
       .map(x =>
         s"""
@@ -204,6 +211,7 @@ class ServiceClientGenerator(mappingLoader: MappingLoader) {
   def destCalls(): String = {
     destTables(xml)
       .map(_.\@("name"))
+      .map(simpleName(_))
       .map(x =>
         s"""
            |${create(x)}
@@ -217,6 +225,7 @@ class ServiceClientGenerator(mappingLoader: MappingLoader) {
   def destCallDescs(): String = {
     destTables(xml)
       .map(_.\@("name"))
+      .map(simpleName(_))
       .map(x =>
         s"""
            |pathCall("/api/create-${cToShell(x)}", create${cToPascal(x)} _),

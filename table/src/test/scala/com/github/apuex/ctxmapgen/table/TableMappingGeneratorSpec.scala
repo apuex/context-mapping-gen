@@ -19,7 +19,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
   "A TableMappingGenerator" should "generate table mapping from rowid" in {
     val table =
-      <src-table name="src_table_1">
+      <src-table name="my_schema.src_table_1">
         <!--
           filter-key columns, or rowid
         -->
@@ -27,7 +27,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
           <column name="col_1" type="string"/>
           <column name="col_2" type="long"/>
         </filter-key>
-        <dest-table name="dest_table_1">
+        <dest-table name="my_schema.dest_table_1">
           <column no="1" name="col_1" from-column="col_1"/>
           <column no="2" name="col_2" from-column="col_2"/>
           <column no="3" name="col_3" from-column="col_3"/>
@@ -40,12 +40,12 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
         <!--
           affected views by source table change.
         -->
-        <view name="src_view_1">
+        <view name="my_schema.src_view_1">
           <filter-key>
             <column name="col_1" type="string"/>
             <column name="col_2" type="long"/>
           </filter-key>
-          <dest-table name="dest_table_2">
+          <dest-table name="my_schema.dest_table_2">
             <column no="1" name="col_1" from-column="col_1"/>
             <column no="2" name="col_2" from-column="col_2"/>
             <column no="3" name="col_3" from-column="col_3"/>
@@ -56,11 +56,11 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
             </filter-key>
           </dest-table>
         </view>
-        <view name="src_view_2">
+        <view name="my_schema.src_view_2">
           <filter-key>
             <column name="col_1" type="string"/>
           </filter-key>
-          <dest-table name="dest_table_5">
+          <dest-table name="my_schema.dest_table_5">
             <column no="1" name="col_1" from-column="col_1"/>
             <column no="2" name="col_2" from-column="col_2"/>
             <column no="3" name="col_3" from-column="col_3"/>
@@ -72,7 +72,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
       </src-table>
 
     val tables = destTables(table)
-    tables.map(_.\@("name")) should be(Seq("dest_table_1", "dest_table_2", "dest_table_5"))
+    tables.map(x => simpleName(x.\@("name"))) should be(Seq("dest_table_1", "dest_table_2", "dest_table_5"))
     deletes(tables) should be(
       s"""
          |case x: DeleteDestTable1Cmd =>
@@ -103,7 +103,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
          |  ) extends TableMapping {
          |  import deleteQueue._
          |
-         |  val tableName = "src_table_1"
+         |  val tableName = "my_schema.src_table_1"
          |
          |  override def create(rowid: String): Unit = {
          |    src.retrieveSrcTable1ByRowid().invoke(RetrieveByRowidCmd(rowid))
@@ -167,7 +167,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
   it should "generate insert dest-table from rowid" in {
     val table =
-      <src-table name="src_table_1">
+      <src-table name="my_schema.src_table_1">
         <!--
           filter-key columns, or rowid
         -->
@@ -175,7 +175,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
           <column name="col_1" type="string"/>
           <column name="col_2" type="long"/>
         </filter-key>
-        <dest-table name="dest_table_1">
+        <dest-table name="my_schema.dest_table_1">
           <column no="1" name="col_1" from-column="col_1"/>
           <column no="2" name="col_2" from-column="col_2"/>
           <column no="3" name="col_3" from-column="col_3"/>
@@ -188,12 +188,12 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
         <!--
           affected views by source table change.
         -->
-        <view name="src_view_1">
+        <view name="my_schema.src_view_1">
           <filter-key>
             <column name="col_1" type="string"/>
             <column name="col_2" type="long"/>
           </filter-key>
-          <dest-table name="dest_table_2">
+          <dest-table name="my_schema.dest_table_2">
             <column no="1" name="col_1" from-column="col_1"/>
             <column no="2" name="col_2" from-column="col_2"/>
             <column no="3" name="col_3" from-column="col_3"/>
@@ -204,11 +204,11 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
             </filter-key>
           </dest-table>
         </view>
-        <view name="src_view_2">
+        <view name="my_schema.src_view_2">
           <filter-key>
             <column name="col_1" type="string"/>
           </filter-key>
-          <dest-table name="dest_table_5">
+          <dest-table name="my_schema.dest_table_5">
             <column no="1" name="col_1" from-column="col_1"/>
             <column no="2" name="col_2" from-column="col_2"/>
             <column no="3" name="col_3" from-column="col_3"/>
@@ -241,7 +241,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
   it should "generate insert dest-table from src-table" in {
     val table =
-      <src-table name="src_table_1">
+      <src-table name="my_schema.src_table_1">
         <!--
           filter-key columns, or rowid
         -->
@@ -249,7 +249,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
           <column name="col_1" type="string"/>
           <column name="col_2" type="long"/>
         </filter-key>
-        <dest-table name="dest_table_1">
+        <dest-table name="my_schema.dest_table_1">
           <column no="1" name="col_1" from-column="col_1"/>
           <column no="2" name="col_2" from-column="col_2"/>
           <column no="3" name="col_3" from-column="col_3"/>
@@ -262,12 +262,12 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
         <!--
           affected views by source table change.
         -->
-        <view name="src_view_1">
+        <view name="my_schema.src_view_1">
           <filter-key>
             <column name="col_1" type="string"/>
             <column name="col_2" type="long"/>
           </filter-key>
-          <dest-table name="dest_table_2">
+          <dest-table name="my_schema.dest_table_2">
             <column no="1" name="col_1" from-column="col_1"/>
             <column no="2" name="col_2" from-column="col_2"/>
             <column no="3" name="col_3" from-column="col_3"/>
@@ -278,11 +278,11 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
             </filter-key>
           </dest-table>
         </view>
-        <view name="src_view_2">
+        <view name="my_schema.src_view_2">
           <filter-key>
             <column name="col_1" type="string"/>
           </filter-key>
-          <dest-table name="dest_table_5">
+          <dest-table name="my_schema.dest_table_5">
             <column no="1" name="col_1" from-column="col_1"/>
             <column no="2" name="col_2" from-column="col_2"/>
             <column no="3" name="col_3" from-column="col_3"/>
@@ -312,12 +312,12 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
   it should "generate insert dest-table from view" in {
     val table =
-      <view name="src_view_1">
+      <view name="my_schema.src_view_1">
         <filter-key>
           <column name="col_1" type="string"/>
           <column name="col_2" type="long"/>
         </filter-key>
-        <dest-table name="dest_table_1">
+        <dest-table name="my_schema.dest_table_1">
           <column no="1" name="col_1" from-column="col_1"/>
           <column no="2" name="col_2" from-column="col_2"/>
           <column no="3" name="col_3" from-column="col_3"/>
@@ -327,7 +327,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
             <column name="col_2" type="long"/>
           </filter-key>
         </dest-table>
-        <dest-table name="dest_table_2">
+        <dest-table name="my_schema.dest_table_2">
           <column no="1" name="col_1" from-column="col_1"/>
           <column no="2" name="col_2" from-column="col_2"/>
           <column no="3" name="col_3" from-column="col_3"/>
@@ -353,7 +353,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
   it should "generate insert dest-table" in {
     val table =
-      <dest-table name="dest_table_1">
+      <dest-table name="my_schema.dest_table_1">
         <column no="1" name="col_1" from-column="col_1"/>
         <column no="2" name="col_2" from-column="col_2"/>
         <column no="3" name="col_3" from-column="col_3"/>
@@ -373,7 +373,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
   it should "generate update dest-table from rowid" in {
     val table =
-      <src-table name="src_table_1">
+      <src-table name="my_schema.src_table_1">
         <!--
           filter-key columns, or rowid
         -->
@@ -381,7 +381,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
           <column name="col_1" type="string"/>
           <column name="col_2" type="long"/>
         </filter-key>
-        <dest-table name="dest_table_1">
+        <dest-table name="my_schema.dest_table_1">
           <column no="1" name="col_1" from-column="col_1"/>
           <column no="2" name="col_2" from-column="col_2"/>
           <column no="3" name="col_3" from-column="col_3"/>
@@ -394,12 +394,12 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
         <!--
           affected views by source table change.
         -->
-        <view name="src_view_1">
+        <view name="my_schema.src_view_1">
           <filter-key>
             <column name="col_1" type="string"/>
             <column name="col_2" type="long"/>
           </filter-key>
-          <dest-table name="dest_table_2">
+          <dest-table name="my_schema.dest_table_2">
             <column no="1" name="col_1" from-column="col_1"/>
             <column no="2" name="col_2" from-column="col_2"/>
             <column no="3" name="col_3" from-column="col_3"/>
@@ -410,11 +410,11 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
             </filter-key>
           </dest-table>
         </view>
-        <view name="src_view_2">
+        <view name="my_schema.src_view_2">
           <filter-key>
             <column name="col_1" type="string"/>
           </filter-key>
-          <dest-table name="dest_table_5">
+          <dest-table name="my_schema.dest_table_5">
             <column no="1" name="col_1" from-column="col_1"/>
             <column no="2" name="col_2" from-column="col_2"/>
             <column no="3" name="col_3" from-column="col_3"/>
@@ -444,7 +444,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
   it should "generate update dest-table from src-table" in {
     val table =
-      <src-table name="src_table_1">
+      <src-table name="my_schema.src_table_1">
         <!--
           filter-key columns, or rowid
         -->
@@ -452,7 +452,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
           <column name="col_1" type="string"/>
           <column name="col_2" type="long"/>
         </filter-key>
-        <dest-table name="dest_table_1">
+        <dest-table name="my_schema.dest_table_1">
           <column no="1" name="col_1" from-column="col_1"/>
           <column no="2" name="col_2" from-column="col_2"/>
           <column no="3" name="col_3" from-column="col_3"/>
@@ -465,12 +465,12 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
         <!--
           affected views by source table change.
         -->
-        <view name="src_view_1">
+        <view name="my_schema.src_view_1">
           <filter-key>
             <column name="col_1" type="string"/>
             <column name="col_2" type="long"/>
           </filter-key>
-          <dest-table name="dest_table_2">
+          <dest-table name="my_schema.dest_table_2">
             <column no="1" name="col_1" from-column="col_1"/>
             <column no="2" name="col_2" from-column="col_2"/>
             <column no="3" name="col_3" from-column="col_3"/>
@@ -481,11 +481,11 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
             </filter-key>
           </dest-table>
         </view>
-        <view name="src_view_2">
+        <view name="my_schema.src_view_2">
           <filter-key>
             <column name="col_1" type="string"/>
           </filter-key>
-          <dest-table name="dest_table_5">
+          <dest-table name="my_schema.dest_table_5">
             <column no="1" name="col_1" from-column="col_1"/>
             <column no="2" name="col_2" from-column="col_2"/>
             <column no="3" name="col_3" from-column="col_3"/>
@@ -512,12 +512,12 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
   it should "generate update dest-table from view" in {
     val table =
-      <view name="src_view_1">
+      <view name="my_schema.src_view_1">
         <filter-key>
           <column name="col_1" type="string"/>
           <column name="col_2" type="long"/>
         </filter-key>
-        <dest-table name="dest_table_1">
+        <dest-table name="my_schema.dest_table_1">
           <column no="1" name="col_1" from-column="col_1"/>
           <column no="2" name="col_2" from-column="col_2"/>
           <column no="3" name="col_3" from-column="col_3"/>
@@ -527,7 +527,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
             <column name="col_2" type="long"/>
           </filter-key>
         </dest-table>
-        <dest-table name="dest_table_2">
+        <dest-table name="my_schema.dest_table_2">
           <column no="1" name="col_1" from-column="col_1"/>
           <column no="2" name="col_2" from-column="col_2"/>
           <column no="3" name="col_3" from-column="col_3"/>
@@ -551,7 +551,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
   it should "generate update dest-table" in {
     val table =
-      <dest-table name="dest_table_1">
+      <dest-table name="my_schema.dest_table_1">
         <column no="1" name="col_1" from-column="col_1"/>
         <column no="2" name="col_2" from-column="col_2"/>
         <column no="3" name="col_3" from-column="col_3"/>
@@ -570,7 +570,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
   it should "generate delete from dest-table from rowid" in {
     val table =
-      <src-table name="src_table_1">
+      <src-table name="my_schema.src_table_1">
         <!--
           filter-key columns, or rowid
         -->
@@ -578,7 +578,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
           <column name="col_1" type="string"/>
           <column name="col_2" type="long"/>
         </filter-key>
-        <dest-table name="dest_table_1">
+        <dest-table name="my_schema.dest_table_1">
           <column no="1" name="col_1" from-column="col_1"/>
           <column no="2" name="col_2" from-column="col_2"/>
           <column no="3" name="col_3" from-column="col_3"/>
@@ -591,12 +591,12 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
         <!--
           affected views by source table change.
         -->
-        <view name="src_view_1">
+        <view name="my_schema.src_view_1">
           <filter-key>
             <column name="col_1" type="string"/>
             <column name="col_2" type="long"/>
           </filter-key>
-          <dest-table name="dest_table_2">
+          <dest-table name="my_schema.dest_table_2">
             <column no="1" name="col_1" from-column="col_1"/>
             <column no="2" name="col_2" from-column="col_2"/>
             <column no="3" name="col_3" from-column="col_3"/>
@@ -607,11 +607,11 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
             </filter-key>
           </dest-table>
         </view>
-        <view name="src_view_2">
+        <view name="my_schema.src_view_2">
           <filter-key>
             <column name="col_1" type="string"/>
           </filter-key>
-          <dest-table name="dest_table_5">
+          <dest-table name="my_schema.dest_table_5">
             <column no="1" name="col_1" from-column="col_1"/>
             <column no="2" name="col_2" from-column="col_2"/>
             <column no="3" name="col_3" from-column="col_3"/>
@@ -692,7 +692,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
   it should "extract empty filter-key columns from src-table with no filter-key" in {
     val table =
-      <src-table name="my_table_1">
+      <src-table name="my_schema.my_table_1">
       </src-table>
 
     filterKeyColumns(table) should be(Seq())
@@ -710,7 +710,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
   it should "extract empty filter-key columns from src-table with empty filter-key" in {
     val table =
-      <src-table name="my_table_1">
+      <src-table name="my_schema.my_table_1">
         <filter-key>
         </filter-key>
       </src-table>
@@ -730,7 +730,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
   it should "extract filter-key columns from src-table" in {
     val table =
-      <src-table name="my_table_1">
+      <src-table name="my_schema.my_table_1">
         <filter-key>
           <column name="column_1" type="string"/>
           <column name="column_2" type="long"/>
@@ -760,7 +760,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
   it should "extract filter-key columns from view" in {
     val table =
-      <view name="my_view_1">
+      <view name="my_schema.my_view_1">
         <filter-key>
           <column name="column_1" type="string"/>
           <column name="column_2" type="long"/>
@@ -790,7 +790,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
   it should "generate no query commands from table with no view" in {
     val table =
-      <src-table name="my_table_1">
+      <src-table name="my_schema.my_table_1">
         <filter-key>
           <column name="column_1" type="string"/>
           <column name="column_2" type="long"/>
@@ -802,7 +802,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
   it should "generate no query commands from view" in {
     val table =
-      <view name="my_view_1">
+      <view name="my_schema.my_view_1">
         <filter-key>
           <column name="column_1" type="string"/>
           <column name="column_2" type="long"/>
@@ -814,7 +814,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
   it should "generate query command from src-table with views" in {
     val table =
-      <src-table name="src_table_1">
+      <src-table name="my_schema.src_table_1">
         <!--
           filter-key columns, or rowid
         -->
@@ -822,7 +822,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
           <column name="col_1" type="string"/>
           <column name="col_2" type="long"/>
         </filter-key>
-        <dest-table name="dest_table_1">
+        <dest-table name="my_schema.dest_table_1">
           <column no="1" name="col_1" from-column="col_1"/>
           <column no="2" name="col_2" from-column="col_2"/>
           <column no="3" name="col_3" from-column="col_3"/>
@@ -835,12 +835,12 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
         <!--
           affected views by source table change.
         -->
-        <view name="src_view_1">
+        <view name="my_schema.src_view_1">
           <filter-key>
             <column name="col_1" type="string"/>
             <column name="col_2" type="long"/>
           </filter-key>
-          <dest-table name="dest_table_2">
+          <dest-table name="my_schema.dest_table_2">
             <column no="1" name="col_1" from-column="col_1"/>
             <column no="2" name="col_2" from-column="col_2"/>
             <column no="3" name="col_3" from-column="col_3"/>
@@ -851,11 +851,11 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
             </filter-key>
           </dest-table>
         </view>
-        <view name="src_view_2">
+        <view name="my_schema.src_view_2">
           <filter-key>
             <column name="col_1" type="string"/>
           </filter-key>
-          <dest-table name="dest_table_5">
+          <dest-table name="my_schema.dest_table_5">
             <column no="1" name="col_1" from-column="col_1"/>
             <column no="2" name="col_2" from-column="col_2"/>
             <column no="3" name="col_3" from-column="col_3"/>

@@ -13,6 +13,11 @@ object TableMappingGenerator {
 
   def apply(mappingLoader: MappingLoader): TableMappingGenerator = new TableMappingGenerator(mappingLoader)
 
+  def simpleName(name: String): String = {
+    if(null != name) name.split("\\.").last
+    else name
+  }
+
   def srcTables(view: Node): Seq[Node] = {
     view.child.filter(x => x.label == "src-table")
   }
@@ -95,9 +100,9 @@ object TableMappingGenerator {
     val keyColumns = filterKeyColumns(view)
     val keys = filterKeyColumnNames(view)
     val map = filterKeyMap(keys)
-
+    val name = simpleName(view.\@("name"))
     s"""
-       |def query${cToPascal(view.\@("name"))}By${by(keys)}Cmd(${filterKeyParamsDef(keyColumns)}): QueryCommand = andCommand(
+       |def query${cToPascal(name)}By${by(keys)}Cmd(${filterKeyParamsDef(keyColumns)}): QueryCommand = andCommand(
        |  ${indent(map, 2)}
        |)
      """.stripMargin.trim
@@ -114,6 +119,7 @@ object TableMappingGenerator {
   def deletes(tables: Seq[Node]): String = {
     tables
       .map(_.\@("name"))
+      .map(simpleName(_))
       .map(x =>
         s"""
            |case x: Delete${cToPascal(x)}Cmd =>
@@ -146,7 +152,8 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
   }
 
   def generateTableMapping(table: Node): (String, String) = {
-    val tableName = table.\@("name")
+    val fullTableName = table.\@("name")
+    val tableName = simpleName(fullTableName)
     val mappingImpl =
       s"""
          |package ${implSrcPackage}
@@ -165,7 +172,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
          |  ) extends TableMapping {
          |  import deleteQueue._
          |
-         |  val tableName = "${tableName}"
+         |  val tableName = "${fullTableName}"
          |
          |  override def create(rowid: String): Unit = {
          |    ${indent(insertFromRowId(table), 4)}
@@ -186,7 +193,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
   }
 
   def insertFromRowId(table: Node): String = {
-    val tableName = table.\@("name")
+    val tableName = simpleName(table.\@("name"))
     s"""
        |${srcSystem}.retrieve${cToPascal(tableName)}ByRowid().invoke(RetrieveByRowidCmd(rowid))
        |  .map(t => {
@@ -208,7 +215,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
   }
 
   def insertFromView(view: Node): String = {
-    val tableName = view.\@("name")
+    val tableName = simpleName(view.\@("name"))
     val keys = filterKeyColumnNames(view)
     s"""
        |${srcSystem}.query${cToPascal(tableName)}().invoke(query${cToPascal(tableName)}By${by(keys)}Cmd(${paramSubstitutions(keys, "t")}))
@@ -226,7 +233,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
   }
 
   def insertDestinationTable(table: Node, from: String): String = {
-    val tableName = table.\@("name")
+    val tableName = simpleName(table.\@("name"))
     s"""
        |stash(tableName, rowid, Delete${cToPascal(tableName)}Cmd(${paramSubstitutions(filterKeyColumnNames(table), from)}))
        |${cToCamel(destSystem)}.create${cToPascal(tableName)}().invoke(Create${cToPascal(tableName)}Cmd(${paramSubstitutions(columns(table), from)}))
@@ -234,7 +241,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
   }
 
   def updateFromRowId(table: Node): String = {
-    val tableName = table.\@("name")
+    val tableName = simpleName(table.\@("name"))
     s"""
        |${srcSystem}.retrieve${cToPascal(tableName)}ByRowid().invoke(RetrieveByRowidCmd(rowid))
        |  .map(t => {
@@ -256,7 +263,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
   }
 
   def updateFromView(view: Node): String = {
-    val tableName = view.\@("name")
+    val tableName = simpleName(view.\@("name"))
     val keys = filterKeyColumnNames(view)
     s"""
        |${srcSystem}.query${cToPascal(tableName)}().invoke(query${cToPascal(tableName)}By${by(keys)}Cmd(${paramSubstitutions(keys, "t")}))
@@ -274,7 +281,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
   }
 
   def updateDestinationTable(table: Node, from: String): String = {
-    val tableName = table.\@("name")
+    val tableName = simpleName(table.\@("name"))
     s"""
        |${cToCamel(destSystem)}.update${cToPascal(tableName)}().invoke(Update${cToPascal(tableName)}Cmd(${paramSubstitutions(columns(table), from)}))
      """.stripMargin.trim

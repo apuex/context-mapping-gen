@@ -11,7 +11,7 @@ class ServiceClientGeneratorSpec extends FlatSpec with Matchers {
                     package="com.github.apuex.mapping"
                     version="1.0.0"
                     maintainer="xtwxy@hotmail.com">
-      <src-table name="src_table_1">
+      <src-table name="my_schema.src_table_1">
         <!--
           filter-key columns, or rowid
         -->
@@ -19,7 +19,7 @@ class ServiceClientGeneratorSpec extends FlatSpec with Matchers {
           <column name="col_1"/>
           <column name="col_2"/>
         </filter-key>
-        <dest-table name="dest_table_1">
+        <dest-table name="my_schema.dest_table_1">
           <column no="1" name="col_1" from-column="col_1"/>
           <column no="2" name="col_2" from-column="col_2"/>
           <column no="3" name="col_3" from-column="col_3"/>
@@ -32,12 +32,12 @@ class ServiceClientGeneratorSpec extends FlatSpec with Matchers {
         <!--
           affected views by source table change.
         -->
-        <view name="src_view_1">
+        <view name="my_schema.src_view_1">
           <filter-key>
             <column name="col_1"/>
             <column name="col_2"/>
           </filter-key>
-          <dest-table name="dest_table_2">
+          <dest-table name="my_schema.dest_table_2">
             <column no="1" name="col_1" from-column="col_1"/>
             <column no="2" name="col_2" from-column="col_2"/>
             <column no="3" name="col_3" from-column="col_3"/>
@@ -48,11 +48,11 @@ class ServiceClientGeneratorSpec extends FlatSpec with Matchers {
             </filter-key>
           </dest-table>
         </view>
-        <view name="src_view_2">
+        <view name="my_schema.src_view_2">
           <filter-key>
             <column name="col_1"/>
           </filter-key>
-          <dest-table name="dest_table_5">
+          <dest-table name="my_schema.dest_table_5">
             <column no="1" name="col_1" from-column="col_1"/>
             <column no="2" name="col_2" from-column="col_2"/>
             <column no="3" name="col_3" from-column="col_3"/>
