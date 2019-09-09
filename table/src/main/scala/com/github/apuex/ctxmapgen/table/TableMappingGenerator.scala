@@ -146,7 +146,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
       .map(_.\@("name"))
       .map(x =>
         s"""
-           |"${x}" -> new ${cToPascal(simpleName(x))}Mapping(srcService, destService, deleteQueue, ec)
+           |"${x}" -> new ${cToPascal(simpleName(x))}Mapping(${cToPascal(srcSystem)}Service, ${cToPascal(destSystem)}Service, deleteQueue, ec)
            """.stripMargin.trim)
       .reduceOption((l, r) => s"${l},\n${r}")
       .getOrElse("")
