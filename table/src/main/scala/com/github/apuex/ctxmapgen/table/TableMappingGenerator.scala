@@ -116,14 +116,14 @@ object TableMappingGenerator {
       .getOrElse("")
   }
 
-  def deletes(tables: Seq[Node]): String = {
+  def deletes(tables: Seq[Node], destSystem: String): String = {
     tables
       .map(_.\@("name"))
       .map(simpleName(_))
       .map(x =>
         s"""
            |case x: Delete${cToPascal(x)}Cmd =>
-           |  dest.delete${cToPascal(x)}().invoke(x)
+           |  ${cToCamel(destSystem)}.delete${cToPascal(x)}().invoke(x)
          """.stripMargin.trim)
       .reduceOption((l, r) => s"${l}\n${r}")
       .getOrElse("")
@@ -329,7 +329,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
   def deleteFromRowId(table: Node): String = {
     s"""
        |cmds.foreach({
-       |  ${indent(deletes(destTables(table)), 2)}
+       |  ${indent(deletes(destTables(table), destSystem), 2)}
        |})
      """.stripMargin.trim
   }
