@@ -146,7 +146,7 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
       .map(_.\@("name"))
       .map(x =>
         s"""
-           |"${x}" -> new ${cToPascal(simpleName(x))}Mapping(${cToPascal(srcSystem)}Service, ${cToPascal(destSystem)}Service, deleteQueue, ec)
+           |"${x}" -> ((deleteQueue: StashedQueue, ec: ExecutionContext) => new ${cToPascal(simpleName(x))}Mapping(${cToCamel(srcSystem)}Service, ${cToCamel(destSystem)}Service, deleteQueue, ec))
            """.stripMargin.trim)
       .reduceOption((l, r) => s"${l},\n${r}")
       .getOrElse("")
@@ -160,17 +160,20 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
          |
          |import scala.concurrent.ExecutionContext
          |
-         |object TableMappings {
+         |class TableMappings(${cToCamel(srcSystem)}Service: ${cToPascal(srcSystem)}Service,
+         |                     ${cToCamel(destSystem)}Service: ${cToPascal(destSystem)}Service
+         |                   ) {
          |
-         |  def create(${cToCamel(srcSystem)}Service: ${cToPascal(srcSystem)}Service,
-         |             ${cToCamel(destSystem)}Service: ${cToPascal(destSystem)}Service,
-         |             deleteQueue: StashedQueue,
-         |             ec: ExecutionContext
-         |            ): Map[String, TableMapping] = {
-         |    Map(
+         |  private val mappingCreator = Map(
          |      ${indent(mappings, 6)}
          |    )
-         |  }
+         |
+         |  def create(tableName: String,
+         |             deleteQueue: StashedQueue,
+         |             ec: ExecutionContext
+         |            ): TableMapping = mappingCreator.get(tableName)
+         |    .map(x => x(deleteQueue, ec))
+         |    .get
          |}
        """.stripMargin.trim
     )
@@ -198,8 +201,9 @@ class TableMappingGenerator(mappingLoader: MappingLoader) {
          |package ${implSrcPackage}
          |
          |import ${apiSrcPackage}._
+         |import ${destPackage}._
          |import com.github.apuex.ctxmap._
-         |import com.github.apuex.springbootsolution.runtime.QueryCommand
+         |import com.github.apuex.springbootsolution.runtime.{QueryCommand, RetrieveByRowidCmd}
          |import com.github.apuex.springbootsolution.runtime.QueryCommandMethods.andCommand
          |import scala.concurrent.ExecutionContext
          |

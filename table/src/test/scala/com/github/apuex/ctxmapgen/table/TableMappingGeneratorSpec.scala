@@ -9,6 +9,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
     <table-mappings from="src"
                     to="dest"
                     package="com.github.apuex.mapping"
+                    dest-package="com.github.apuex.mapping.message"
                     version="1.0.0"
                     maintainer="xtwxy@hotmail.com">
     </table-mappings>
@@ -73,7 +74,7 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
 
     val tables = destTables(table)
     tables.map(x => simpleName(x.\@("name"))) should be(Seq("dest_table_1", "dest_table_2", "dest_table_5"))
-    deletes(tables) should be(
+    deletes(tables, "dest") should be(
       s"""
          |case x: DeleteDestTable1Cmd =>
          |  dest.deleteDestTable1().invoke(x)
@@ -90,8 +91,9 @@ class TableMappingGeneratorSpec extends FlatSpec with Matchers {
          |package com.github.apuex.mapping.impl
          |
          |import com.github.apuex.mapping._
+         |import com.github.apuex.mapping.message._
          |import com.github.apuex.ctxmap._
-         |import com.github.apuex.springbootsolution.runtime.QueryCommand
+         |import com.github.apuex.springbootsolution.runtime.{QueryCommand, RetrieveByRowidCmd}
          |import com.github.apuex.springbootsolution.runtime.QueryCommandMethods.andCommand
          |import scala.concurrent.ExecutionContext
          |

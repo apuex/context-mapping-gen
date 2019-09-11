@@ -43,6 +43,7 @@ class MappingLoader(val xml: Node) {
   val modelPackage = xml.\@("package")
   val modelVersion = xml.\@("version")
   val modelMaintainer = xml.\@("maintainer")
+  val destPackage = xml.\@("dest-package")
   val outputDir = s"${System.getProperty("output.dir", "target/generated")}"
   val rootProjectName = s"${cToShell(modelName)}"
   val rootProjectDir = s"${outputDir}/${rootProjectName}"

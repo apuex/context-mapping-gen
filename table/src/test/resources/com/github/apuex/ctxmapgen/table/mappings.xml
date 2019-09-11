@@ -2,6 +2,7 @@
 <table-mappings from="src"
                 to="dest"
                 package="com.github.apuex.mapping"
+                dest-package="com.github.apuex.mapping.message"
                 version="1.0.0"
                 maintainer="xtwxy@hotmail.com">
 
