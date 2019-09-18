@@ -64,5 +64,7 @@ class MappingLoader(val xml: Node) {
     "new IdentityConverter()" else "new CamelToCConverter()"
   val docsDir = s"${rootProjectDir}/docs"
   val classNamePostfix = s"${cToPascal(impl)}"
-  val hyphen = if ("microsoft" == s"${System.getProperty("symbol.naming", "microsoft")}") "" else "-"
+  val hyphen = if ("unix_c" == s"${System.getProperty("symbol.naming", "unix_c")}") "-"
+  else if("microsoft" == s"${System.getProperty("symbol.naming", "unix_c")}") ""
+  else "-"
 }

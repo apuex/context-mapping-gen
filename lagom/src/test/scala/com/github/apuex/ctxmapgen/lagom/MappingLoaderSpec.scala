@@ -5,6 +5,7 @@ import org.scalatest.{FlatSpec, Matchers}
 
 class MappingLoaderSpec extends FlatSpec with Matchers {
   "A MappingLoader" should "load mapping project settings from xml" in {
+    System.setProperty("symbol.naming", "unix_c")
     val m = MappingLoader(ClasspathXmlLoader("com/github/apuex/ctxmapgen/lagom/mappings.xml").xml)
     import m._
 

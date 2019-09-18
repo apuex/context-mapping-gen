@@ -8,7 +8,7 @@ maintainer   := artifactMaintainer
 
 lazy val root = (project in file("."))
   .aggregate(
-    `app`,
+    `api`,
     `impl`,
     `app`
   )
