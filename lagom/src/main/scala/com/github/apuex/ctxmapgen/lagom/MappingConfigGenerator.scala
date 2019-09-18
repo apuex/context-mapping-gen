@@ -26,7 +26,7 @@ class MappingConfigGenerator(mappingLoader: MappingLoader) {
        |  val keepAlive = Source.fromIterator(() => new Iterator[String] {
        |    override def hasNext: Boolean = true
        |
-       |    override def next(): String = s"[$${new Date()}] - keep-alive."
+       |    override def next(): String = "{}"
        |  })
        |    .throttle(1, duration)
        |    .map(_.toString)
