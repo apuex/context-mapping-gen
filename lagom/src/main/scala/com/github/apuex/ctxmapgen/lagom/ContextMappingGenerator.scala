@@ -126,6 +126,7 @@ class ContextMappingGenerator(mappingFile: String) {
        |private def updateState: (Any => Unit) = {
        |  case x: String =>
        |    offset = Some(x)
+       |  case x =>
        |    log.info("unhandled update state: {}", x)
        |}
      """.stripMargin
